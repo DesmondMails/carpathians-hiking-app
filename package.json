@@ -1,0 +1,12 @@
+{
+  "name": "hiking-app",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "api": "npm run start:dev --workspace=api",
+    "mobile": "npm run start --workspace=mobile"
+  }
+}
