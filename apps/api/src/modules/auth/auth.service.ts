@@ -1,22 +1,31 @@
 import {
   ConflictException,
+  ForbiddenException,
   Injectable,
   Logger,
+  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { PublicUser, LoginResponse } from '@hiking/shared';
+import { LoginResponse, SignupResponse } from '@hiking/shared';
 
 import { UsersService } from '../users/users.service';
+import { EmailService } from '../email/email.service';
 import { SignupDto } from './dto/signup.dto';
 
 import * as bcrypt from 'bcrypt';
+import * as crypto from 'crypto';
 import type ms from 'ms';
 import { LoginUserDto } from './dto/login-user.dto';
 import { toPublicUser } from 'src/common/mappers';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
+import { VerifyEmailDto } from './dto/verify-email.dto';
+import { ResendCodeDto } from './dto/resend-code.dto';
 import { User } from 'src/prisma/generated/client';
 import { GoogleUserPayload } from './interfaces';
+import { PrismaService } from 'src/prisma/prisma.service';
+
+const VERIFICATION_CODE_TTL_MS = 15 * 60 * 1000; // 15 minutes
 
 @Injectable()
 export class AuthService {
@@ -25,26 +34,95 @@ export class AuthService {
   constructor(
     private usersService: UsersService,
     private jwtService: JwtService,
+    private emailService: EmailService,
+    private prisma: PrismaService,
   ) {}
 
-  async signup(signupDto: SignupDto): Promise<PublicUser> {
+  async signup(signupDto: SignupDto): Promise<SignupResponse> {
     const { email, password } = signupDto;
 
-    const user = await this.usersService.findByEmail(email);
+    const existing = await this.usersService.findByEmail(email);
 
-    if (user) {
-      throw new ConflictException('Email already in use');
+    if (existing) {
+      throw new ConflictException('Email вже використовується');
     }
 
     const salt = await bcrypt.genSalt();
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    const createdUser = await this.usersService.create({
+    const user = await this.usersService.create({
       email,
       password: hashedPassword,
     });
 
-    return toPublicUser(createdUser);
+    await this.sendVerificationCode(user.id, email);
+
+    return { email };
+  }
+
+  async verifyEmail(dto: VerifyEmailDto): Promise<LoginResponse> {
+    const user = await this.usersService.findByEmail(dto.email);
+
+    if (!user) {
+      throw new NotFoundException('Користувача не знайдено');
+    }
+
+    if (user.isEmailVerified) {
+      throw new ConflictException('Email вже підтверджено');
+    }
+
+    const verification = await this.prisma.emailVerification.findUnique({
+      where: { userId: user.id },
+    });
+
+    if (!verification) {
+      throw new UnauthorizedException(
+        'Код підтвердження не знайдено. Запитайте новий.',
+      );
+    }
+
+    if (verification.expiresAt < new Date()) {
+      throw new UnauthorizedException(
+        'Код підтвердження застарів. Запитайте новий.',
+      );
+    }
+
+    const isCodeValid = await bcrypt.compare(dto.code, verification.codeHash);
+
+    if (!isCodeValid) {
+      throw new UnauthorizedException('Невірний код підтвердження');
+    }
+
+    await this.prisma.$transaction([
+      this.prisma.user.update({
+        where: { id: user.id },
+        data: { isEmailVerified: true },
+      }),
+      this.prisma.emailVerification.delete({ where: { userId: user.id } }),
+    ]);
+
+    const { accessToken, refreshToken } = await this.getTokens(
+      user.id,
+      user.email,
+    );
+    await this.updateRefreshToken(user.id, refreshToken);
+
+    return { user: toPublicUser(user), accessToken, refreshToken };
+  }
+
+  async resendVerificationCode(dto: ResendCodeDto): Promise<void> {
+    const user = await this.usersService.findByEmail(dto.email);
+
+    if (!user) {
+      // Return silently to avoid email enumeration
+      return;
+    }
+
+    if (user.isEmailVerified) {
+      throw new ConflictException('Email вже підтверджено');
+    }
+
+    await this.sendVerificationCode(user.id, user.email);
   }
 
   async login(loginUserDto: LoginUserDto): Promise<LoginResponse> {
@@ -52,24 +130,23 @@ export class AuthService {
 
     const user = await this.validateUserCredentials(email, password);
 
+    if (!user.isEmailVerified) {
+      throw new ForbiddenException('Email не підтверджено');
+    }
+
     const { accessToken, refreshToken } = await this.getTokens(
       user.id,
       user.email,
     );
-
     await this.updateRefreshToken(user.id, refreshToken);
 
-    return {
-      user: toPublicUser(user),
-      accessToken,
-      refreshToken,
-    };
+    return { user: toPublicUser(user), accessToken, refreshToken };
   }
 
   async loginWithGoogle(googleUser: GoogleUserPayload): Promise<LoginResponse> {
     this.logger.log('loginWithGoogle', googleUser);
     if (!googleUser.email) {
-      throw new UnauthorizedException('Google email is not available');
+      throw new UnauthorizedException('Google email не доступний');
     }
 
     let user = await this.usersService.findByGoogleId(googleUser.googleId);
@@ -95,14 +172,9 @@ export class AuthService {
       user.id,
       user.email,
     );
-
     await this.updateRefreshToken(user.id, refreshToken);
 
-    return {
-      user: toPublicUser(user),
-      accessToken,
-      refreshToken,
-    };
+    return { user: toPublicUser(user), accessToken, refreshToken };
   }
 
   async refreshTokens(
@@ -117,7 +189,7 @@ export class AuthService {
     const user = await this.usersService.findById(payload.sub);
 
     if (!user || !user.refreshTokenHash) {
-      throw new UnauthorizedException('Access denied');
+      throw new UnauthorizedException('Доступ заборонено');
     }
 
     const refreshTokenMatches = await bcrypt.compare(
@@ -126,11 +198,10 @@ export class AuthService {
     );
 
     if (!refreshTokenMatches) {
-      throw new UnauthorizedException('Access denied');
+      throw new UnauthorizedException('Доступ заборонено');
     }
 
     const tokens = await this.getTokens(user.id, user.email);
-
     await this.updateRefreshToken(user.id, tokens.refreshToken);
 
     return {
@@ -144,12 +215,28 @@ export class AuthService {
     await this.usersService.updateHashedRefreshToken(userId, null);
   }
 
+  private async sendVerificationCode(
+    userId: string,
+    email: string,
+  ): Promise<void> {
+    const code = crypto.randomInt(100000, 999999).toString();
+    const codeHash = await bcrypt.hash(code, 10);
+    const expiresAt = new Date(Date.now() + VERIFICATION_CODE_TTL_MS);
+
+    await this.prisma.emailVerification.upsert({
+      where: { userId },
+      create: { userId, codeHash, expiresAt },
+      update: { codeHash, expiresAt },
+    });
+
+    await this.emailService.sendVerificationCode(email, code);
+  }
+
   private async updateRefreshToken(
     userId: string,
     refreshToken: string,
   ): Promise<void> {
     const hashedRefreshToken = await bcrypt.hash(refreshToken, 10);
-
     await this.usersService.updateHashedRefreshToken(
       userId,
       hashedRefreshToken,
@@ -160,10 +247,7 @@ export class AuthService {
     userId: string,
     email: string,
   ): Promise<{ accessToken: string; refreshToken: string }> {
-    const payload = {
-      sub: userId,
-      email,
-    };
+    const payload = { sub: userId, email };
 
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAsync(payload, {
@@ -176,10 +260,7 @@ export class AuthService {
       }),
     ]);
 
-    return {
-      accessToken,
-      refreshToken,
-    };
+    return { accessToken, refreshToken };
   }
 
   private async validateUserCredentials(
@@ -192,7 +273,7 @@ export class AuthService {
       throw new UnauthorizedException('Неправильний email або пароль');
     }
 
-    const isPasswordValid = await bcrypt.compare(password, user.password);
+    const isPasswordValid = await bcrypt.compare(password, user.password!);
 
     if (!isPasswordValid) {
       throw new UnauthorizedException('Неправильний email або пароль');
