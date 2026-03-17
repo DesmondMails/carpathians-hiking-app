@@ -6,6 +6,10 @@ export interface LoginResponse {
   refreshToken: string
 }
 
+export interface SignupResponse {
+  email: string
+}
+
 export interface JwtPayload {
   sub: string
   email: string

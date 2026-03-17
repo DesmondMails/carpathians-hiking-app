@@ -12,9 +12,11 @@ import {
 import { AuthService } from './auth.service';
 import { SignupDto } from './dto/signup.dto';
 import { Public } from 'src/common/decorators/public.decorator';
-import { LoginResponse, PublicUser } from '@hiking/shared';
+import { LoginResponse, SignupResponse } from '@hiking/shared';
 import { LoginUserDto } from './dto/login-user.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
+import { VerifyEmailDto } from './dto/verify-email.dto';
+import { ResendCodeDto } from './dto/resend-code.dto';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import type { User } from 'src/prisma/generated/client';
 import { GoogleUserPayload } from './interfaces';
@@ -28,8 +30,22 @@ export class AuthController {
 
   @Public()
   @Post('signup')
-  async signup(@Body() signupDto: SignupDto): Promise<PublicUser> {
+  async signup(@Body() signupDto: SignupDto): Promise<SignupResponse> {
     return this.authService.signup(signupDto);
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Public()
+  @Post('verify-email')
+  async verifyEmail(@Body() dto: VerifyEmailDto): Promise<LoginResponse> {
+    return this.authService.verifyEmail(dto);
+  }
+
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Public()
+  @Post('resend-code')
+  async resendCode(@Body() dto: ResendCodeDto): Promise<void> {
+    return this.authService.resendVerificationCode(dto);
   }
 
   @HttpCode(HttpStatus.OK)
@@ -57,9 +73,7 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @Public()
   @Post('refresh')
-  async refresh(
-    @Body() refreshTokenDto: RefreshTokenDto,
-  ): Promise<LoginResponse> {
+  async refresh(@Body() refreshTokenDto: RefreshTokenDto): Promise<LoginResponse> {
     return this.authService.refreshTokens(refreshTokenDto);
   }
 
