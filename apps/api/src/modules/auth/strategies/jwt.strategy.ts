@@ -26,7 +26,6 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       updatedAt: true,
     });
 
-    console.log(user);
     if (!user) {
       throw new UnauthorizedException('Неправильний токен');
     }
