@@ -16,8 +16,16 @@ datasource db {
 model User {
   id        String   @id @default(uuid())
   email     String   @unique
-  password  String
+  password  String?
+  refreshTokenHash String?
+  googleId String? @unique
+  authProvider AuthProvider @default(EMAIL)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   avatar    String?
+}
+
+enum AuthProvider {
+  EMAIL
+  GOOGLE
 }
