@@ -13,7 +13,7 @@ import { AuthInput, AuthButton } from '@/src/features/auth/components'
 
 export default function LoginScreen() {
   const router = useRouter()
-  const { login, isLoading } = useAuth()
+  const { login, isLoading, signInWithGoogle } = useAuth()
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -29,6 +29,19 @@ export default function LoginScreen() {
 
     try {
       await login({ email: email.trim(), password })
+    } catch (err: unknown) {
+      const message =
+        (err as { response?: { data?: { message?: string | string[] } } })
+          ?.response?.data?.message ?? 'Щось пішло не так. Спробуйте знову.'
+      setError(Array.isArray(message) ? message.join(', ') : message)
+    }
+  }
+
+  const handleSignInWithGoogle = async () => {
+    setError(null)
+
+    try {
+      await signInWithGoogle()
     } catch (err: unknown) {
       const message =
         (err as { response?: { data?: { message?: string | string[] } } })
@@ -70,6 +83,12 @@ export default function LoginScreen() {
           label='Увійти'
           isLoading={isLoading}
           onPress={handleLogin}
+        />
+
+        <AuthButton
+          label='Увійти з Google'
+          isLoading={isLoading}
+          onPress={handleSignInWithGoogle}
         />
 
         <Pressable

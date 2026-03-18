@@ -8,6 +8,7 @@ import {
 } from '../types'
 import { tokenStorage } from '@/src/shared/api/token-storage'
 import { PublicUser, SignupResponse } from '@hiking/shared'
+import { signInWithGoogle } from '../lib/google'
 
 interface AuthState {
   user: PublicUser | null
@@ -22,6 +23,7 @@ interface AuthState {
   resendCode: (payload: ResendCodePayload) => Promise<void>
   logout: () => Promise<void>
   hydrate: () => Promise<void>
+  signInWithGoogle: () => Promise<void>
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
@@ -48,6 +50,34 @@ export const useAuthStore = create<AuthState>((set) => ({
       })
     } catch (error) {
       set({ isLoading: false })
+      throw error
+    }
+  },
+
+  signInWithGoogle: async () => {
+    set({ isLoading: true })
+
+    try {
+      const { idToken } = await signInWithGoogle()
+
+      if (!idToken) {
+        throw new Error('Немає токену Google')
+      }
+
+      const res = await authApi.googleLogin(idToken)
+
+      await tokenStorage.setAccessToken(res.accessToken)
+      await tokenStorage.setRefreshToken(res.refreshToken)
+
+      set({
+        user: res.user,
+        accessToken: res.accessToken,
+        isAuthenticated: true,
+        isLoading: false,
+      })
+    } catch (error) {
+      set({ isLoading: false })
+
       throw error
     }
   },
