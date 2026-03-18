@@ -2,6 +2,7 @@ import axios from 'axios'
 import { apiClient } from './client'
 import { tokenStorage } from './token-storage'
 import type { LoginResponse } from '@hiking/shared'
+import { getBaseUrl } from './getBaseUrl'
 
 apiClient.interceptors.request.use(async (config) => {
   const token = await tokenStorage.getAccessToken()
@@ -29,7 +30,7 @@ apiClient.interceptors.response.use(
         }
 
         const { data } = await axios.post<LoginResponse>(
-          `${process.env.EXPO_PUBLIC_API_URL}/auth/refresh`,
+          `${getBaseUrl()}/auth/refresh`,
           { refreshToken },
         )
 
@@ -41,9 +42,8 @@ apiClient.interceptors.response.use(
       } catch {
         await tokenStorage.clearTokens()
 
-        const { useAuthStore } = await import(
-          '@/src/features/auth/store/auth.store'
-        )
+        const { useAuthStore } =
+          await import('@/src/features/auth/store/auth.store')
         useAuthStore.getState().logout()
 
         return Promise.reject(error)

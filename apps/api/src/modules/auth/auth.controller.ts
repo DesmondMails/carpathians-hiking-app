@@ -21,6 +21,7 @@ import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import type { User } from 'src/prisma/generated/client';
 import { GoogleUserPayload } from './interfaces';
 import { AuthGuard } from '@nestjs/passport';
+import { GoogleNativeDto } from './dto/google-native.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -66,14 +67,21 @@ export class AuthController {
   async googleRedirect(
     @Req() req: Request & { user: GoogleUserPayload },
   ): Promise<LoginResponse> {
-    this.logger.log('googleRedirect', req.user);
-    return this.authService.loginWithGoogle(req.user);
+    return this.authService.loginWithGoogleOrCreate(req.user);
+  }
+
+  @Public()
+  @Post('google/native')
+  async googleNative(@Body() dto: GoogleNativeDto): Promise<LoginResponse> {
+    return this.authService.loginWithGoogleNative(dto);
   }
 
   @HttpCode(HttpStatus.OK)
   @Public()
   @Post('refresh')
-  async refresh(@Body() refreshTokenDto: RefreshTokenDto): Promise<LoginResponse> {
+  async refresh(
+    @Body() refreshTokenDto: RefreshTokenDto,
+  ): Promise<LoginResponse> {
     return this.authService.refreshTokens(refreshTokenDto);
   }
 

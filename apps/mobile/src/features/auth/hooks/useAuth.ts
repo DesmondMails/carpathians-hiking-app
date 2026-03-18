@@ -7,6 +7,7 @@ export const useAuth = () => {
   const isHydrated = useAuthStore((state) => state.isHydrated)
   const login = useAuthStore((state) => state.login)
   const signup = useAuthStore((state) => state.signup)
+  const signInWithGoogle = useAuthStore((state) => state.signInWithGoogle)
   const verifyEmail = useAuthStore((state) => state.verifyEmail)
   const resendCode = useAuthStore((state) => state.resendCode)
   const logout = useAuthStore((state) => state.logout)
@@ -19,6 +20,7 @@ export const useAuth = () => {
     isHydrated,
     login,
     signup,
+    signInWithGoogle,
     verifyEmail,
     resendCode,
     logout,

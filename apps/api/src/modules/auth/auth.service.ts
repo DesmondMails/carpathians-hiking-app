@@ -24,8 +24,11 @@ import { ResendCodeDto } from './dto/resend-code.dto';
 import { User } from 'src/prisma/generated/client';
 import { GoogleUserPayload } from './interfaces';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { GoogleNativeDto } from './dto/google-native.dto';
+import { OAuth2Client } from 'google-auth-library';
 
 const VERIFICATION_CODE_TTL_MS = 15 * 60 * 1000; // 15 minutes
+const googleOAuth2Client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 @Injectable()
 export class AuthService {
@@ -143,7 +146,9 @@ export class AuthService {
     return { user: toPublicUser(user), accessToken, refreshToken };
   }
 
-  async loginWithGoogle(googleUser: GoogleUserPayload): Promise<LoginResponse> {
+  async loginWithGoogleOrCreate(
+    googleUser: GoogleUserPayload,
+  ): Promise<LoginResponse> {
     this.logger.log('loginWithGoogle', googleUser);
     if (!googleUser.email) {
       throw new UnauthorizedException('Google email не доступний');
@@ -175,6 +180,14 @@ export class AuthService {
     await this.updateRefreshToken(user.id, refreshToken);
 
     return { user: toPublicUser(user), accessToken, refreshToken };
+  }
+
+  async loginWithGoogleNative(dto: GoogleNativeDto): Promise<LoginResponse> {
+    const { idToken } = dto;
+
+    const googleUser = await this.verifyGoogleIdToken(idToken);
+    this.logger.log('googleUser in loginWithGoogleNative', googleUser);
+    return this.loginWithGoogleOrCreate(googleUser);
   }
 
   async refreshTokens(
@@ -280,5 +293,26 @@ export class AuthService {
     }
 
     return user;
+  }
+
+  private async verifyGoogleIdToken(
+    idToken: string,
+  ): Promise<GoogleUserPayload> {
+    const ticket = await googleOAuth2Client.verifyIdToken({
+      idToken,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+
+    const payload = ticket.getPayload();
+
+    if (!payload) {
+      throw new UnauthorizedException();
+    }
+
+    return {
+      googleId: payload.sub,
+      email: payload.email!,
+      avatar: payload.picture,
+    };
   }
 }

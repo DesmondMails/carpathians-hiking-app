@@ -56,4 +56,13 @@ export const authApi = {
 
     return data
   },
+
+  async googleLogin(idToken: string): Promise<LoginResponse> {
+    const { data } = await apiClient.post<LoginResponse>(
+      '/auth/google/native',
+      { idToken },
+    )
+
+    return data
+  },
 }
