@@ -1,0 +1,20 @@
+model User {
+  id                String              @id @default(uuid())
+  email             String              @unique
+  password          String?
+  refreshTokenHash  String?
+  googleId          String?             @unique
+  authProvider      AuthProvider        @default(EMAIL)
+  isEmailVerified   Boolean             @default(false)
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  avatar            String?
+  emailVerification EmailVerification?
+
+  routes Route[]
+}
+
+enum AuthProvider {
+  EMAIL
+  GOOGLE
+}

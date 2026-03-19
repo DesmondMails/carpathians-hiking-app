@@ -1,11 +1,11 @@
-import { Injectable } from '@nestjs/common';
 import { PublicUser } from '@hiking/shared';
+import { Injectable } from '@nestjs/common';
 
+import { toPublicUser } from 'src/common/mappers';
 import { AuthProvider, Prisma, User } from 'src/prisma/generated/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 
 import { SignupDto } from '../auth/dto/signup.dto';
-import { toPublicUser } from 'src/common/mappers';
 import { GoogleUserPayload } from '../auth/interfaces';
 
 @Injectable()

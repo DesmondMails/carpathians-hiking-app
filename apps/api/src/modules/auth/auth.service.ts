@@ -1,3 +1,6 @@
+import * as crypto from 'crypto';
+
+import { JwtPayload, LoginResponse, SignupResponse } from '@hiking/shared';
 import {
   ConflictException,
   ForbiddenException,
@@ -7,25 +10,23 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { LoginResponse, SignupResponse } from '@hiking/shared';
-
-import { UsersService } from '../users/users.service';
-import { EmailService } from '../email/email.service';
-import { SignupDto } from './dto/signup.dto';
-
 import * as bcrypt from 'bcrypt';
-import * as crypto from 'crypto';
-import type ms from 'ms';
-import { LoginUserDto } from './dto/login-user.dto';
-import { toPublicUser } from 'src/common/mappers';
-import { RefreshTokenDto } from './dto/refresh-token.dto';
-import { VerifyEmailDto } from './dto/verify-email.dto';
-import { ResendCodeDto } from './dto/resend-code.dto';
-import { User } from 'src/prisma/generated/client';
-import { GoogleUserPayload } from './interfaces';
-import { PrismaService } from 'src/prisma/prisma.service';
-import { GoogleNativeDto } from './dto/google-native.dto';
 import { OAuth2Client } from 'google-auth-library';
+import type ms from 'ms';
+
+import { toPublicUser } from 'src/common/mappers';
+import { User } from 'src/prisma/generated/client';
+import { PrismaService } from 'src/prisma/prisma.service';
+
+import { EmailService } from '../email/email.service';
+import { UsersService } from '../users/users.service';
+import { GoogleNativeDto } from './dto/google-native.dto';
+import { LoginUserDto } from './dto/login-user.dto';
+import { RefreshTokenDto } from './dto/refresh-token.dto';
+import { ResendCodeDto } from './dto/resend-code.dto';
+import { SignupDto } from './dto/signup.dto';
+import { VerifyEmailDto } from './dto/verify-email.dto';
+import { GoogleUserPayload } from './interfaces';
 
 const VERIFICATION_CODE_TTL_MS = 15 * 60 * 1000; // 15 minutes
 const googleOAuth2Client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
@@ -195,9 +196,12 @@ export class AuthService {
   ): Promise<LoginResponse> {
     const { refreshToken } = refreshTokenDto;
 
-    const payload = await this.jwtService.verifyAsync(refreshToken, {
-      secret: process.env.JWT_REFRESH_SECRET,
-    });
+    const payload = await this.jwtService.verifyAsync<JwtPayload>(
+      refreshToken,
+      {
+        secret: process.env.JWT_REFRESH_SECRET,
+      },
+    );
 
     const user = await this.usersService.findById(payload.sub);
 

@@ -1,5 +1,7 @@
+import { ApiProperty } from '@nestjs/swagger';
 import {
   IsEmail,
+  IsNotEmpty,
   IsString,
   Matches,
   MaxLength,
@@ -8,9 +10,13 @@ import {
 
 export class SignupDto {
   @IsEmail()
+  @ApiProperty({ description: 'Email користувача' })
+  @IsNotEmpty()
   email!: string;
 
   @IsString()
+  @ApiProperty({ description: 'Пароль користувача' })
+  @IsNotEmpty()
   @MinLength(8)
   @MaxLength(32)
   @Matches(/((?=.*\d)|(?=.*\W+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$/, {
