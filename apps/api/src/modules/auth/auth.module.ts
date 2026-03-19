@@ -1,15 +1,17 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { AuthService } from './auth.service';
-import { UsersModule } from '../users/users.module';
-import { EmailModule } from '../email/email.module';
-import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
-import { JwtStrategy } from './strategies/jwt.strategy';
-import { AuthController } from './auth.controller';
+import { PassportModule } from '@nestjs/passport';
 import ms from 'ms';
-import { GoogleStrategy } from './strategies/google.strategy';
+
 import { PrismaModule } from 'src/prisma/prisma.module';
+
+import { AuthController } from './auth.controller';
+import { AuthService } from './auth.service';
+import { EmailModule } from '../email/email.module';
+import { UsersModule } from '../users/users.module';
+import { GoogleStrategy } from './strategies/google.strategy';
+import { JwtStrategy } from './strategies/jwt.strategy';
 
 @Module({
   imports: [
