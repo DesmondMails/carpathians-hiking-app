@@ -12,6 +12,9 @@ export const useAuth = () => {
   const resendCode = useAuthStore((state) => state.resendCode)
   const logout = useAuthStore((state) => state.logout)
   const hydrate = useAuthStore((state) => state.hydrate)
+  const confirmAuthentication = useAuthStore(
+    (state) => state.confirmAuthentication,
+  )
 
   return {
     user,
@@ -25,5 +28,6 @@ export const useAuth = () => {
     resendCode,
     logout,
     hydrate,
+    confirmAuthentication,
   }
 }

@@ -1,8 +1,9 @@
-import axios from 'axios'
-import { apiClient } from './client'
-import { tokenStorage } from './token-storage'
 import type { LoginResponse } from '@hiking/shared'
+import axios from 'axios'
+
+import { apiClient } from './client'
 import { getBaseUrl } from './getBaseUrl'
+import { tokenStorage } from './token-storage'
 
 apiClient.interceptors.request.use(async (config) => {
   const token = await tokenStorage.getAccessToken()

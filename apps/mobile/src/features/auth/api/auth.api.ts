@@ -1,5 +1,6 @@
-import { apiClient } from '@/src/shared/api/client'
 import { PublicUser, LoginResponse, SignupResponse } from '@hiking/shared'
+
+import { apiClient } from '@/src/shared/api/client'
 
 import {
   LoginPayload,

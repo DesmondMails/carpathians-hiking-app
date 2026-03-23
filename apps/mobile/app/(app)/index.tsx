@@ -1,4 +1,5 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native'
+
 import { useAuth } from '@/src/features/auth/hooks/useAuth'
 
 export default function HomeScreen() {

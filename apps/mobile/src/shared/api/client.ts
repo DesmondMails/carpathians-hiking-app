@@ -1,4 +1,5 @@
 import axios from 'axios'
+
 import { getBaseUrl } from './getBaseUrl'
 
 export const apiClient = axios.create({
