@@ -1,14 +1,16 @@
+import { PublicUser, SignupResponse } from '@hiking/shared'
 import { create } from 'zustand'
+
+import { tokenStorage } from '@/src/shared/api/token-storage'
+
 import { authApi } from '../api/auth.api'
+import { signInWithGoogle } from '../lib/google'
 import {
   LoginPayload,
   SignupPayload,
   VerifyEmailPayload,
   ResendCodePayload,
 } from '../types'
-import { tokenStorage } from '@/src/shared/api/token-storage'
-import { PublicUser, SignupResponse } from '@hiking/shared'
-import { signInWithGoogle } from '../lib/google'
 
 interface AuthState {
   user: PublicUser | null
@@ -20,6 +22,7 @@ interface AuthState {
   login: (payload: LoginPayload) => Promise<void>
   signup: (payload: SignupPayload) => Promise<SignupResponse>
   verifyEmail: (payload: VerifyEmailPayload) => Promise<void>
+  confirmAuthentication: () => void
   resendCode: (payload: ResendCodePayload) => Promise<void>
   logout: () => Promise<void>
   hydrate: () => Promise<void>
@@ -109,13 +112,16 @@ export const useAuthStore = create<AuthState>((set) => ({
       set({
         user: response.user,
         accessToken: response.accessToken,
-        isAuthenticated: true,
         isLoading: false,
       })
     } catch (error) {
       set({ isLoading: false })
       throw error
     }
+  },
+
+  confirmAuthentication: () => {
+    set({ isAuthenticated: true })
   },
 
   resendCode: async (payload) => {

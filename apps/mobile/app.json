@@ -29,16 +29,13 @@
     },
     "plugins": [
       "expo-router",
+      "expo-dev-client",
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/splash-icon.png",
-          "imageWidth": 200,
-          "resizeMode": "contain",
-          "backgroundColor": "#ffffff",
-          "dark": {
-            "backgroundColor": "#000000"
-          }
+          "image": "./assets/images/splash-screen-final.png",
+          "resizeMode": "cover",
+          "enableFullScreenImage_legacy": true
         }
       ],
       "expo-secure-store",
@@ -47,7 +44,8 @@
         {
           "iosUrlScheme": "com.googleusercontent.apps.942450969798-acv873inkv0jie6u0qb7b46vcqj45e83"
         }
-      ]
+      ],
+      "expo-font"
     ],
     "experiments": {
       "typedRoutes": true,
