@@ -14,6 +14,7 @@ export const colors = {
   textSecondary: '#64748b',
   textDisabled: '#94a3b8',
   textWhite: '#ffffff',
+  textLightGray: '#ffffff99',
 
   // BORDER / INPUT
   border: '#d1d5db',
