@@ -1,12 +1,8 @@
 import { useState } from 'react'
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native'
-import { Feather } from '@expo/vector-icons'
+import { ScrollView, StyleSheet, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
 import { AppSearch } from '@/src/shared/components/AppSearch'
-import { AppText } from '@/src/shared/components/AppText'
-import { colors } from '@/src/theme/colors'
-import { typography } from '@/src/theme/typography'
 
 import {
   AllRouteCard,
@@ -63,43 +59,15 @@ export default function ExploreScreen() {
           ))}
         </View>
       </ScrollView>
-
-      {/* FAB */}
-      <View style={styles.fabWrap}>
-        <Pressable style={styles.fab}>
-          <Feather name='plus' size={20} color={colors.white} />
-          <AppText style={styles.fabText}>Маршрут</AppText>
-        </Pressable>
-      </View>
     </SafeAreaView>
   )
 }
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: '#f7f7f7' },
-  scroll: { paddingBottom: 120 },
+  scroll: { paddingBottom: 100 },
   categoryChips: { marginTop: 12, paddingBottom: 12 },
   section: { marginTop: 12, marginBottom: 24 },
   hScroll: { paddingHorizontal: 16, gap: 12, paddingBottom: 4 },
   vGap: { gap: 12 },
-  fabWrap: { position: 'absolute', bottom: 90, right: 20 },
-  fab: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    backgroundColor: colors.primary,
-    borderRadius: 200,
-    paddingHorizontal: 18,
-    paddingVertical: 13,
-    shadowColor: colors.primary,
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.35,
-    shadowRadius: 14,
-    elevation: 10,
-  },
-  fabText: {
-    fontFamily: typography.bodyMedium.fontFamily,
-    fontSize: 14,
-    color: colors.white,
-  },
 })

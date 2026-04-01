@@ -5,19 +5,14 @@ import { BottomTabBarProps } from '@react-navigation/bottom-tabs'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { colors } from '@/src/theme/colors'
-import { typography } from '@/src/theme/typography'
-
-
-import { AppText } from './AppText'
-
 
 type TabName = 'index' | 'explore' | 'history' | 'profile'
 
-const TAB_CONFIG: Record<TabName, { icon: string; label: string }> = {
-  index: { icon: 'home', label: 'Home' },
-  explore: { icon: 'compass', label: 'Explore' },
-  history: { icon: 'clock', label: 'History' },
-  profile: { icon: 'user', label: 'Profile' },
+const TAB_CONFIG: Record<TabName, { icon: string }> = {
+  index: { icon: 'home' },
+  explore: { icon: 'compass' },
+  history: { icon: 'clock' },
+  profile: { icon: 'user' },
 }
 
 export function CustomTabBar({
@@ -27,44 +22,67 @@ export function CustomTabBar({
 }: BottomTabBarProps) {
   const insets = useSafeAreaInsets()
 
+  const handleAddRoute = () => {
+    console.log('Add Route pressed')
+  }
+
+  const renderTab = (routeIndex: number) => {
+    const route = state.routes[routeIndex]
+    const isFocused = state.index === routeIndex
+    const tabKey = route.name as TabName
+    const config = TAB_CONFIG[tabKey]
+
+    if (!config) return null
+
+    const onPress = () => {
+      const event = navigation.emit({
+        type: 'tabPress',
+        target: route.key,
+        canPreventDefault: true,
+      })
+      if (!isFocused && !event.defaultPrevented) {
+        navigation.navigate(route.name)
+      }
+    }
+
+    return (
+      <Pressable
+        key={route.key}
+        onPress={onPress}
+        style={styles.tab}
+        accessibilityRole='tab'
+        accessibilityState={{ selected: isFocused }}
+      >
+        <Feather
+          name={config.icon as any}
+          size={24}
+          color={isFocused ? colors.primary : colors.textLightGray}
+        />
+      </Pressable>
+    )
+  }
+
   return (
     <View style={[styles.wrapper, { paddingBottom: insets.bottom }]}>
-      <View style={styles.container}>
-        {state.routes.map((route, index) => {
-          const isFocused = state.index === index
-          const tabKey = route.name as TabName
-          const config = TAB_CONFIG[tabKey]
+      <View style={styles.bar}>
+        {renderTab(0)}
+        {renderTab(1)}
 
-          if (!config) return null
-
-          const onPress = () => {
-            const event = navigation.emit({
-              type: 'tabPress',
-              target: route.key,
-              canPreventDefault: true,
-            })
-            if (!isFocused && !event.defaultPrevented) {
-              navigation.navigate(route.name)
-            }
-          }
-
-          return (
+        <View style={styles.centerSlot}>
+          <View style={styles.socket}>
             <Pressable
-              key={route.key}
-              onPress={onPress}
-              style={[styles.tab, isFocused && styles.tabActive]}
+              onPress={handleAddRoute}
+              style={styles.centerButton}
+              accessibilityLabel='Add route'
+              accessibilityRole='button'
             >
-              <Feather
-                name={config.icon as any}
-                size={22}
-                color={isFocused ? colors.white : 'rgba(255,255,255,0.6)'}
-              />
-              {isFocused && (
-                <AppText style={styles.label}>{config.label}</AppText>
-              )}
+              <Feather name='plus' size={20} color={colors.white} />
             </Pressable>
-          )
-        })}
+          </View>
+        </View>
+
+        {renderTab(2)}
+        {renderTab(3)}
       </View>
     </View>
   )
@@ -78,32 +96,45 @@ const styles = StyleSheet.create({
     right: 0,
     alignItems: 'center',
   },
-  container: {
+  bar: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(30,30,30,0.65)',
-    borderRadius: 1000,
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    gap: 4,
-    width: '90%',
-    justifyContent: 'space-between',
+    backgroundColor: 'rgba(26,26,26,0.85)',
+    borderRadius: 100,
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+    width: '92%',
   },
   tab: {
-    flexDirection: 'row',
+    flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    borderRadius: 1000,
-    gap: 6,
   },
-  tabActive: {
+  centerSlot: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 4,
+  },
+  socket: {
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    backgroundColor: 'rgba(0,0,0,0.28)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  centerButton: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
     backgroundColor: colors.primary,
-  },
-  label: {
-    color: colors.white,
-    fontFamily: typography.button.fontFamily,
-    fontSize: 15,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: colors.primaryDark,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+    elevation: 4,
   },
 })
