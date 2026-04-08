@@ -1,15 +1,18 @@
 import { FC } from 'react'
+
 import { StyleSheet, View } from 'react-native'
-import { Image } from 'expo-image'
+
 import { Ionicons } from '@expo/vector-icons'
+import { Image } from 'expo-image'
 
 import { AppText } from '@/src/shared/components/AppText'
 import { colors } from '@/src/theme/colors'
 import { typography } from '@/src/theme/typography'
+
 import { Route } from '../types'
 import { BottomGradient } from './BottomGradient'
-import { MetaChip } from './MetaChip'
 import { DiffBadge } from './DiffBadge'
+import { MetaChip } from './MetaChip'
 import { SaveButton } from './SaveButton'
 
 interface AllRouteCardProps {

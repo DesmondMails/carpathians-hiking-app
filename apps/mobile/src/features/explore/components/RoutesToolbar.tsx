@@ -1,5 +1,7 @@
 import { FC } from 'react'
+
 import { Pressable, StyleSheet, View } from 'react-native'
+
 import { Feather } from '@expo/vector-icons'
 
 import { AppText } from '@/src/shared/components/AppText'

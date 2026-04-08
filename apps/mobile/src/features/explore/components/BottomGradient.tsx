@@ -1,4 +1,5 @@
 import { FC } from 'react'
+
 import { StyleSheet, View } from 'react-native'
 
 interface BottomGradientProps {

@@ -1,5 +1,7 @@
 import { FC } from 'react'
+
 import { StyleSheet, TouchableOpacity } from 'react-native'
+
 import { Ionicons } from '@expo/vector-icons'
 
 import { colors } from '@/src/theme/colors'

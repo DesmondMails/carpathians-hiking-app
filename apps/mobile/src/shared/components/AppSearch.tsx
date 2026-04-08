@@ -1,9 +1,14 @@
-import { StyleSheet, Pressable, TextInput, View } from 'react-native'
 import { FC } from 'react'
+import type { ComponentProps } from 'react'
+
+import { StyleSheet, Pressable, TextInput, View } from 'react-native'
+
+import { Feather } from '@expo/vector-icons'
+
 import { colors } from '@/src/theme/colors'
 import { typography } from '@/src/theme/typography'
-import { Feather } from '@expo/vector-icons'
-import type { ComponentProps } from 'react'
+
+
 
 type FeatherIconName = ComponentProps<typeof Feather>['name']
 

@@ -1,6 +1,7 @@
 import { StyleSheet, View } from 'react-native'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
+
 import { Image } from 'expo-image'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { AppText } from '@/src/shared/components/AppText'
 import { colors } from '@/src/theme/colors'

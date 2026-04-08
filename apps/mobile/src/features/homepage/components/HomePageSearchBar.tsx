@@ -1,8 +1,9 @@
+import { StyleSheet, TextInput, View , Pressable } from 'react-native'
+
+import { Feather } from '@expo/vector-icons'
+
 import { colors } from '@/src/theme/colors'
 import { typography } from '@/src/theme/typography'
-import { Feather } from '@expo/vector-icons'
-import { StyleSheet, TextInput, View } from 'react-native'
-import { Pressable } from 'react-native'
 
 export const HomePageSearchBar = () => {
   return (

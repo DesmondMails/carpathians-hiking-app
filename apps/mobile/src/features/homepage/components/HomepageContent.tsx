@@ -1,8 +1,9 @@
 import { useState } from 'react'
+
 import { ScrollView, StyleSheet, View } from 'react-native'
 
-import { colors } from '@/src/theme/colors'
-import { typography } from '@/src/theme/typography'
+import { useRouter } from 'expo-router'
+
 import {
   NearbyCard,
   RecommendedCard,
@@ -13,10 +14,13 @@ import {
   POPULAR_ROUTES,
   RECOMMENDED_ROUTES,
 } from '@/src/features/explore/data/mock-routes'
-import { useHomepage } from '../hooks/useHomepage'
+import { colors } from '@/src/theme/colors'
+import { typography } from '@/src/theme/typography'
+
 import { PopularRow } from './PopularRow'
 import { WeekendCard } from './WeekendCard'
-import { useRouter } from 'expo-router'
+import { useHomepage } from '../hooks/useHomepage'
+
 
 export const HomepageContent = () => {
   const router = useRouter()

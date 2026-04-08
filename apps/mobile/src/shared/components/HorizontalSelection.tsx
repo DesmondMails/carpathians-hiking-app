@@ -1,8 +1,11 @@
 import { FC } from 'react'
+
 import { Pressable, ScrollView, StyleSheet } from 'react-native'
-import { AppText } from './AppText'
+
 import { colors } from '@/src/theme/colors'
 import { typography } from '@/src/theme/typography'
+
+import { AppText } from './AppText'
 
 interface HorizontalSelectionProps {
   items: { label: string; active: boolean }[]

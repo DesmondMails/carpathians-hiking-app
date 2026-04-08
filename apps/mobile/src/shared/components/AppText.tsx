@@ -1,4 +1,5 @@
 import React from 'react'
+
 import { Text, TextProps, StyleProp, TextStyle, StyleSheet } from 'react-native'
 
 import { colors } from '@/src/theme/colors'

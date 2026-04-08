@@ -1,19 +1,20 @@
 import { useState } from 'react'
+
 import { ScrollView, StyleSheet, View } from 'react-native'
+
 import { SafeAreaView } from 'react-native-safe-area-context'
 
-import { AppSearch } from '@/src/shared/components/AppSearch'
 
 import {
   AllRouteCard,
   CategoryChips,
   ExploreHeader,
 } from '@/src/features/explore/components'
-
 import {
   ALL_ROUTES,
   EXPLORE_CATEGORIES,
 } from '@/src/features/explore/data/mock-routes'
+import { AppSearch } from '@/src/shared/components/AppSearch'
 
 export default function ExploreScreen() {
   const [activeCategory, setActiveCategory] = useState('Поруч')
