@@ -45,7 +45,8 @@
           "iosUrlScheme": "com.googleusercontent.apps.942450969798-acv873inkv0jie6u0qb7b46vcqj45e83"
         }
       ],
-      "expo-font"
+      "expo-font",
+      "@maplibre/maplibre-react-native"
     ],
     "experiments": {
       "typedRoutes": true,

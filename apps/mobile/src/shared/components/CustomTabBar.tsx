@@ -2,6 +2,7 @@ import { Pressable, StyleSheet, View } from 'react-native'
 
 import { Feather } from '@expo/vector-icons'
 import { BottomTabBarProps } from '@react-navigation/bottom-tabs'
+import { usePathname } from 'expo-router'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { colors } from '@/src/theme/colors'
@@ -21,6 +22,9 @@ export function CustomTabBar({
   navigation,
 }: BottomTabBarProps) {
   const insets = useSafeAreaInsets()
+  const pathname = usePathname()
+
+  if (pathname.startsWith('/routes/')) return null
 
   const handleAddRoute = () => {
     console.log('Add Route pressed')
@@ -99,7 +103,7 @@ const styles = StyleSheet.create({
   bar: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(26,26,26,0.85)',
+    backgroundColor: colors.transparentDark,
     borderRadius: 100,
     paddingVertical: 4,
     paddingHorizontal: 8,

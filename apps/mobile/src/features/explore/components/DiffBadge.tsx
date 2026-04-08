@@ -1,9 +1,12 @@
-import { AppText } from '@/src/shared/components/AppText'
 import { FC } from 'react'
+
 import { StyleSheet, View } from 'react-native'
-import { getDifficultyColor } from '../utills/diificulties-colors'
+
+import { AppText } from '@/src/shared/components/AppText'
 import { typography } from '@/src/theme/typography'
+
 import { Difficulty } from '../types'
+import { getDifficultyColor } from '../utills/diificulties-colors'
 
 interface DiffBadgeProps {
   difficulty: Difficulty

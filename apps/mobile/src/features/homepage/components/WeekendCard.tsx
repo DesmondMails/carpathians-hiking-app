@@ -1,6 +1,7 @@
 import { Pressable, StyleSheet, View } from 'react-native'
-import { Image } from 'expo-image'
+
 import { Feather } from '@expo/vector-icons'
+import { Image } from 'expo-image'
 
 import { AppText } from '@/src/shared/components/AppText'
 import { colors } from '@/src/theme/colors'

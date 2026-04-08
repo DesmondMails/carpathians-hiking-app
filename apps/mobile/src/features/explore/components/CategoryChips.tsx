@@ -1,12 +1,15 @@
 import { FC } from 'react'
+
 import { Pressable, ScrollView, StyleSheet } from 'react-native'
+
+import { Feather } from '@expo/vector-icons'
+
 import { AppText } from '@/src/shared/components/AppText'
 import { colors } from '@/src/theme/colors'
+import { typography } from '@/src/theme/typography'
 
 import { Category } from '../types'
 
-import { Feather } from '@expo/vector-icons'
-import { typography } from '@/src/theme/typography'
 
 interface CategoryChipsProps {
   categories: Category[]

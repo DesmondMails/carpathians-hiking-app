@@ -1,16 +1,19 @@
 import { FC } from 'react'
+
 import { Pressable, StyleSheet, View } from 'react-native'
-import { Image } from 'expo-image'
+
 import { Feather, Ionicons } from '@expo/vector-icons'
+import { Image } from 'expo-image'
 
 import { AppText } from '@/src/shared/components/AppText'
 import { colors } from '@/src/theme/colors'
 import { typography } from '@/src/theme/typography'
-import { Route } from '../../explore/types'
+
 import { BottomGradient } from '../../explore/components/BottomGradient'
-import { MetaChip } from '../../explore/components/MetaChip'
 import { DiffBadge } from '../../explore/components/DiffBadge'
+import { MetaChip } from '../../explore/components/MetaChip'
 import { SaveButton } from '../../explore/components/SaveButton'
+import { Route } from '../../explore/types'
 
 interface RecommendedCardProps {
   route: Route

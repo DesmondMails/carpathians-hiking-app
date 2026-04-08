@@ -1,9 +1,10 @@
 import { FC } from 'react'
+
 import { Pressable, View, StyleSheet } from 'react-native'
 
-import { typography } from '@/src/theme/typography'
 import { AppText } from '@/src/shared/components/AppText'
 import { colors } from '@/src/theme/colors'
+import { typography } from '@/src/theme/typography'
 
 interface SectionHeaderProps {
   title: string

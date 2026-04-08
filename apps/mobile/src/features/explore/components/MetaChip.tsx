@@ -1,9 +1,13 @@
+import { FC } from 'react'
+
+import { StyleSheet, View } from 'react-native'
+
+import { Feather } from '@expo/vector-icons'
+
 import { AppText } from '@/src/shared/components/AppText'
 import { colors } from '@/src/theme/colors'
 import { typography } from '@/src/theme/typography'
-import { Feather } from '@expo/vector-icons'
-import { FC } from 'react'
-import { StyleSheet, View } from 'react-native'
+
 
 interface MetaChipProps {
   icon: string

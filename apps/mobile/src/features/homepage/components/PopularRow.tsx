@@ -1,14 +1,15 @@
 import { FC } from 'react'
-import { StyleSheet, View } from 'react-native'
-import { Image } from 'expo-image'
-import { Ionicons } from '@expo/vector-icons'
 
+import { StyleSheet, View } from 'react-native'
+
+import { Ionicons } from '@expo/vector-icons'
+import { Image } from 'expo-image'
+
+import { MetaChip , SaveButton } from '@/src/features/explore/components'
+import { Route } from '@/src/features/explore/types'
 import { AppText } from '@/src/shared/components/AppText'
 import { colors } from '@/src/theme/colors'
 import { typography } from '@/src/theme/typography'
-import { Route } from '@/src/features/explore/types'
-import { MetaChip } from '@/src/features/explore/components'
-import { SaveButton } from '@/src/features/explore/components'
 
 interface PopularRowProps {
   route: Route

@@ -34,4 +34,7 @@ export const colors = {
   // SPECIAL
   white: '#ffffff',
   black: '#000000',
+
+  // TRANSPARENT
+  transparentDark: 'rgba(26,26,26,0.85)',
 }

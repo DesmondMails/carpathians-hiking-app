@@ -1,12 +1,16 @@
+import { useEffect } from 'react'
+
 import { ScrollView, StyleSheet, View } from 'react-native'
+
+import { useRouter } from 'expo-router'
+
 import {
   HomapageHero,
   HomepageContent,
 } from '@/src/features/homepage/components'
 import { useHomepage } from '@/src/features/homepage/hooks/useHomepage'
-import { useEffect } from 'react'
 import { AppSearch } from '@/src/shared/components/AppSearch'
-import { useRouter } from 'expo-router'
+
 
 export default function HomepageScreen() {
   const { loadFavoriteRoutes } = useHomepage()
