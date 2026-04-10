@@ -1,5 +1,3 @@
-import { PublicUser } from './user'
-
 export interface Route {
   id: string
   title: string
@@ -7,7 +5,11 @@ export interface Route {
   distanceKm: number
   elevationGainM: number
   createdByUserId: string
-  createdByUser: PublicUser
   createdAt: Date
   updatedAt: Date
+}
+
+export interface CreateRoutePayload {
+  title: string
+  description?: string
 }

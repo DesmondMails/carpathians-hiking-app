@@ -1,9 +1,10 @@
 import { FC } from 'react'
 
-import { StyleSheet, View } from 'react-native'
+import { Pressable, StyleSheet, View } from 'react-native'
 
 import { Ionicons } from '@expo/vector-icons'
 import { Image } from 'expo-image'
+import { useRouter } from 'expo-router'
 
 import { AppText } from '@/src/shared/components/AppText'
 import { colors } from '@/src/theme/colors'
@@ -22,8 +23,16 @@ interface NearbyCardProps {
 }
 
 export const NearbyCard: FC<NearbyCardProps> = ({ route, saved, onSave }) => {
+  const router = useRouter()
+
+  const handleCardPress = () => {
+    router.push({
+      pathname: '/routes/[id]',
+      params: { id: route.id },
+    })
+  }
   return (
-    <View style={styles.card}>
+    <Pressable style={styles.card} onPress={handleCardPress}>
       <View style={styles.imageWrap}>
         <Image
           source={{ uri: route.imageUri }}
@@ -61,7 +70,7 @@ export const NearbyCard: FC<NearbyCardProps> = ({ route, saved, onSave }) => {
           </AppText>
         </View>
       </View>
-    </View>
+    </Pressable>
   )
 }
 

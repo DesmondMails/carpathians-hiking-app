@@ -2,10 +2,17 @@ import { Pressable, StyleSheet, View } from 'react-native'
 
 import { Feather } from '@expo/vector-icons'
 import { BottomTabBarProps } from '@react-navigation/bottom-tabs'
-import { usePathname } from 'expo-router'
+import { usePathname, useRouter } from 'expo-router'
+import {
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+} from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { colors } from '@/src/theme/colors'
+
+import { AnimatedPressable } from './AnimatedPressable'
 
 type TabName = 'index' | 'explore' | 'history' | 'profile'
 
@@ -23,11 +30,20 @@ export function CustomTabBar({
 }: BottomTabBarProps) {
   const insets = useSafeAreaInsets()
   const pathname = usePathname()
+  const pressProgress = useSharedValue(0)
+  const router = useRouter()
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [
+      { scale: 1 - 0.04 * pressProgress.value },
+      { translateY: 1.5 * pressProgress.value },
+    ],
+  }))
 
   if (pathname.startsWith('/routes/')) return null
 
   const handleAddRoute = () => {
-    console.log('Add Route pressed')
+    router.push('/(modals)/create-route')
   }
 
   const renderTab = (routeIndex: number) => {
@@ -74,14 +90,26 @@ export function CustomTabBar({
 
         <View style={styles.centerSlot}>
           <View style={styles.socket}>
-            <Pressable
+            <AnimatedPressable
+              onPressIn={() => {
+                pressProgress.value = withSpring(1, {
+                  damping: 16,
+                  stiffness: 380,
+                })
+              }}
+              onPressOut={() => {
+                pressProgress.value = withSpring(0, {
+                  damping: 14,
+                  stiffness: 320,
+                })
+              }}
               onPress={handleAddRoute}
-              style={styles.centerButton}
+              style={[styles.centerButton, animatedStyle]}
               accessibilityLabel='Add route'
               accessibilityRole='button'
             >
               <Feather name='plus' size={20} color={colors.white} />
-            </Pressable>
+            </AnimatedPressable>
           </View>
         </View>
 

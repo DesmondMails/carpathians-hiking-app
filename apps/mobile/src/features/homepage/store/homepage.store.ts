@@ -7,14 +7,14 @@ interface HomepageState {
   routes: Route[]
   isLoading: boolean
 
-  loadFavoriteRoutes: () => Promise<void>
+  loadRoutes: () => Promise<void>
 }
 
 export const useHomepageStore = create<HomepageState>((set) => ({
   routes: [],
   isLoading: false,
 
-  loadFavoriteRoutes: async () => {
+  loadRoutes: async () => {
     set({ isLoading: true })
 
     try {
