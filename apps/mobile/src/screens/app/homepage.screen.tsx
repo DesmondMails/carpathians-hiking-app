@@ -11,9 +11,8 @@ import {
 import { useHomepage } from '@/src/features/homepage/hooks/useHomepage'
 import { AppSearch } from '@/src/shared/components/AppSearch'
 
-
 export default function HomepageScreen() {
-  const { loadFavoriteRoutes } = useHomepage()
+  const { loadRoutes } = useHomepage()
 
   const router = useRouter()
 
@@ -22,8 +21,8 @@ export default function HomepageScreen() {
   }
 
   useEffect(() => {
-    loadFavoriteRoutes()
-  }, [])
+    loadRoutes()
+  }, [loadRoutes])
 
   return (
     <View style={styles.root}>

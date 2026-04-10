@@ -62,6 +62,10 @@ export default function RootLayout() {
       <Stack>
         <Stack.Screen name='(app)' options={{ headerShown: false }} />
         <Stack.Screen name='(auth)' options={{ headerShown: false }} />
+        <Stack.Screen
+          name='(modals)'
+          options={{ presentation: 'fullScreenModal', headerShown: false }}
+        />
       </Stack>
       <StatusBar style='auto' />
 

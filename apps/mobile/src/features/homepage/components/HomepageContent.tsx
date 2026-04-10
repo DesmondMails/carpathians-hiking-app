@@ -21,7 +21,6 @@ import { PopularRow } from './PopularRow'
 import { WeekendCard } from './WeekendCard'
 import { useHomepage } from '../hooks/useHomepage'
 
-
 export const HomepageContent = () => {
   const router = useRouter()
   const { routes } = useHomepage()
@@ -97,10 +96,22 @@ export const HomepageContent = () => {
           title='Популярне цього тижня'
           onSeeAll={handleSeeAllPress}
         />
-        {POPULAR_ROUTES.map((route, i) => (
+        {routes.map((route, i) => (
           <PopularRow
             key={route.id}
-            route={route}
+            route={{
+              id: route.id,
+              title: route.title,
+              region: 'Some region',
+              distanceKm: route.distanceKm,
+              elevationM: route.elevationGainM,
+              durationH: 0,
+              difficulty: 'Легкий',
+              rating: 0,
+              reviewCount: 0,
+              distanceFromUserKm: 0,
+              imageUri: 'https://via.placeholder.com/150',
+            }}
             rank={i + 1}
             saved={savedPopular.has(route.id)}
             onSave={() => togglePopular(route.id)}

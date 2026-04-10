@@ -2,12 +2,13 @@ import { FC } from 'react'
 
 import { Pressable, StyleSheet, View } from 'react-native'
 
-import Animated, {
+import {
   useAnimatedStyle,
   useSharedValue,
   withSpring,
 } from 'react-native-reanimated'
 
+import { AnimatedPressable } from '@/src/shared/components'
 import { AppText } from '@/src/shared/components/AppText'
 import { colors } from '@/src/theme/colors'
 import { spacing } from '@/src/theme/spacing'
@@ -15,8 +16,6 @@ import { fontFamily, typography } from '@/src/theme/typography'
 
 import { TransportIcon } from './TransportIcon'
 import type { StartPoint } from './types'
-
-const AnimatedPressable = Animated.createAnimatedComponent(Pressable)
 
 interface StartPointCardProps {
   point: StartPoint

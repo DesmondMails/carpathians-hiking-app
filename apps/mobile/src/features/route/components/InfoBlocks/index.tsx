@@ -5,11 +5,11 @@ import { Pressable, StyleSheet, View } from 'react-native'
 import { AppText } from '@/src/shared/components/AppText'
 import { colors } from '@/src/theme/colors'
 import { spacing } from '@/src/theme/spacing'
-import { fontFamily, typography } from '@/src/theme/typography'
+import { fontFamily } from '@/src/theme/typography'
 
 import type { RouteDetails } from '../../types'
 import { TransportSection } from '../Transport'
-import { About, InfoRow, Weather } from './components'
+import { About, Weather } from './components'
 
 type InfoTabId = 'transport' | 'weather' | 'about'
 
