@@ -1,4 +1,14 @@
-import { Body, Controller, Delete, Get, Param, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Param,
+  Patch,
+  Post,
+} from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiOperation,
@@ -20,7 +30,8 @@ export class RoutesController {
   constructor(private routesService: RoutesService) {}
 
   @Post()
-  @ApiOperation({ summary: 'Створити маршрут' })
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Створити або фіналізувати маршрут' })
   @ApiResponse({ status: 201, description: 'Маршрут успішно створений' })
   @ApiResponse({ status: 401, description: 'Користувач не авторизований' })
   async createRoute(
@@ -30,7 +41,7 @@ export class RoutesController {
     return this.routesService.createRoute(user.id, createRouteDto);
   }
 
-  @Post(':id')
+  @Patch(':id')
   @ApiOperation({ summary: 'Оновити маршрут' })
   @ApiResponse({ status: 200, description: 'Маршрут успішно оновлений' })
   @ApiResponse({ status: 401, description: 'Користувач не авторизований' })
@@ -68,6 +79,7 @@ export class RoutesController {
   }
 
   @Delete(':id')
+  @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Видалити маршрут' })
   @ApiResponse({ status: 204, description: 'Маршрут успішно видалений' })
   @ApiResponse({ status: 401, description: 'Користувач не авторизований' })

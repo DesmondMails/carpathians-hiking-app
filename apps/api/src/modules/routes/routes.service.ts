@@ -1,10 +1,11 @@
 import {
   ForbiddenException,
   Injectable,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
 
-import { Route } from 'src/prisma/generated/client';
+import { Route, RouteDraft } from 'src/prisma/generated/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 
 import { CreateRouteDto } from './dto/create-route.dto';
@@ -12,6 +13,8 @@ import { UpdateRouteDto } from './dto/update-route.dto';
 
 @Injectable()
 export class RoutesService {
+  private readonly logger = new Logger(RoutesService.name);
+
   constructor(private prisma: PrismaService) {}
 
   async createRoute(
@@ -73,6 +76,12 @@ export class RoutesService {
     await this.prisma.route.delete({
       where: { id: routeId },
     });
+  }
+
+  createRouteFromDraft(draftRoute: RouteDraft, userId: string): void {
+    this.logger.log(
+      `Creating route from draft ${draftRoute.id} for user ${userId}: ${JSON.stringify(draftRoute)}`,
+    );
   }
 
   private checkRouteOwnership(route: Route, userId: string): void {

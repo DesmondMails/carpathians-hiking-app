@@ -17,7 +17,6 @@ import {
 import { MOCK_ROUTE_DETAILS } from '@/src/features/route/data/mock-route'
 import { colors } from '@/src/theme/colors'
 
-
 export default function RouteScreen() {
   useLocalSearchParams<{ id: string }>()
   const [saved, setSaved] = useState(false)
@@ -45,7 +44,7 @@ export default function RouteScreen() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
         scrollEnabled={scrollEnabled}
-        bounces
+        bounces={false}
       >
         <HeroSection route={route} />
 

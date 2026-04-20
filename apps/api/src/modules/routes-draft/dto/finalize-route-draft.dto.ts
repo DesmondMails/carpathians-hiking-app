@@ -1,22 +1,15 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
+  IsArray,
   IsEnum,
   IsNotEmpty,
   IsOptional,
   IsString,
-  IsUUID,
 } from 'class-validator';
 
-import { Difficulty, RouteType } from 'src/prisma/generated/client';
+import { Difficulty } from 'src/prisma/generated/client';
 
-export class CreateRouteDto {
-  @IsUUID()
-  @IsOptional()
-  @ApiPropertyOptional({
-    description: 'ID route draft, з якого фіналізується маршрут',
-  })
-  draftId?: string;
-
+export class FinalizeRouteDraftDto {
   @IsString()
   @IsNotEmpty()
   @ApiProperty({ description: 'Назва маршруту' })
@@ -24,7 +17,7 @@ export class CreateRouteDto {
 
   @IsString()
   @IsOptional()
-  @ApiProperty({ description: 'Опис маршруту', required: false })
+  @ApiPropertyOptional({ description: 'Опис маршруту' })
   description?: string;
 
   @IsString()
@@ -40,16 +33,23 @@ export class CreateRouteDto {
   })
   difficulty?: Difficulty;
 
-  @IsEnum(RouteType)
+  @IsString()
+  @IsNotEmpty()
+  @ApiProperty({ description: 'URL зображення покриття маршруту' })
+  coveringImageUrl?: string;
+
+  @IsArray()
   @IsOptional()
-  @ApiPropertyOptional({
-    description: 'Тип маршруту',
-    enum: RouteType,
-  })
-  routeType?: RouteType;
+  @ApiPropertyOptional({ description: 'URL зображень маршруту' })
+  imageUrls?: string[];
 
   @IsString()
   @IsOptional()
-  @ApiPropertyOptional({ description: 'Додаткові нотатки до маршруту' })
+  @ApiPropertyOptional({ description: 'URL зображення покриття маршруту' })
+  coverImageUrl?: string;
+
+  @IsString()
+  @IsOptional()
+  @ApiPropertyOptional({ description: 'Нотатки до маршруту' })
   notes?: string;
 }
