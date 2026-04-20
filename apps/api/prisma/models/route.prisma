@@ -1,15 +1,50 @@
-
 model Route {
-    id String @id @default(uuid())
-    title String
-    description String?
+  id                   String      @id @default(uuid())
+  draftId              String?     @unique
+  draft                RouteDraft? @relation(fields: [draftId], references: [id])
+  title                String
+  description          String?
+  region               String?
+  difficulty           Difficulty?
+  routeType            RouteType?
+  distanceM           Float?
+  elevationGainM       Int?
+  durationH            Float?
+  coverImageUrl        String?
+  imageUrlsJson        Json?
+  notes                String?
+  routeCoordinatesJson Json?
+  elevationProfileJson Json?
+  poiMarkersJson       Json?
+  gpxStorageKey        String?
+  gpxAvailable         Boolean     @default(false)
+  rating               Float       @default(0)
+  reviewCount          Int         @default(0)
+  status               RouteStatus @default(DRAFT)
+  createdByUserId      String
+  createdByUser        User        @relation(fields: [createdByUserId], references: [id])
+  createdAt            DateTime    @default(now())
+  updatedAt            DateTime    @updatedAt
 
-    distanceKm Float?
-    elevationGainM Int?
+  @@index([createdByUserId])
+  @@index([status])
+}
 
-    createdByUserId String
-    createdByUser User @relation(fields: [createdByUserId], references: [id])
+enum RouteStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
 
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+enum Difficulty {
+  EASY
+  MODERATE
+  HARD
+  EXTREME
+}
+
+enum RouteType {
+  LOOP
+  OUT_AND_BACK
+  POINT_TO_POINT
 }

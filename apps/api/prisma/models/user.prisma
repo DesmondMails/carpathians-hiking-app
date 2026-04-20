@@ -11,7 +11,8 @@ model User {
   avatar            String?
   emailVerification EmailVerification?
 
-  routes Route[]
+  routes      Route[]
+  routeDrafts RouteDraft[]
 }
 
 enum AuthProvider {
