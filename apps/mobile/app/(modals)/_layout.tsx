@@ -12,9 +12,6 @@ export default function ModalsLayout() {
   if (!isAuthenticated) {
     return <Redirect href='/(auth)/login' />
   }
-  return (
-    <Stack
-      screenOptions={{ presentation: 'fullScreenModal', headerShown: false }}
-    />
-  )
+  return <Stack screenOptions={{ headerShown: false }} />
+
 }

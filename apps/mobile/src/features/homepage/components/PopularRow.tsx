@@ -1,11 +1,12 @@
 import { FC } from 'react'
 
-import { StyleSheet, View } from 'react-native'
+import { Pressable, StyleSheet, View } from 'react-native'
 
 import { Ionicons } from '@expo/vector-icons'
 import { Image } from 'expo-image'
+import { useRouter } from 'expo-router'
 
-import { MetaChip , SaveButton } from '@/src/features/explore/components'
+import { MetaChip, SaveButton } from '@/src/features/explore/components'
 import { Route } from '@/src/features/explore/types'
 import { AppText } from '@/src/shared/components/AppText'
 import { colors } from '@/src/theme/colors'
@@ -24,8 +25,16 @@ export const PopularRow: FC<PopularRowProps> = ({
   saved,
   onSave,
 }) => {
+  const router = useRouter()
+
+  const handlePress = () => {
+    router.push({
+      pathname: '/routes/[id]',
+      params: { id: route.id },
+    })
+  }
   return (
-    <View style={styles.row}>
+    <Pressable style={styles.row} onPress={handlePress}>
       <View style={styles.rankWrap}>
         <AppText style={styles.rank}>{String(rank).padStart(2, '0')}</AppText>
       </View>
@@ -53,7 +62,7 @@ export const PopularRow: FC<PopularRowProps> = ({
         </View>
       </View>
       <SaveButton saved={saved} onPress={onSave} />
-    </View>
+    </Pressable>
   )
 }
 
