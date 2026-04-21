@@ -1,0 +1,29 @@
+import { RouteDraftPreview } from './route-draft-preview'
+
+export interface RouteDraft {
+  id: string
+  title: string
+  description?: string
+  createdByUserId: string
+  sourceFileName: string
+  gpxStorageKey?: string
+  previewJson?: RouteDraftPreview
+  errorMessage?: string
+  createdAt: Date
+  updatedAt: Date
+  expiresAt: Date
+}
+
+export const DIFFICULTY_VALUES = ['EASY', 'MODERATE', 'HARD', 'EXTREME'] as const
+export type Difficulty = (typeof DIFFICULTY_VALUES)[number]
+
+export interface FinalizeRouteDraftPayload {
+  title: string
+  description?: string
+  region?: string
+  difficulty?: Difficulty
+  coveringImageUrl?: string
+  imageUrls?: string[]
+  coverImageUrl?: string
+  notes?: string
+}
