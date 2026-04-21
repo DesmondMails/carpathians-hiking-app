@@ -1,11 +1,18 @@
 import {
+  ConflictException,
   ForbiddenException,
   Injectable,
   Logger,
   NotFoundException,
 } from '@nestjs/common';
 
-import { RouteDraft, RouteDraftStatus } from 'src/prisma/generated/client';
+import { toPreviewJson } from 'src/common/mappers';
+import {
+  Prisma,
+  Route,
+  RouteDraft,
+  RouteDraftStatus,
+} from 'src/prisma/generated/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 
 import { CreateRouteDraftDto } from './dto/create-route-draft.dto';
@@ -13,6 +20,7 @@ import { FinalizeRouteDraftDto } from './dto/finalize-route-draft.dto';
 import { UpdateRouteDraftDto } from './dto/update-route-draft.dto';
 import { RoutesService } from '../routes/routes.service';
 import { GpxParserService } from './gpx/gpx-parser.service';
+import { parsePreview } from './utils/parse-preview';
 
 @Injectable()
 export class RoutesDraftService {
@@ -91,25 +99,51 @@ export class RoutesDraftService {
     routeDraftId: string,
     userId: string,
     finalizeRouteDraftDto: FinalizeRouteDraftDto,
-  ): Promise<void> {
+  ): Promise<Route> {
     const routeDraft = await this.findOwnedRouteDraftById(routeDraftId, userId);
 
-    const data = {
-      ...routeDraft,
-      ...finalizeRouteDraftDto,
-      status: RouteDraftStatus.FINALIZED,
-    };
+    this.checkIfAllreadyFinalized(routeDraft);
 
-    this.logger.log(
-      `Finalizing route draft ${routeDraftId} for user ${userId}: ${JSON.stringify(data)}`,
-    );
-    this.logger.log(`Route draft preview: ${JSON.stringify(data.previewJson)}`);
+    const preview = parsePreview(routeDraft.previewJson);
 
-    this.routesService.createRouteFromDraft(data, userId);
+    const [route] = await this.prisma.$transaction([
+      this.routesService.createRouteFromDraft(
+        routeDraft,
+        preview,
+        finalizeRouteDraftDto,
+      ),
+      this.prisma.routeDraft.update({
+        where: { id: routeDraftId },
+        data: {
+          status: RouteDraftStatus.FINALIZED,
+        },
+      }),
+    ]);
+
+    return route;
   }
 
-  createRouteDraftFromGpx(userId: string, file: Express.Multer.File): void {
-    this.gpxParserService.parseGpx(file);
+  createRouteDraftFromGpx(
+    userId: string,
+    file: Express.Multer.File,
+  ): Promise<RouteDraft> {
+    const parsedGpx = this.gpxParserService.parseGpx(file);
+
+    const fileName = (file as { originalname: string }).originalname;
+
+    const title = this.extractTitleFromFileName(fileName);
+
+    const createRouteDraftData: Prisma.RouteDraftUncheckedCreateInput = {
+      sourceFileName: fileName,
+      title,
+      createdByUserId: userId,
+      status: RouteDraftStatus.READY,
+      previewJson: toPreviewJson(parsedGpx),
+    };
+
+    return this.prisma.routeDraft.create({
+      data: createRouteDraftData,
+    });
   }
 
   private checkRouteDraftOwnership(
@@ -119,5 +153,15 @@ export class RoutesDraftService {
     if (routeDraft.createdByUserId !== userId) {
       throw new ForbiddenException('Ви не маєте доступу до цього draft');
     }
+  }
+
+  private checkIfAllreadyFinalized(routeDraft: RouteDraft): void {
+    if (routeDraft.status === RouteDraftStatus.FINALIZED) {
+      throw new ConflictException('Draft маршрут вже завершено');
+    }
+  }
+
+  private extractTitleFromFileName(fileName: string): string {
+    return fileName.split('.').slice(0, -1).join(' ');
   }
 }

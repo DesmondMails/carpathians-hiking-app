@@ -15,18 +15,18 @@ export type RouteDraftPreviewPoiType =
   | 'VIEWPOINT'
   | 'PEAK'
 
-export interface RouteDraftPreviewCoordinate {
+export type RouteDraftPreviewCoordinate = {
   latitude: number
   longitude: number
   elevationM?: number
 }
 
-export interface RouteDraftPreviewElevationPoint {
+export type RouteDraftPreviewElevationPoint = {
   distanceKm: number
   elevationM: number
 }
 
-export interface RouteDraftPreviewPoi {
+export type RouteDraftPreviewPoi = {
   id: string
   type: RouteDraftPreviewPoiType
   label: string
@@ -34,15 +34,15 @@ export interface RouteDraftPreviewPoi {
   longitude: number
 }
 
-export interface RouteDraftPreview {
+export type RouteDraftPreview = {
   version: 1
   region?: string
   difficulty?: RouteDraftPreviewDifficulty
   routeType?: RouteDraftPreviewRouteType
-  distanceKm?: number
+  distanceM?: number
   elevationGainM?: number
   durationH?: number
-  routeCoordinates?: RouteDraftPreviewCoordinate[]
+  coordinates?: RouteDraftPreviewCoordinate[]
   elevationProfile?: RouteDraftPreviewElevationPoint[]
   poiMarkers?: RouteDraftPreviewPoi[]
 }

@@ -7,7 +7,7 @@ model Route {
   region               String?
   difficulty           Difficulty?
   routeType            RouteType?
-  distanceM           Float?
+  distanceM            Float?
   elevationGainM       Int?
   durationH            Float?
   coverImageUrl        String?

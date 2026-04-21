@@ -35,7 +35,11 @@ export class GpxParserService {
       `Parsed GPX: points=${coordinates.length}, distanceM=${distanceM.toFixed(1)}`,
     );
 
-    return { coordinates, distanceM, elevation };
+    console.dir(coordinates, { depth: null });
+
+    const { elevationGainM } = elevation;
+
+    return { coordinates, distanceM, elevationGainM };
   }
 
   private toGpxDocument(file: Express.Multer.File): GpxDocument {
@@ -56,9 +60,20 @@ export class GpxParserService {
     const trackPoints = (gpx.trk ?? []).flatMap((track) =>
       (track.trkseg ?? []).flatMap((seg) => seg.trkpt ?? []),
     );
-    const routePoints = (gpx.rte ?? []).flatMap((route) => route.rtept ?? []);
 
-    return [...trackPoints, ...routePoints]
+    let routePoints: GpxPoint[] = [];
+
+    if (trackPoints.length === 0) {
+      routePoints = (gpx.rte ?? []).flatMap((route) => route.rtept ?? []);
+    }
+
+    const allPoints = [...trackPoints, ...routePoints];
+
+    if (allPoints.length === 0) {
+      throw new BadRequestException('GPX файл не містить точок');
+    }
+
+    return allPoints
       .map((pt) => this.toCoordinate(pt))
       .filter((c): c is Coordinate => c !== null);
   }
@@ -72,7 +87,8 @@ export class GpxParserService {
     }
 
     const ele = this.toNumber(pt.ele) ?? 0;
-    return [lon, lat, ele];
+
+    return { longitude: lon, latitude: lat, elevationM: ele };
   }
 
   private toNumber(value: number | string | undefined): number | null {
@@ -82,14 +98,16 @@ export class GpxParserService {
   }
 
   private calculateDistanceM(coordinates: Coordinate[]): number {
-    const line = turf.lineString(coordinates);
+    const line = turf.lineString(
+      coordinates.map((c) => [c.longitude, c.latitude]),
+    );
     return parseFloat(turf.length(line, { units: 'meters' }).toFixed(1));
   }
 
   private calculateElevationStats(
     coordinates: Coordinate[],
   ): GpxElevationStats {
-    const elevations = coordinates.map(([, , ele]) => ele);
+    const elevations = coordinates.map((c) => c.elevationM ?? 0);
 
     let elevationGainM = 0;
     let elevationLossM = 0;
