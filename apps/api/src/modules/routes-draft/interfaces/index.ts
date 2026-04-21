@@ -1,8 +1,8 @@
-export type Coordinate = [
-  longitude: number,
-  latitude: number,
-  elevationM: number,
-];
+export type Coordinate = {
+  longitude: number;
+  latitude: number;
+  elevationM: number;
+};
 
 export interface GpxPoint {
   lat?: number | string;
@@ -36,8 +36,9 @@ export interface GpxElevationStats {
   minElevationM: number;
 }
 
-export interface ParsedGpx {
+export type ParsedGpx = {
   coordinates: Coordinate[];
   distanceM: number;
-  elevation: GpxElevationStats;
-}
+  // elevation: GpxElevationStats;
+  elevationGainM: number;
+};

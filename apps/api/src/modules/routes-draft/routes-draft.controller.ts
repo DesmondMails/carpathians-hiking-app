@@ -24,7 +24,7 @@ import {
 
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import { FileExtensionValidator } from 'src/common/validators/file-extension.validator';
-import type { User, RouteDraft } from 'src/prisma/generated/client';
+import type { User, RouteDraft, Route } from 'src/prisma/generated/client';
 
 import { CreateRouteDraftDto } from './dto/create-route-draft.dto';
 import { FinalizeRouteDraftDto } from './dto/finalize-route-draft.dto';
@@ -82,7 +82,7 @@ export class RoutesDraftController {
       }),
     )
     file: Express.Multer.File,
-  ): Promise<void> {
+  ): Promise<RouteDraft> {
     return this.routesDraftService.createRouteDraftFromGpx(user.id, file);
   }
 
@@ -103,7 +103,7 @@ export class RoutesDraftController {
     @CurrentUser() user: User,
     @Param('id') routeDraftId: string,
     @Body() finalizeRouteDraftDto: FinalizeRouteDraftDto,
-  ): Promise<void> {
+  ): Promise<Route> {
     return this.routesDraftService.finalizeRouteDraft(
       routeDraftId,
       user.id,

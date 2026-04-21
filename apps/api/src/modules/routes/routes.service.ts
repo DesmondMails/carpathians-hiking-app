@@ -1,3 +1,4 @@
+import { RouteDraftPreview } from '@hiking/shared';
 import {
   ForbiddenException,
   Injectable,
@@ -5,11 +6,13 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 
-import { Route, RouteDraft } from 'src/prisma/generated/client';
+import { toRouteCreateInput } from 'src/common/mappers/route-creation';
+import { Prisma, Route, RouteDraft } from 'src/prisma/generated/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 
 import { CreateRouteDto } from './dto/create-route.dto';
 import { UpdateRouteDto } from './dto/update-route.dto';
+import { FinalizeRouteDraftDto } from '../routes-draft/dto/finalize-route-draft.dto';
 
 @Injectable()
 export class RoutesService {
@@ -78,10 +81,16 @@ export class RoutesService {
     });
   }
 
-  createRouteFromDraft(draftRoute: RouteDraft, userId: string): void {
-    this.logger.log(
-      `Creating route from draft ${draftRoute.id} for user ${userId}: ${JSON.stringify(draftRoute)}`,
-    );
+  createRouteFromDraft(
+    draftRoute: RouteDraft,
+    preview: RouteDraftPreview,
+    finalizeRouteDto: FinalizeRouteDraftDto,
+  ): Prisma.PrismaPromise<Route> {
+    const data = toRouteCreateInput(draftRoute, preview, finalizeRouteDto);
+
+    return this.prisma.route.create({
+      data,
+    });
   }
 
   private checkRouteOwnership(route: Route, userId: string): void {
