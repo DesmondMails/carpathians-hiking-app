@@ -1,4 +1,4 @@
-import { ElevationPoint } from '../../../types'
+import type { RouteElevationPoint } from '@hiking/shared'
 
 export const smoothElevationPath = (
   points: { x: number; y: number }[],
@@ -21,7 +21,7 @@ export const smoothElevationPath = (
   return d
 }
 
-export const cumulativeGainM = (data: ElevationPoint[]): number => {
+export const cumulativeGainM = (data: RouteElevationPoint[]): number => {
   let gain = 0
   for (let i = 1; i < data.length; i++) {
     const d = data[i].elevationM - data[i - 1].elevationM
@@ -40,4 +40,8 @@ export const padForSpline = (
 export const formatKmLabel = (km: number): string => {
   const v = Math.round(km * 10) / 10
   return Number.isInteger(v) ? `${v}` : v.toFixed(1)
+}
+
+export const toKm = (m: number): number => {
+  return m / 1000
 }

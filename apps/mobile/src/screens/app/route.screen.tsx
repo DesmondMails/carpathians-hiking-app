@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import { ScrollView, StyleSheet, View } from 'react-native'
 
@@ -14,16 +14,16 @@ import {
   RouteIdentity,
   StatsRow,
 } from '@/src/features/route/components'
-import { MOCK_ROUTE_DETAILS } from '@/src/features/route/data/mock-route'
+import { useRoute } from '@/src/features/route/hooks/useRoute'
 import { colors } from '@/src/theme/colors'
 
 export default function RouteScreen() {
-  useLocalSearchParams<{ id: string }>()
+  const { id } = useLocalSearchParams<{ id: string }>()
+
+  const { isLoading, route, loadRoute } = useRoute()
+
   const [saved, setSaved] = useState(false)
   const [scrollEnabled, setScrollEnabled] = useState(true)
-
-  // In production: fetch by params.id — using mock for MVP
-  const route = MOCK_ROUTE_DETAILS
 
   const handleSave = () => setSaved((v) => !v)
   const handleShare = () => {
@@ -35,6 +35,14 @@ export default function RouteScreen() {
   const handleOpenExternal = () => {
     /* TODO: Linking.openURL to OsmAnd / Mapy deeplink */
   }
+
+  useEffect(() => {
+    if (id) {
+      loadRoute(id)
+    }
+  }, [id, loadRoute])
+
+  if (!route) return null
 
   return (
     <View style={styles.root}>
@@ -57,7 +65,7 @@ export default function RouteScreen() {
             <ElevationChart
               data={route.elevationProfile}
               elevationGainM={route.elevationGainM}
-              totalDistanceKm={route.distanceKm}
+              totalDistanceM={route.distanceM}
               onInteractionStart={() => setScrollEnabled(false)}
               onInteractionEnd={() => setScrollEnabled(true)}
             />

@@ -1,20 +1,22 @@
-export const POI_COLOR: Record<string, string> = {
-  water: '#3b82f6',
-  shelter: '#f59e0b',
-  viewpoint: '#8b5cf6',
-  peak: '#ef4444',
+import type { RoutePoiType } from '@hiking/shared'
+
+export const POI_COLOR: Record<RoutePoiType, string> = {
+  WATER: '#3b82f6',
+  SHELTER: '#f59e0b',
+  VIEWPOINT: '#8b5cf6',
+  PEAK: '#ef4444',
 }
 
-export const POI_ICON: Record<string, string> = {
-  water: 'droplet',
-  shelter: 'home',
-  viewpoint: 'eye',
-  peak: 'triangle',
+export const POI_ICON: Record<RoutePoiType, string> = {
+  WATER: 'droplet',
+  SHELTER: 'home',
+  VIEWPOINT: 'eye',
+  PEAK: 'triangle',
 }
 
-export const POI_LABEL: Record<string, string> = {
-  water: 'Вода',
-  shelter: 'Прихисток',
-  viewpoint: 'Оглядовий майданчик',
-  peak: 'Вершина',
+export const POI_LABEL: Record<RoutePoiType, string> = {
+  WATER: 'Вода',
+  SHELTER: 'Прихисток',
+  VIEWPOINT: 'Оглядовий майданчик',
+  PEAK: 'Вершина',
 }

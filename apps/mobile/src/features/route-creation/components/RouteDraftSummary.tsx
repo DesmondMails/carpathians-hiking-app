@@ -21,7 +21,6 @@ export const RouteDraftSummary: FC<RouteDraftSummaryProps> = ({
   const distanceKm =
     preview?.distanceM != null ? preview.distanceM / 1000 : undefined
   const elevationGainM = preview?.elevationGainM
-  const durationH = preview?.durationH
 
   const stats: { icon: keyof typeof Feather.glyphMap; label: string }[] = []
 
@@ -36,13 +35,6 @@ export const RouteDraftSummary: FC<RouteDraftSummaryProps> = ({
     stats.push({
       icon: 'trending-up',
       label: `${Math.round(elevationGainM)} м`,
-    })
-  }
-
-  if (durationH != null) {
-    stats.push({
-      icon: 'clock',
-      label: `${durationH.toFixed(1)} год`,
     })
   }
 
@@ -64,7 +56,11 @@ export const RouteDraftSummary: FC<RouteDraftSummaryProps> = ({
         <View style={styles.stats}>
           {stats.map((stat) => (
             <View key={stat.icon} style={styles.stat}>
-              <Feather name={stat.icon} size={14} color={colors.textSecondary} />
+              <Feather
+                name={stat.icon}
+                size={14}
+                color={colors.textSecondary}
+              />
               <AppText variant='caption' color={colors.textSecondary}>
                 {stat.label}
               </AppText>

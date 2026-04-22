@@ -7,5 +7,5 @@ export const toPreviewJson = (parsedGpx: ParsedGpx): Prisma.InputJsonValue => {
     region: '',
     durationH: 0,
     ...parsedGpx,
-  };
+  } as unknown as Prisma.InputJsonValue;
 };

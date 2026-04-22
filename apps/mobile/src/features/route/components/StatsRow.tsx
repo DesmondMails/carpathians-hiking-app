@@ -3,19 +3,15 @@ import { FC } from 'react'
 import { StyleSheet, View } from 'react-native'
 
 import { Feather, Ionicons } from '@expo/vector-icons'
+import type { RouteDetails } from '@hiking/shared'
 
 import { AppText } from '@/src/shared/components/AppText'
+import { toFixedNumber } from '@/src/shared/utils/toFixedNumber'
 import { colors } from '@/src/theme/colors'
 import { spacing } from '@/src/theme/spacing'
 import { typography } from '@/src/theme/typography'
 
-import type { RouteDetails } from '../types'
-
-function formatDuration(h: number): string {
-  const hours = Math.floor(h)
-  const mins = Math.round((h - hours) * 60)
-  return mins > 0 ? `${hours}г ${mins}хв` : `${hours}г`
-}
+import { formatDuration } from '../utils/formatDuration'
 
 interface StatItemProps {
   icon: React.ReactNode
@@ -40,7 +36,7 @@ export const StatsRow: FC<StatsRowProps> = ({ route }) => (
   <View style={styles.row}>
     <StatItem
       icon={<Feather name='map' size={15} color={colors.primary} />}
-      value={`${route.distanceKm} км`}
+      value={`${toFixedNumber(route.distanceM ? route.distanceM / 1000 : 0)} км`}
     />
     <StatItem
       icon={<Feather name='trending-up' size={15} color={colors.primary} />}
@@ -48,11 +44,11 @@ export const StatsRow: FC<StatsRowProps> = ({ route }) => (
     />
     <StatItem
       icon={<Feather name='clock' size={15} color={colors.primary} />}
-      value={formatDuration(route.durationH)}
+      value={formatDuration(route.durationH ?? 0)}
     />
     <StatItem
       icon={<Ionicons name='star' size={15} color='#f59e0b' />}
-      value={`${route.rating}`}
+      value={`${route.rating || 'N/A'}`}
       isLast
     />
   </View>

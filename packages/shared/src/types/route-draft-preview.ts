@@ -22,7 +22,7 @@ export type RouteDraftPreviewCoordinate = {
 }
 
 export type RouteDraftPreviewElevationPoint = {
-  distanceKm: number
+  distanceM: number
   elevationM: number
 }
 
@@ -37,11 +37,9 @@ export type RouteDraftPreviewPoi = {
 export type RouteDraftPreview = {
   version: 1
   region?: string
-  difficulty?: RouteDraftPreviewDifficulty
   routeType?: RouteDraftPreviewRouteType
   distanceM?: number
   elevationGainM?: number
-  durationH?: number
   coordinates?: RouteDraftPreviewCoordinate[]
   elevationProfile?: RouteDraftPreviewElevationPoint[]
   poiMarkers?: RouteDraftPreviewPoi[]

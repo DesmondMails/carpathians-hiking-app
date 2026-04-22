@@ -7,6 +7,7 @@ import {
   GestureResponderEvent,
 } from 'react-native'
 
+import type { RouteElevationPoint } from '@hiking/shared'
 import * as Haptics from 'expo-haptics'
 import Svg, {
   Circle,
@@ -23,8 +24,12 @@ import { spacing } from '@/src/theme/spacing'
 import { fontFamily, typography } from '@/src/theme/typography'
 
 import { PointerLabel } from './components'
-import { cumulativeGainM, formatKmLabel, smoothElevationPath } from './utils'
-import type { ElevationPoint } from '../../types'
+import {
+  cumulativeGainM,
+  formatKmLabel,
+  smoothElevationPath,
+  toKm,
+} from './utils'
 
 const LINE_COLOR = '#2a8f68'
 const GRADIENT_TOP = 'rgba(42, 143, 104, 0.42)'
@@ -37,9 +42,9 @@ const CARD_RADIUS = 14
 const AXIS_PAD_H = 4
 
 export interface ElevationChartProps {
-  data: ElevationPoint[]
-  elevationGainM?: number
-  totalDistanceKm?: number
+  data: RouteElevationPoint[]
+  elevationGainM: number | null
+  totalDistanceM: number | null
   title?: string | false
   onInteractionStart?: () => void
   onInteractionEnd?: () => void
@@ -48,7 +53,7 @@ export interface ElevationChartProps {
 export const ElevationChart: FC<ElevationChartProps> = ({
   data,
   elevationGainM: gainProp,
-  totalDistanceKm,
+  totalDistanceM,
   title,
   onInteractionStart,
   onInteractionEnd,
@@ -65,8 +70,11 @@ export const ElevationChart: FC<ElevationChartProps> = ({
     () => Math.max(...data.map((p) => p.elevationM)),
     [data],
   )
-  const endKm = totalDistanceKm ?? data[data.length - 1]?.distanceKm ?? 0
-  const gainM = gainProp ?? cumulativeGainM(data)
+  const totalDistanceKm = totalDistanceM ? toKm(totalDistanceM) : 0
+  const lastPointKm = data.length ? toKm(data[data.length - 1].distanceM) : 0
+
+  const endKm = totalDistanceKm || lastPointKm
+  const gainM = gainProp ? gainProp : cumulativeGainM(data)
 
   const yRange = Math.max(maxEl - minEl, 1)
   const yPad = yRange * 0.08
@@ -74,12 +82,12 @@ export const ElevationChart: FC<ElevationChartProps> = ({
   const pixelGeometry = useMemo(() => {
     if (chartWidth <= 0 || data.length < 2) return null
     const innerW = chartWidth - AXIS_PAD_H * 2
-    const maxDist = Math.max(data[data.length - 1].distanceKm, 0.0001)
+    const maxDist = Math.max(toKm(data[data.length - 1].distanceM), 0.0001)
     const yTop = CHART_PAD_TOP
     const yBottom = CHART_PAD_TOP + CHART_INNER_HEIGHT
 
-    const toXY = (p: ElevationPoint) => {
-      const x = AXIS_PAD_H + (p.distanceKm / maxDist) * innerW
+    const toXY = (p: RouteElevationPoint) => {
+      const x = AXIS_PAD_H + (toKm(p.distanceM) / maxDist) * innerW
       const t = (p.elevationM - minEl + yPad) / (yRange + yPad * 2)
       const y = yBottom - t * (yBottom - yTop)
       return { x, y }
@@ -111,7 +119,7 @@ export const ElevationChart: FC<ElevationChartProps> = ({
       let best = 0
       let bestD = Infinity
       for (let i = 0; i < data.length; i++) {
-        const d = Math.abs(data[i].distanceKm - distKm)
+        const d = Math.abs(toKm(data[i].distanceM) - distKm)
         if (d < bestD) {
           bestD = d
           best = i
@@ -230,7 +238,7 @@ export const ElevationChart: FC<ElevationChartProps> = ({
           >
             <PointerLabel
               value={activeSample.elevationM}
-              distanceKm={activeSample.distanceKm}
+              distanceKm={toKm(activeSample.distanceM)}
             />
           </View>
         ) : null}

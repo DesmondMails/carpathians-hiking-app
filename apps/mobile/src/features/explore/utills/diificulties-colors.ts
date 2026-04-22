@@ -1,14 +1,14 @@
+import type { RouteDifficulty } from '@hiking/shared'
+
 import { colors } from '@/src/theme/colors'
 
-import { Difficulty } from '../types'
-
-const DIFFICULTY_COLOR: Record<Difficulty, string> = {
-  Легкий: '#22c55e',
-  Помірний: '#f59e0b',
-  Складний: '#e94d94',
-  Екстрем: '#ef4444',
+const DIFFICULTY_COLOR: Record<RouteDifficulty, string> = {
+  EASY: '#22c55e',
+  MODERATE: '#f59e0b',
+  HARD: '#e94d94',
+  EXTREME: '#ef4444',
 }
 
-export const getDifficultyColor = (d: Difficulty) => {
+export const getDifficultyColor = (d: RouteDifficulty) => {
   return DIFFICULTY_COLOR[d] ?? colors.primary
 }

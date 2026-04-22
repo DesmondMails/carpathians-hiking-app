@@ -1,3 +1,4 @@
+import { RouteDetails } from '@hiking/shared';
 import {
   Body,
   Controller,
@@ -69,13 +70,9 @@ export class RoutesController {
   @ApiOperation({ summary: 'Отримати маршрут по id' })
   @ApiResponse({ status: 200, description: 'Маршрут успішно отриманий' })
   @ApiResponse({ status: 401, description: 'Користувач не авторизований' })
-  @ApiResponse({
-    status: 403,
-    description: 'Користувач не має доступу до цього маршруту',
-  })
   @ApiResponse({ status: 404, description: 'Маршрут не знайдено' })
-  async getRouteById(@Param('id') routeId: string): Promise<Route> {
-    return this.routesService.findRouteById(routeId);
+  async getRouteById(@Param('id') routeId: string): Promise<RouteDetails> {
+    return this.routesService.getRouteDetails(routeId);
   }
 
   @Delete(':id')

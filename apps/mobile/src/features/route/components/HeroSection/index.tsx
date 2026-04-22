@@ -2,11 +2,11 @@ import { useState } from 'react'
 
 import { StyleSheet, View } from 'react-native'
 
+import type { RouteDetails } from '@hiking/shared'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { MapLibrePreview } from '@/src/features/map/components/MapLibrePreview'
 import { HERO_HEIGHT } from '@/src/features/route/constants'
-import type { RouteDetails } from '@/src/features/route/types'
 import { colors } from '@/src/theme/colors'
 
 import { ModeSwitcher, PhotosView } from './components'
@@ -19,7 +19,9 @@ interface HeroSectionProps {
 
 export function HeroSection({ route }: HeroSectionProps) {
   const [mode, setMode] = useState<HeroMode>('map')
+
   const { top } = useSafeAreaInsets()
+
   const totalHeight = HERO_HEIGHT + top
 
   return (
@@ -31,7 +33,7 @@ export function HeroSection({ route }: HeroSectionProps) {
           routeCoordinates={route.routeCoordinates}
         />
       ) : (
-        <PhotosView imageUris={route.imageUris} height={totalHeight} />
+        <PhotosView imageUrls={route.imageUrls ?? []} height={totalHeight} />
       )}
 
       <ModeSwitcher mode={mode} setMode={setMode} />

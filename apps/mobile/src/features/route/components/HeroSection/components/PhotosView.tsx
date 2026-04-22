@@ -14,11 +14,11 @@ import { Image } from 'expo-image'
 import { colors } from '@/src/theme/colors'
 
 interface PhotosViewProps {
-  imageUris: string[]
+  imageUrls: string[]
   height: number
 }
 
-export const PhotosView: FC<PhotosViewProps> = ({ imageUris, height }) => {
+export const PhotosView: FC<PhotosViewProps> = ({ imageUrls, height }) => {
   const { width } = useWindowDimensions()
 
   const [activeIndex, setActiveIndex] = useState(0)
@@ -41,7 +41,7 @@ export const PhotosView: FC<PhotosViewProps> = ({ imageUris, height }) => {
   return (
     <View style={StyleSheet.absoluteFill}>
       <FlatList
-        data={imageUris}
+        data={imageUrls}
         keyExtractor={(_, i) => String(i)}
         horizontal
         pagingEnabled
@@ -65,9 +65,9 @@ export const PhotosView: FC<PhotosViewProps> = ({ imageUris, height }) => {
         ref={flatListRef}
       />
 
-      {imageUris.length > 1 && (
+      {imageUrls.length > 1 && (
         <View style={styles.dots}>
-          {imageUris.map((_, i) => (
+          {imageUrls.map((_, i) => (
             <Pressable
               key={i}
               style={[styles.dot, i === activeIndex && styles.dotActive]}

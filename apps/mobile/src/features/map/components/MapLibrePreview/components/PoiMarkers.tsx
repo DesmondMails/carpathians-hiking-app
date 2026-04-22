@@ -3,16 +3,16 @@ import { FC, useCallback } from 'react'
 import { View, StyleSheet } from 'react-native'
 
 import { Feather } from '@expo/vector-icons'
+import type { RoutePoi } from '@hiking/shared'
 import { PointAnnotation } from '@maplibre/maplibre-react-native'
 
-import type { PoiMarker } from '@/src/features/route/types'
 import { colors } from '@/src/theme/colors'
 
 import { POI_COLOR, POI_ICON } from '../../../constants'
 
 interface PoiMarkersProps {
-  poiMarkers: PoiMarker[]
-  selectedPoi: PoiMarker | null
+  poiMarkers: RoutePoi[]
+  selectedPoi: RoutePoi | null
   handlePoiPress: (e: { features: GeoJSON.Feature[] }) => void
 }
 
@@ -22,7 +22,7 @@ export const PoiMarkers: FC<PoiMarkersProps> = ({
   handlePoiPress,
 }) => {
   const makeFeature = useCallback(
-    (poi: PoiMarker): GeoJSON.Feature => ({
+    (poi: RoutePoi): GeoJSON.Feature => ({
       type: 'Feature',
       geometry: {
         type: 'Point',
