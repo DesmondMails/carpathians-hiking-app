@@ -9,7 +9,11 @@ import {
   View,
 } from 'react-native'
 
-import { FinalizeRouteDraftPayload, RouteDraft } from '@hiking/shared'
+import {
+  DIFFICULTY_VALUES,
+  FinalizeRouteDraftPayload,
+  RouteDraft,
+} from '@hiking/shared'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Controller, useForm } from 'react-hook-form'
 
@@ -51,7 +55,7 @@ export const FinalizeRouteForm: FC<FinalizeRouteFormProps> = ({
       title: routeDraft.title ?? '',
       description: routeDraft.description ?? '',
       region: routeDraft.previewJson?.region ?? '',
-      difficulty: routeDraft.previewJson?.difficulty,
+      difficulty: DIFFICULTY_VALUES[0],
       coveringImageUrl: '',
       notes: '',
     },

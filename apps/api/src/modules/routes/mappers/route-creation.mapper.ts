@@ -1,12 +1,19 @@
 import { RouteDraftPreview } from '@hiking/shared';
 
+import { RouteDerivedValues } from 'src/modules/routes/types';
 import { FinalizeRouteDraftDto } from 'src/modules/routes-draft/dto/finalize-route-draft.dto';
-import { Prisma, RouteDraft, RouteStatus } from 'src/prisma/generated/client';
+import {
+  Difficulty,
+  Prisma,
+  RouteDraft,
+  RouteStatus,
+} from 'src/prisma/generated/client';
 
 export const toRouteCreateInput = (
   draft: RouteDraft,
   preview: RouteDraftPreview,
   finalize: FinalizeRouteDraftDto,
+  derived: RouteDerivedValues,
 ): Prisma.RouteUncheckedCreateInput => {
   return {
     createdByUserId: draft.createdByUserId,
@@ -15,13 +22,14 @@ export const toRouteCreateInput = (
     title: finalize.title ?? draft.title ?? 'Untitled route',
     description: finalize.description ?? draft.description,
     region: finalize.region ?? preview.region,
-    difficulty: finalize.difficulty ?? preview.difficulty,
+    difficulty: finalize.difficulty ?? Difficulty.MODERATE,
     notes: finalize.notes,
 
     distanceM: preview.distanceM,
     elevationGainM: preview.elevationGainM,
-    durationH: preview.durationH,
-    // routeCoordinatesJson: preview.coordinates as Prisma.JsonValue,
+    durationH: derived.durationH,
+    routeCoordinatesJson: preview.coordinates,
+    elevationProfileJson: preview.elevationProfile,
 
     gpxStorageKey: draft.gpxStorageKey,
     gpxAvailable: Boolean(draft.gpxStorageKey),

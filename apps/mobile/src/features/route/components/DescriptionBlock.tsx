@@ -2,12 +2,12 @@ import { FC, useState } from 'react'
 
 import { Pressable, StyleSheet, View } from 'react-native'
 
+import type { RouteDetails } from '@hiking/shared'
+
 import { AppText } from '@/src/shared/components/AppText'
 import { colors } from '@/src/theme/colors'
 import { spacing } from '@/src/theme/spacing'
 import { typography } from '@/src/theme/typography'
-
-import type { RouteDetails } from '../types'
 
 interface DescriptionBlockProps {
   route: RouteDetails
@@ -15,7 +15,10 @@ interface DescriptionBlockProps {
 
 export const DescriptionBlock: FC<DescriptionBlockProps> = ({ route }) => {
   const [expanded, setExpanded] = useState(false)
-  const isLong = route.description.length > 160
+
+  const isLong = route.description && route.description?.length > 160
+
+  if (!route.description) return null
 
   return (
     <View style={styles.container}>

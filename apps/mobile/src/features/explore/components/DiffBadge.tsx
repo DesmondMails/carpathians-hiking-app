@@ -2,14 +2,16 @@ import { FC } from 'react'
 
 import { StyleSheet, View } from 'react-native'
 
+import type { RouteDifficulty } from '@hiking/shared'
+import { DIFFICULTY_LABELS } from '@hiking/shared'
+
 import { AppText } from '@/src/shared/components/AppText'
 import { typography } from '@/src/theme/typography'
 
-import { Difficulty } from '../types'
 import { getDifficultyColor } from '../utills/diificulties-colors'
 
 interface DiffBadgeProps {
-  difficulty: Difficulty
+  difficulty: RouteDifficulty
 }
 
 export const DiffBadge: FC<DiffBadgeProps> = ({ difficulty }) => {
@@ -24,7 +26,7 @@ export const DiffBadge: FC<DiffBadgeProps> = ({ difficulty }) => {
       ]}
     >
       <AppText style={[db.text, { color: getDifficultyColor(difficulty) }]}>
-        {difficulty}
+        {DIFFICULTY_LABELS[difficulty]}
       </AppText>
     </View>
   )

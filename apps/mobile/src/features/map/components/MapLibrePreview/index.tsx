@@ -2,6 +2,7 @@ import { FC, useCallback, useMemo, useRef, useState } from 'react'
 
 import { StyleSheet, View } from 'react-native'
 
+import type { RouteCoordinate, RoutePoi } from '@hiking/shared'
 import {
   Camera,
   type CameraRef,
@@ -10,8 +11,6 @@ import {
   RasterSource,
   setAccessToken,
 } from '@maplibre/maplibre-react-native'
-
-import type { PoiMarker } from '@/src/features/route/types'
 
 import { SelectedPoi } from '../SelectedPoi'
 import { PoiMarkers, RouteLine, StartEndDot } from './components'
@@ -24,8 +23,8 @@ setAccessToken(null)
 type BasemapType = 'maptilerOutdoor' | 'opentopomap'
 
 interface MapLibrePreviewProps {
-  poiMarkers: PoiMarker[]
-  routeCoordinates: { latitude: number; longitude: number }[]
+  poiMarkers: RoutePoi[]
+  routeCoordinates: RouteCoordinate[]
   basemap?: BasemapType
 }
 
@@ -53,7 +52,7 @@ export const MapLibrePreview: FC<MapLibrePreviewProps> = ({
   basemap = 'opentopomap',
 }) => {
   const cameraRef = useRef<CameraRef>(null)
-  const [selectedPoi, setSelectedPoi] = useState<PoiMarker | null>(null)
+  const [selectedPoi, setSelectedPoi] = useState<RoutePoi | null>(null)
 
   const bounds = useMemo(() => {
     if (!routeCoordinates.length) return null

@@ -1,3 +1,5 @@
+import { RouteElevationPoint } from '@hiking/shared';
+
 export type Coordinate = {
   longitude: number;
   latitude: number;
@@ -41,4 +43,5 @@ export type ParsedGpx = {
   distanceM: number;
   // elevation: GpxElevationStats;
   elevationGainM: number;
+  elevationProfile: RouteElevationPoint[];
 };

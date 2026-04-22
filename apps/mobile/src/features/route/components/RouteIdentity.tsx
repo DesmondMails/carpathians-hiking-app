@@ -3,6 +3,7 @@ import { FC } from 'react'
 import { StyleSheet, View } from 'react-native'
 
 import { Feather } from '@expo/vector-icons'
+import type { RouteDetails } from '@hiking/shared'
 
 import { AppText } from '@/src/shared/components/AppText'
 import { colors } from '@/src/theme/colors'
@@ -10,7 +11,6 @@ import { spacing } from '@/src/theme/spacing'
 import { typography } from '@/src/theme/typography'
 
 import { DiffBadge } from '../../explore/components'
-import type { RouteDetails } from '../types'
 
 interface RouteIdentityProps {
   route: RouteDetails
@@ -35,7 +35,7 @@ export const RouteIdentity: FC<RouteIdentityProps> = ({ route }) => {
           </AppText>
         </View>
 
-        <DiffBadge difficulty={route.difficulty} />
+        {route?.difficulty ? <DiffBadge difficulty={route.difficulty} /> : null}
       </View>
     </View>
   )

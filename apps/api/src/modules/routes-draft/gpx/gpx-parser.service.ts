@@ -1,3 +1,4 @@
+import { RouteElevationPoint } from '@hiking/shared';
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import * as turf from '@turf/turf';
 import { XMLParser } from 'fast-xml-parser';
@@ -20,6 +21,7 @@ export class GpxParserService {
 
   parseGpx(file: Express.Multer.File): ParsedGpx {
     const gpx = this.toGpxDocument(file);
+
     const coordinates = this.extractCoordinates(gpx);
 
     if (coordinates.length < MIN_COORDINATES_COUNT) {
@@ -30,16 +32,15 @@ export class GpxParserService {
 
     const distanceM = this.calculateDistanceM(coordinates);
     const elevation = this.calculateElevationStats(coordinates);
+    const elevationProfile = this.getElevationProfile(coordinates);
 
     this.logger.log(
       `Parsed GPX: points=${coordinates.length}, distanceM=${distanceM.toFixed(1)}`,
     );
 
-    console.dir(coordinates, { depth: null });
-
     const { elevationGainM } = elevation;
 
-    return { coordinates, distanceM, elevationGainM };
+    return { coordinates, distanceM, elevationGainM, elevationProfile };
   }
 
   private toGpxDocument(file: Express.Multer.File): GpxDocument {
@@ -125,5 +126,72 @@ export class GpxParserService {
       maxElevationM: parseFloat(Math.max(...elevations).toFixed(1)),
       minElevationM: parseFloat(Math.min(...elevations).toFixed(1)),
     };
+  }
+
+  private getElevationProfile(
+    coordinates: Coordinate[],
+  ): RouteElevationPoint[] {
+    if (coordinates.length < MIN_COORDINATES_COUNT) return [];
+
+    const step = this.getProfileStep(coordinates.length);
+    const profile: RouteElevationPoint[] = [];
+
+    let cumulativeDistanceM = 0;
+    let lastSampledIndex = 0;
+
+    profile.push({
+      distanceM: 0,
+      elevationM: coordinates[0].elevationM ?? 0,
+    });
+
+    for (let i = step; i < coordinates.length; i += step) {
+      cumulativeDistanceM = this.appendSample(
+        profile,
+        coordinates,
+        lastSampledIndex,
+        i,
+        cumulativeDistanceM,
+      );
+      lastSampledIndex = i;
+    }
+
+    const finalIndex = coordinates.length - 1;
+
+    if (lastSampledIndex !== finalIndex) {
+      this.appendSample(
+        profile,
+        coordinates,
+        lastSampledIndex,
+        finalIndex,
+        cumulativeDistanceM,
+      );
+    }
+
+    return profile;
+  }
+
+  private appendSample(
+    profile: RouteElevationPoint[],
+    coordinates: Coordinate[],
+    fromIndex: number,
+    toIndex: number,
+    cumulativeDistanceM: number,
+  ): number {
+    const nextCumulativeDistanceM =
+      cumulativeDistanceM +
+      this.calculateDistanceM([coordinates[fromIndex], coordinates[toIndex]]);
+
+    profile.push({
+      distanceM: parseFloat(nextCumulativeDistanceM.toFixed(1)),
+      elevationM: coordinates[toIndex].elevationM ?? 0,
+    });
+
+    return nextCumulativeDistanceM;
+  }
+
+  private getProfileStep(coordsCount: number): number {
+    const TARGET_SAMPLES = 200;
+
+    return Math.max(1, Math.floor(coordsCount / TARGET_SAMPLES));
   }
 }
