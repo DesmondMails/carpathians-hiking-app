@@ -8,4 +8,10 @@ export const routeInfoApi = {
 
     return data
   },
+
+  async getGpxUrl(routeId: string): Promise<string> {
+    const { data } = await apiClient.get<string>(`/routes/${routeId}/gpx-url`)
+
+    return data
+  },
 }

@@ -8,6 +8,7 @@ import { RoutesModule } from './modules/routes/routes.module';
 import { RoutesDraftModule } from './modules/routes-draft/routes-draft.module';
 import { UsersModule } from './modules/users/users.module';
 import { PrismaModule } from './prisma/prisma.module';
+import { StorageModule } from './modules/storage/storage.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { PrismaModule } from './prisma/prisma.module';
     UsersModule,
     RoutesModule,
     RoutesDraftModule,
+    StorageModule,
   ],
   controllers: [],
   providers: [

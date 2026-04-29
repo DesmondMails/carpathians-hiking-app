@@ -21,6 +21,7 @@ import { UpdateRouteDraftDto } from './dto/update-route-draft.dto';
 import { RoutesService } from '../routes/routes.service';
 import { GpxParserService } from './gpx/gpx-parser.service';
 import { parsePreview } from './utils/parse-preview';
+import { StorageService } from '../storage/storage.service';
 
 @Injectable()
 export class RoutesDraftService {
@@ -30,6 +31,7 @@ export class RoutesDraftService {
     private readonly prisma: PrismaService,
     private readonly routesService: RoutesService,
     private readonly gpxParserService: GpxParserService,
+    private readonly storageService: StorageService,
   ) {}
 
   async createRouteDraft(
@@ -123,7 +125,7 @@ export class RoutesDraftService {
     return route;
   }
 
-  createRouteDraftFromGpx(
+  async createRouteDraftFromGpx(
     userId: string,
     file: Express.Multer.File,
   ): Promise<RouteDraft> {
@@ -141,8 +143,21 @@ export class RoutesDraftService {
       previewJson: toPreviewJson(parsedGpx),
     };
 
-    return this.prisma.routeDraft.create({
+    const routeDraft = await this.prisma.routeDraft.create({
       data: createRouteDraftData,
+    });
+
+    const gpxStorageKey = await this.uploadGpxToStorage(
+      userId,
+      routeDraft.id,
+      file,
+    );
+
+    return this.prisma.routeDraft.update({
+      where: { id: routeDraft.id },
+      data: {
+        gpxStorageKey,
+      },
     });
   }
 
@@ -153,6 +168,26 @@ export class RoutesDraftService {
     if (routeDraft.createdByUserId !== userId) {
       throw new ForbiddenException('Ви не маєте доступу до цього draft');
     }
+  }
+
+  private async uploadGpxToStorage(
+    userId: string,
+    routeDraftId: string,
+    file: Express.Multer.File,
+  ): Promise<string> {
+    const gpxStorageKey = this.storageService.buildDraftGpxKey(
+      userId,
+      routeDraftId,
+    );
+
+    await this.storageService.putObject({
+      key: gpxStorageKey,
+      body: file.buffer,
+      contentType: file.mimetype,
+      contentLength: file.size,
+    });
+
+    return gpxStorageKey;
   }
 
   private checkIfAllreadyFinalized(routeDraft: RouteDraft): void {

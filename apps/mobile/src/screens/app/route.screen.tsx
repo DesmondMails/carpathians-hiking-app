@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 
-import { ScrollView, StyleSheet, View } from 'react-native'
+import { ScrollView, Share, StyleSheet, View } from 'react-native'
 
 import { useLocalSearchParams } from 'expo-router'
 
@@ -15,25 +15,58 @@ import {
   StatsRow,
 } from '@/src/features/route/components'
 import { useRoute } from '@/src/features/route/hooks/useRoute'
+import { ensureGpxFile, shareGpxFile } from '@/src/features/route/utils/gpxFile'
+import { buildRouteLink } from '@/src/features/route/utils/routeLink'
+import { toast } from '@/src/shared/store/toast.store'
 import { colors } from '@/src/theme/colors'
 
 export default function RouteScreen() {
   const { id } = useLocalSearchParams<{ id: string }>()
 
-  const { isLoading, route, loadRoute } = useRoute()
+  const { isLoading, route, loadRoute, loadGpxUrl } = useRoute()
 
   const [saved, setSaved] = useState(false)
   const [scrollEnabled, setScrollEnabled] = useState(true)
 
   const handleSave = () => setSaved((v) => !v)
-  const handleShare = () => {
-    /* TODO: Share.share */
+
+  const handleShare = async () => {
+    if (!route) return
+
+    const url = buildRouteLink(id)
+
+    try {
+      await Share.share({
+        title: route.title,
+        message: `${route.title}\n${url}`,
+        url,
+      })
+    } catch (error) {
+      console.error('Share failed', error)
+      toast.error('Не вдалось поділитись маршрутом')
+    }
   }
-  const handleDownloadGpx = () => {
-    /* TODO: download / open file */
+
+  const gpxFilename = route?.title ?? `route-${id}`
+
+  const handleDownloadGpx = async () => {
+    try {
+      const file = await ensureGpxFile(gpxFilename, () => loadGpxUrl(id))
+      await shareGpxFile(file, 'Збереження GPX файлу')
+    } catch (error) {
+      console.error('GPX download failed', error)
+      toast.error('Не вдалось завантажити GPX файл')
+    }
   }
-  const handleOpenExternal = () => {
-    /* TODO: Linking.openURL to OsmAnd / Mapy deeplink */
+
+  const handleOpenExternal = async () => {
+    try {
+      const file = await ensureGpxFile(gpxFilename, () => loadGpxUrl(id))
+      await shareGpxFile(file, 'Відкрити в додатку для карт')
+    } catch (error) {
+      console.error('GPX open failed', error)
+      toast.error('Не вдалось відкрити GPX файл')
+    }
   }
 
   useEffect(() => {
@@ -81,8 +114,8 @@ export default function RouteScreen() {
         </View>
       </ScrollView>
 
-      {/* Floating CTA bar */}
       <PrimaryActions
+        isLoading={isLoading}
         onDownloadGpx={handleDownloadGpx}
         onOpenExternal={handleOpenExternal}
         gpxAvailable={route.gpxAvailable}

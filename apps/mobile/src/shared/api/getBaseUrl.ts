@@ -1,13 +1,23 @@
-import { Platform } from 'react-native'
+import Constants from 'expo-constants'
 
-const DEV_MACHINE_IP = process.env.EXPO_PUBLIC_LOCAL_MAC_IP
+const API_PORT = 3000
+
+const getDevMachineIp = (): string | null => {
+  const hostUri = Constants.expoConfig?.hostUri
+  if (hostUri) {
+    return hostUri.split(':')[0]
+  }
+  return process.env.EXPO_PUBLIC_LOCAL_MAC_IP ?? null
+}
 
 export const getBaseUrl = () => {
   if (__DEV__) {
-    if (Platform.OS === 'android') {
-      return `http://${DEV_MACHINE_IP}:3000`
+    const ip = getDevMachineIp()
+    if (!ip) {
+      console.warn('Could not detect dev machine IP. Falling back to localhost.')
+      return `http://localhost:${API_PORT}`
     }
-    return 'http://localhost:3000'
+    return `http://${ip}:${API_PORT}`
   }
 
   return process.env.EXPO_PUBLIC_API_URL

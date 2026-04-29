@@ -14,7 +14,12 @@ export interface RouteDraft {
   expiresAt: Date
 }
 
-export const DIFFICULTY_VALUES = ['EASY', 'MODERATE', 'HARD', 'EXTREME'] as const
+export const DIFFICULTY_VALUES = [
+  'EASY',
+  'MODERATE',
+  'HARD',
+  'EXTREME',
+] as const
 export type Difficulty = (typeof DIFFICULTY_VALUES)[number]
 
 export interface FinalizeRouteDraftPayload {
@@ -22,7 +27,6 @@ export interface FinalizeRouteDraftPayload {
   description?: string
   region?: string
   difficulty?: Difficulty
-  coveringImageUrl?: string
   imageUrls?: string[]
   coverImageUrl?: string
   notes?: string

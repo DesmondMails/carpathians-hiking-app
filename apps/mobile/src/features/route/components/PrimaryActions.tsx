@@ -10,12 +10,14 @@ import { colors } from '@/src/theme/colors'
 import { spacing } from '@/src/theme/spacing'
 
 interface PrimaryActionsProps {
+  isLoading: boolean
   onDownloadGpx: () => void
   onOpenExternal: () => void
   gpxAvailable?: boolean
 }
 
 export const PrimaryActions: FC<PrimaryActionsProps> = ({
+  isLoading,
   onDownloadGpx,
   onOpenExternal,
   gpxAvailable = true,
@@ -30,9 +32,10 @@ export const PrimaryActions: FC<PrimaryActionsProps> = ({
             title='Завантажити GPX'
             icon={<Feather name='download' size={16} color={colors.white} />}
             onPress={onDownloadGpx}
-            disabled={!gpxAvailable}
+            disabled={!gpxAvailable || isLoading}
             size='medium'
             variant='primary'
+            loading={isLoading}
           />
         </View>
         <AppButton

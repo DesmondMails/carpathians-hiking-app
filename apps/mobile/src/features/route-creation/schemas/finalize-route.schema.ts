@@ -20,12 +20,6 @@ export const finalizeRouteSchema = z.object({
     .optional()
     .or(z.literal('')),
   difficulty: z.enum(DIFFICULTY_VALUES).optional(),
-  coveringImageUrl: z
-    .string()
-    .trim()
-    .url('Вкажіть коректне посилання на зображення')
-    .optional()
-    .or(z.literal('')),
   notes: z
     .string()
     .trim()
