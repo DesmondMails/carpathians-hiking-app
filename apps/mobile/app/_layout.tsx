@@ -6,10 +6,12 @@ import { Stack } from 'expo-router'
 import * as SplashScreen from 'expo-splash-screen'
 import { StatusBar } from 'expo-status-bar'
 import 'react-native-reanimated'
+import { SafeAreaProvider } from 'react-native-safe-area-context'
 
 import { useAuthStore } from '@/src/features/auth/store/auth.store'
 import { AnimatedSplash } from '@/src/features/splash/AnimatedSplash'
 import '@/src/shared/api/interceptors'
+import { ToastHost } from '@/src/shared/components'
 
 SplashScreen.preventAutoHideAsync()
 
@@ -58,20 +60,24 @@ export default function RootLayout() {
   }
 
   return (
-    <ThemeProvider value={DefaultTheme}>
-      <Stack>
-        <Stack.Screen name='(app)' options={{ headerShown: false }} />
-        <Stack.Screen name='(auth)' options={{ headerShown: false }} />
-        <Stack.Screen
-          name='(modals)'
-          options={{ presentation: 'fullScreenModal', headerShown: false }}
-        />
-      </Stack>
-      <StatusBar style='auto' />
+    <SafeAreaProvider>
+      <ThemeProvider value={DefaultTheme}>
+        <Stack>
+          <Stack.Screen name='(app)' options={{ headerShown: false }} />
+          <Stack.Screen name='(auth)' options={{ headerShown: false }} />
+          <Stack.Screen
+            name='(modals)'
+            options={{ presentation: 'fullScreenModal', headerShown: false }}
+          />
+        </Stack>
+        <StatusBar style='auto' />
 
-      {showAnimatedSplash ? (
-        <AnimatedSplash onFinish={() => setShowAnimatedSplash(false)} />
-      ) : null}
-    </ThemeProvider>
+        <ToastHost />
+
+        {showAnimatedSplash ? (
+          <AnimatedSplash onFinish={() => setShowAnimatedSplash(false)} />
+        ) : null}
+      </ThemeProvider>
+    </SafeAreaProvider>
   )
 }

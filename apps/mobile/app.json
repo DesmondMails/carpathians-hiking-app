@@ -46,7 +46,14 @@
         }
       ],
       "expo-font",
-      "@maplibre/maplibre-react-native"
+      "@maplibre/maplibre-react-native",
+      [
+        "expo-file-system",
+        {
+          "supportsOpeningDocumentsInPlace": true,
+          "enableFileSharing": true
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,

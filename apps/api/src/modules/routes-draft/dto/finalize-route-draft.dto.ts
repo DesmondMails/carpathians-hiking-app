@@ -33,11 +33,6 @@ export class FinalizeRouteDraftDto {
   })
   difficulty?: Difficulty;
 
-  @IsString()
-  @IsNotEmpty()
-  @ApiProperty({ description: 'URL зображення покриття маршруту' })
-  coveringImageUrl?: string;
-
   @IsArray()
   @IsOptional()
   @ApiPropertyOptional({ description: 'URL зображень маршруту' })

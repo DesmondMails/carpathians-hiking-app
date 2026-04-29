@@ -75,6 +75,18 @@ export class RoutesController {
     return this.routesService.getRouteDetails(routeId);
   }
 
+  @Get(':id/gpx-url')
+  @ApiOperation({ summary: 'Отримати URL GPX-файлу' })
+  @ApiResponse({ status: 200, description: 'URL GPX-файлу успішно отриманий' })
+  @ApiResponse({ status: 401, description: 'Користувач не авторизований' })
+  @ApiResponse({ status: 404, description: 'Draft не знайдено' })
+  async getGpxUrl(
+    @CurrentUser() user: User,
+    @Param('id') routeId: string,
+  ): Promise<string> {
+    return this.routesService.getGpxUrl(routeId, user.id);
+  }
+
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Видалити маршрут' })

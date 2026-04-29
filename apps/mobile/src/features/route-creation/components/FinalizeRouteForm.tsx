@@ -56,7 +56,6 @@ export const FinalizeRouteForm: FC<FinalizeRouteFormProps> = ({
       description: routeDraft.description ?? '',
       region: routeDraft.previewJson?.region ?? '',
       difficulty: DIFFICULTY_VALUES[0],
-      coveringImageUrl: '',
       notes: '',
     },
   })
@@ -68,7 +67,6 @@ export const FinalizeRouteForm: FC<FinalizeRouteFormProps> = ({
         description: trimToUndefined(values.description),
         region: trimToUndefined(values.region),
         difficulty: values.difficulty,
-        coveringImageUrl: trimToUndefined(values.coveringImageUrl),
         notes: trimToUndefined(values.notes),
       })
     } catch (error) {

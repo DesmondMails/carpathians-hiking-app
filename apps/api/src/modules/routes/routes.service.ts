@@ -14,12 +14,16 @@ import { CreateRouteDto } from './dto/create-route.dto';
 import { UpdateRouteDto } from './dto/update-route.dto';
 import { calculateDerivedRouteValues } from './utils/calculate-derived-route-values';
 import { FinalizeRouteDraftDto } from '../routes-draft/dto/finalize-route-draft.dto';
+import { StorageService } from '../storage/storage.service';
 
 @Injectable()
 export class RoutesService {
   private readonly logger = new Logger(RoutesService.name);
 
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private storageService: StorageService,
+  ) {}
 
   async createRoute(
     userId: string,
@@ -92,6 +96,18 @@ export class RoutesService {
 
     return this.prisma.route.create({
       data,
+    });
+  }
+
+  async getGpxUrl(routeId: string, userId: string): Promise<string> {
+    const route = await this.findOwnedRouteById(routeId, userId);
+
+    if (!route.gpxStorageKey) {
+      throw new NotFoundException('GPX-файл не знайдено');
+    }
+
+    return this.storageService.createPresignedDownloadUrl({
+      key: route.gpxStorageKey,
     });
   }
 
