@@ -153,9 +153,6 @@ export class RoutesDraftService {
       file,
     );
 
-    console.dir('gpxStorageKey', gpxStorageKey);
-    console.dir('routeDraft', routeDraft);
-
     return this.prisma.routeDraft.update({
       where: { id: routeDraft.id },
       data: {

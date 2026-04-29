@@ -54,7 +54,6 @@ export class StorageService {
     contentType,
     contentLength,
   }: PutStorageObjectParams): Promise<void> {
-    console.dir('putObject', { key, body, contentType, contentLength });
     try {
       await this.s3.send(
         new PutObjectCommand({
