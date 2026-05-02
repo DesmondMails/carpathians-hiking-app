@@ -27,7 +27,24 @@ export interface FinalizeRouteDraftPayload {
   description?: string
   region?: string
   difficulty?: Difficulty
-  imageUrls?: string[]
-  coverImageUrl?: string
+  imageIds?: string[]
+  coverImageId?: string
   notes?: string
+}
+
+export interface PresignedUrlResponse {
+  uploadUrl: string
+  imageId: string
+  storageKey: string
+}
+
+export interface GetPresignedUrlPayload {
+  fileName: string
+  contentType: string
+}
+
+export interface CompleteUploadPayload {
+  imageId: string
+  storageKey: string
+  sortOrder?: number
 }

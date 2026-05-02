@@ -28,6 +28,7 @@ export const toRouteCreateInput = (
     distanceM: preview.distanceM,
     elevationGainM: preview.elevationGainM,
     durationH: derived.durationH,
+    coverImageId: finalize.coverImageId,
     routeCoordinatesJson: preview.coordinates,
     elevationProfileJson: preview.elevationProfile,
 

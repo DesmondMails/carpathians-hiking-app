@@ -1,4 +1,4 @@
-import { FC } from 'react'
+import { FC, useState } from 'react'
 
 import {
   Alert,
@@ -22,11 +22,13 @@ import { colors } from '@/src/theme/colors'
 import { spacing } from '@/src/theme/spacing'
 
 import { DifficultySelector } from './DifficultySelector'
+import { DraftImagesField } from './DraftImagesField'
 import { RouteDraftSummary } from './RouteDraftSummary'
 import {
   FinalizeRouteFormValues,
   finalizeRouteSchema,
 } from '../schemas/finalize-route.schema'
+import { DraftImageItem } from '../types'
 
 interface FinalizeRouteFormProps {
   routeDraft: RouteDraft
@@ -60,7 +62,16 @@ export const FinalizeRouteForm: FC<FinalizeRouteFormProps> = ({
     },
   })
 
+  const [draftImages, setDraftImages] = useState<DraftImageItem[]>([])
+
   const submit = async (values: FinalizeRouteFormValues) => {
+    const uploadedImages = draftImages.filter(
+      (image) => image.status === 'uploaded' && image.imageId,
+    )
+    const coverImageId =
+      uploadedImages.find((image) => image.isCover)?.imageId ??
+      uploadedImages[0]?.imageId
+
     try {
       await onSubmit({
         title: values.title.trim(),
@@ -68,6 +79,8 @@ export const FinalizeRouteForm: FC<FinalizeRouteFormProps> = ({
         region: trimToUndefined(values.region),
         difficulty: values.difficulty,
         notes: trimToUndefined(values.notes),
+        imageIds: uploadedImages.map((image) => image.imageId!),
+        coverImageId,
       })
     } catch (error) {
       const message =
@@ -80,6 +93,10 @@ export const FinalizeRouteForm: FC<FinalizeRouteFormProps> = ({
       )
     }
   }
+
+  const hasUploadingImages = draftImages.some(
+    (image) => image.status === 'uploading',
+  )
 
   return (
     <KeyboardAvoidingView
@@ -102,6 +119,12 @@ export const FinalizeRouteForm: FC<FinalizeRouteFormProps> = ({
         </View>
 
         <RouteDraftSummary routeDraft={routeDraft} />
+
+        <DraftImagesField
+          routeDraftId={routeDraft.id}
+          draftImages={draftImages}
+          setDraftImages={setDraftImages}
+        />
 
         <Controller
           control={control}
@@ -192,7 +215,7 @@ export const FinalizeRouteForm: FC<FinalizeRouteFormProps> = ({
           title='Зберегти маршрут'
           onPress={handleSubmit(submit)}
           loading={isSubmitting}
-          disabled={!isValid || isSubmitting}
+          disabled={!isValid || isSubmitting || hasUploadingImages}
         />
       </View>
     </KeyboardAvoidingView>

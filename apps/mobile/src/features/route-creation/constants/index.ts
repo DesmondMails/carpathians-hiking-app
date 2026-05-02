@@ -1,0 +1,1 @@
+export const GRID_ITEM_ASPECT_RATIO = 0.94

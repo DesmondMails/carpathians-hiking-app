@@ -4,3 +4,5 @@ generate:
 	npx prisma generate
 studio:
 	npx prisma studio
+start:
+	npm run start:dev

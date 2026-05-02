@@ -1,4 +1,8 @@
+import { randomUUID } from 'node:crypto';
+
+import { PresignedUrlResponse } from '@hiking/shared';
 import {
+  BadRequestException,
   ConflictException,
   ForbiddenException,
   Injectable,
@@ -11,10 +15,13 @@ import {
   Prisma,
   Route,
   RouteDraft,
+  RouteDraftImage,
   RouteDraftStatus,
+  RouteImageStatus,
 } from 'src/prisma/generated/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 
+import { CompleteDraftImageUploadDto } from './dto/complete-image-upload.dto';
 import { CreateRouteDraftDto } from './dto/create-route-draft.dto';
 import { FinalizeRouteDraftDto } from './dto/finalize-route-draft.dto';
 import { UpdateRouteDraftDto } from './dto/update-route-draft.dto';
@@ -22,6 +29,7 @@ import { RoutesService } from '../routes/routes.service';
 import { GpxParserService } from './gpx/gpx-parser.service';
 import { parsePreview } from './utils/parse-preview';
 import { StorageService } from '../storage/storage.service';
+import { CreatePresignedUrlDto } from './dto/create-presigned-url.dto';
 
 @Injectable()
 export class RoutesDraftService {
@@ -108,19 +116,57 @@ export class RoutesDraftService {
 
     const preview = parsePreview(routeDraft.previewJson);
 
-    const [route] = await this.prisma.$transaction([
-      this.routesService.createRouteFromDraft(
+    const allDraftImages = await this.prisma.routeDraftImage.findMany({
+      where: { draftId: routeDraftId },
+      orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }],
+    });
+
+    const selectedDraftImages = this.resolveSelectedDraftImages(
+      allDraftImages,
+      finalizeRouteDraftDto.imageIds,
+    );
+    const coverImageId = this.resolveCoverImageId(
+      selectedDraftImages,
+      finalizeRouteDraftDto.coverImageId,
+    );
+
+    const route = await this.prisma.$transaction(async (tx) => {
+      const createdRoute = await this.routesService.createRouteFromDraft(
+        tx,
         routeDraft,
         preview,
-        finalizeRouteDraftDto,
-      ),
-      this.prisma.routeDraft.update({
+        {
+          ...finalizeRouteDraftDto,
+          coverImageId,
+        },
+      );
+
+      if (selectedDraftImages.length > 0) {
+        await tx.routeImage.createMany({
+          data: selectedDraftImages.map((image, index) => ({
+            id: image.id,
+            routeId: createdRoute.id,
+            storageKey: image.storageKey,
+            status: RouteImageStatus.APPROVED,
+            sortOrder: index,
+            uploadedByUserId: userId,
+          })),
+        });
+      }
+
+      await tx.routeDraft.update({
         where: { id: routeDraftId },
         data: {
           status: RouteDraftStatus.FINALIZED,
         },
-      }),
-    ]);
+      });
+
+      await tx.routeDraftImage.deleteMany({
+        where: { draftId: routeDraftId },
+      });
+
+      return createdRoute;
+    });
 
     return route;
   }
@@ -159,6 +205,141 @@ export class RoutesDraftService {
         gpxStorageKey,
       },
     });
+  }
+
+  async createPresignedUrl(
+    routeDraftId: string,
+    userId: string,
+    createPresignedUrlDto: CreatePresignedUrlDto,
+  ): Promise<PresignedUrlResponse> {
+    await this.findOwnedRouteDraftById(routeDraftId, userId);
+
+    const generatedId = randomUUID();
+
+    const extension = createPresignedUrlDto.fileName.split('.').pop()!;
+
+    const key = this.storageService.buildDraftImageKey(
+      routeDraftId,
+      generatedId,
+      extension,
+    );
+
+    const uploadUrl = await this.storageService.createPresignedUploadUrl({
+      key,
+      contentType: createPresignedUrlDto.contentType,
+    });
+
+    return {
+      uploadUrl,
+      imageId: generatedId,
+      storageKey: key,
+    };
+  }
+
+  async completeDraftImageUpload(
+    routeDraftId: string,
+    userId: string,
+    completeDraftImageUploadDto: CompleteDraftImageUploadDto,
+  ): Promise<void> {
+    await this.findOwnedRouteDraftById(routeDraftId, userId);
+
+    const { imageId, storageKey, sortOrder } = completeDraftImageUploadDto;
+
+    const isValidKey = storageKey.startsWith(`drafts/${routeDraftId}/images/`);
+
+    if (!isValidKey) {
+      throw new BadRequestException('Неправильний storage key');
+    }
+
+    const data: Prisma.RouteDraftImageUncheckedCreateInput = {
+      id: imageId,
+      draftId: routeDraftId,
+      storageKey,
+      sortOrder,
+    };
+
+    await this.prisma.routeDraftImage.create({
+      data,
+    });
+  }
+
+  async deleteRouteDraftImage(
+    routeDraftId: string,
+    imageId: string,
+    userId: string,
+  ): Promise<void> {
+    await this.findOwnedRouteDraftById(routeDraftId, userId);
+
+    const image = await this.prisma.routeDraftImage.findFirst({
+      where: {
+        id: imageId,
+        draftId: routeDraftId,
+      },
+    });
+
+    if (!image) {
+      throw new NotFoundException('Зображення не знайдено');
+    }
+
+    await this.storageService.deleteObject(image.storageKey);
+
+    await this.prisma.routeDraftImage.delete({
+      where: { id: imageId },
+    });
+  }
+
+  private resolveSelectedDraftImages(
+    draftImages: RouteDraftImage[],
+    imageIds?: string[],
+  ): RouteDraftImage[] {
+    if (!imageIds || imageIds.length === 0) {
+      return [];
+    }
+
+    const uniqueImageIds = [...new Set(imageIds)];
+
+    if (uniqueImageIds.length !== imageIds.length) {
+      throw new BadRequestException('Список зображень містить дублікати');
+    }
+
+    const draftImagesById = new Map(
+      draftImages.map((image) => [image.id, image]),
+    );
+
+    const selectedDraftImages = uniqueImageIds.map((imageId) => {
+      const draftImage = draftImagesById.get(imageId);
+
+      if (!draftImage) {
+        throw new BadRequestException(
+          `Зображення "${imageId}" не належить цьому draft`,
+        );
+      }
+
+      return draftImage;
+    });
+
+    return selectedDraftImages;
+  }
+
+  private resolveCoverImageId(
+    selectedDraftImages: RouteDraftImage[],
+    requestedCoverImageId?: string,
+  ): string | undefined {
+    if (!requestedCoverImageId) {
+      return selectedDraftImages[0]?.id;
+    }
+
+    const isCoverSelected = selectedDraftImages.some(
+      (image) => image.id === requestedCoverImageId,
+    );
+
+    if (!isCoverSelected) {
+      throw new BadRequestException(
+        'Обкладинка маршруту не знайдена в списку зображень',
+      );
+    }
+
+    return requestedCoverImageId;
   }
 
   private checkRouteDraftOwnership(

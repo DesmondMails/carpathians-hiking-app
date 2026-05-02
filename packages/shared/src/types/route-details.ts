@@ -27,6 +27,16 @@ export interface RouteAuthor {
   avatarUrl?: string | null
 }
 
+export interface RouteImage {
+  id: string
+  routeId: string
+  uploadedByUserId: string
+  url: string
+  status: 'APPROVED' | 'PENDING' | 'REJECTED'
+  sortOrder: number
+  createdAt: string
+}
+
 export interface RouteDetails {
   id: string
   title: string
@@ -39,7 +49,7 @@ export interface RouteDetails {
   durationH: number | null
 
   coverImageUrl?: string | null
-  imageUrls?: string[]
+  imageUrls: string[]
 
   routeCoordinates: RouteCoordinate[]
   elevationProfile: RouteElevationPoint[]

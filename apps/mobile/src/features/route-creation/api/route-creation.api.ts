@@ -1,6 +1,9 @@
 import {
+  CompleteUploadPayload,
   CreateRoutePayload,
   FinalizeRouteDraftPayload,
+  GetPresignedUrlPayload,
+  PresignedUrlResponse,
   Route,
   RouteDraft,
 } from '@hiking/shared'
@@ -50,5 +53,33 @@ export const routeCreationApi = {
     )
 
     return data
+  },
+
+  async getPresignedUrl(
+    routeDraftId: string,
+    payload: GetPresignedUrlPayload,
+  ): Promise<PresignedUrlResponse> {
+    const { data } = await apiClient.post<PresignedUrlResponse>(
+      `/routes-draft/${routeDraftId}/images/presigned`,
+      payload,
+    )
+
+    return data
+  },
+
+  async completeImageUpload(
+    routeDraftId: string,
+    payload: CompleteUploadPayload,
+  ): Promise<void> {
+    await apiClient.post<void>(
+      `/routes-draft/${routeDraftId}/images/complete`,
+      payload,
+    )
+  },
+
+  async deleteImage(routeDraftId: string, imageId: string): Promise<void> {
+    await apiClient.delete<void>(
+      `/routes-draft/${routeDraftId}/images/${imageId}`,
+    )
   },
 }

@@ -35,13 +35,13 @@ export class FinalizeRouteDraftDto {
 
   @IsArray()
   @IsOptional()
-  @ApiPropertyOptional({ description: 'URL зображень маршруту' })
-  imageUrls?: string[];
+  @ApiPropertyOptional({ description: 'Ключі зображень маршруту' })
+  imageIds?: string[];
 
   @IsString()
   @IsOptional()
-  @ApiPropertyOptional({ description: 'URL зображення покриття маршруту' })
-  coverImageUrl?: string;
+  @ApiPropertyOptional({ description: 'Ключ зображення покриття маршруту' })
+  coverImageId?: string;
 
   @IsString()
   @IsOptional()

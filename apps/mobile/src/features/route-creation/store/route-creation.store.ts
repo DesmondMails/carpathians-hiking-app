@@ -1,6 +1,9 @@
 import {
+  CompleteUploadPayload,
   CreateRoutePayload,
   FinalizeRouteDraftPayload,
+  GetPresignedUrlPayload,
+  PresignedUrlResponse,
   Route,
   RouteDraft,
 } from '@hiking/shared'
@@ -20,6 +23,15 @@ interface RouteCreationState {
     payload: FinalizeRouteDraftPayload,
   ) => Promise<Route>
   resetRouteDraft: () => void
+  getPresignedUrl: (
+    routeDraftId: string,
+    payload: GetPresignedUrlPayload,
+  ) => Promise<PresignedUrlResponse>
+  completeImageUpload: (
+    routeDraftId: string,
+    payload: CompleteUploadPayload,
+  ) => Promise<void>
+  deleteImage: (routeDraftId: string, imageId: string) => Promise<void>
 }
 
 export const useRouteCreationStore = create<RouteCreationState>((set) => ({
@@ -73,4 +85,45 @@ export const useRouteCreationStore = create<RouteCreationState>((set) => ({
     }
   },
   resetRouteDraft: () => set({ routeDraft: null }),
+  getPresignedUrl: async (routeDraftId, payload) => {
+    set({ isLoading: true })
+
+    try {
+      const presignedUrlData = await routeCreationApi.getPresignedUrl(
+        routeDraftId,
+        payload,
+      )
+
+      return presignedUrlData
+    } catch (error) {
+      set({ isLoading: false })
+      throw error
+    } finally {
+      set({ isLoading: false })
+    }
+  },
+  completeImageUpload: async (routeDraftId, payload) => {
+    set({ isLoading: true })
+
+    try {
+      await routeCreationApi.completeImageUpload(routeDraftId, payload)
+    } catch (error) {
+      set({ isLoading: false })
+      throw error
+    } finally {
+      set({ isLoading: false })
+    }
+  },
+  deleteImage: async (routeDraftId, imageId) => {
+    set({ isLoading: true })
+
+    try {
+      await routeCreationApi.deleteImage(routeDraftId, imageId)
+    } catch (error) {
+      set({ isLoading: false })
+      throw error
+    } finally {
+      set({ isLoading: false })
+    }
+  },
 }))

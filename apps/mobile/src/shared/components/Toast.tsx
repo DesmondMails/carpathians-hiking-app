@@ -3,13 +3,14 @@ import { FC, useEffect } from 'react'
 import { Pressable, StyleSheet, View } from 'react-native'
 
 import { Feather } from '@expo/vector-icons'
-import Animated, {
-  FadeOutUp,
-  SlideInUp,
-} from 'react-native-reanimated'
+import Animated, { FadeOutUp, SlideInUp } from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
-import { ToastItem, ToastVariant, useToastStore } from '@/src/shared/store/toast.store'
+import {
+  ToastItem,
+  ToastVariant,
+  useToastStore,
+} from '@/src/shared/store/toast.store'
 import { colors } from '@/src/theme/colors'
 import { spacing } from '@/src/theme/spacing'
 
@@ -26,7 +27,7 @@ const VARIANT_ICON: Record<ToastVariant, IconName> = {
 
 const VARIANT_BG: Record<ToastVariant, string> = {
   error: colors.warning,
-  success: colors.success,
+  success: colors.primary,
   info: colors.primary,
   warning: '#f59e0b',
 }

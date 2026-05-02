@@ -1,0 +1,12 @@
+model RouteDraftImage {
+  id         String   @id @default(uuid())
+  draftId    String
+  storageKey String
+  sortOrder  Int      @default(0)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  draft      RouteDraft @relation(fields: [draftId], references: [id], onDelete: Cascade)
+
+  @@index([draftId])
+}

@@ -10,7 +10,11 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.hiking.mobile"
+      "bundleIdentifier": "com.hiking.mobile",
+      "infoPlist": {
+        "NSPhotoLibraryUsageDescription": "Додаток потребує доступу до ваших фото, щоб ви могли додавати зображення маршруту.",
+        "NSPhotoLibraryAddUsageDescription": "Додаток може зберігати або поширювати вибрані зображення маршруту."
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -52,6 +56,15 @@
         {
           "supportsOpeningDocumentsInPlace": true,
           "enableFileSharing": true
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Додаток хоче отримати доступ до ваших фотографій, щоб ви могли поділитися ними з іншими користувачами",
+          "colors": {
+            "cropToolbarColor": "#389d75"
+          }
         }
       ]
     ],
