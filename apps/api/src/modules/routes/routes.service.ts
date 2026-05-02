@@ -7,7 +7,13 @@ import {
 } from '@nestjs/common';
 
 import { toRouteCreateInput, toRouteView } from 'src/modules/routes/mappers';
-import { Prisma, Route, RouteDraft, User } from 'src/prisma/generated/client';
+import {
+  Prisma,
+  Route,
+  RouteDraft,
+  RouteImage,
+  User,
+} from 'src/prisma/generated/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 
 import { CreateRouteDto } from './dto/create-route.dto';
@@ -62,7 +68,25 @@ export class RoutesService {
     const { createdByUser, ...route } =
       await this.findRouteWithAuthorById(routeId);
 
-    return toRouteView(route, createdByUser);
+    const imageUrls = await Promise.all(
+      route.images.map((image) => this.resolveImageUrl(image.storageKey)),
+    );
+
+    const coverImageKey = route.images.find(
+      (image) => image.id === route.coverImageId,
+    )?.storageKey;
+
+    const coverImageUrl = coverImageKey
+      ? await this.resolveImageUrl(
+          route.images.find((image) => image.id === route.coverImageId)!
+            .storageKey,
+        )
+      : null;
+
+    return toRouteView(route, createdByUser, {
+      coverImageUrl,
+      imageUrls,
+    });
   }
 
   async getAllRoutes(): Promise<Route[]> {
@@ -82,10 +106,11 @@ export class RoutesService {
   }
 
   createRouteFromDraft(
+    tx: Prisma.TransactionClient,
     draftRoute: RouteDraft,
     preview: RouteDraftPreview,
     finalizeRouteDto: FinalizeRouteDraftDto,
-  ): Prisma.PrismaPromise<Route> {
+  ): Promise<Route> {
     const derived = calculateDerivedRouteValues(preview, finalizeRouteDto);
     const data = toRouteCreateInput(
       draftRoute,
@@ -94,7 +119,7 @@ export class RoutesService {
       derived,
     );
 
-    return this.prisma.route.create({
+    return tx.route.create({
       data,
     });
   }
@@ -119,10 +144,15 @@ export class RoutesService {
 
   private findRouteWithAuthorById(
     routeId: string,
-  ): Promise<Route & { createdByUser: User }> {
+  ): Promise<Route & { createdByUser: User; images: RouteImage[] }> {
     const request = this.prisma.route.findUnique({
       where: { id: routeId },
-      include: { createdByUser: true },
+      include: {
+        createdByUser: true,
+        images: {
+          orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }],
+        },
+      },
     });
 
     return this.findRouteOrThrow(request);
@@ -142,5 +172,14 @@ export class RoutesService {
     if (route.createdByUserId !== userId) {
       throw new ForbiddenException('Ви не маєте доступу до цього маршруту');
     }
+  }
+
+  private async resolveImageUrl(storageKey: string): Promise<string> {
+    return (
+      this.storageService.getPublicUrl(storageKey) ??
+      this.storageService.createPresignedDownloadUrl({
+        key: storageKey,
+      })
+    );
   }
 }

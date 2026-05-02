@@ -4,7 +4,6 @@ import {
   asCoordinates,
   asElevationProfile,
   asPoiMarkers,
-  asStringArray,
 } from 'src/common/utils/json-guards';
 import type { Route } from 'src/prisma/generated/client';
 
@@ -14,9 +13,15 @@ export interface RouteAuthorSource {
   avatar: string | null;
 }
 
+export interface RouteImageViewSource {
+  coverImageUrl: string | null;
+  imageUrls: string[];
+}
+
 export const toRouteView = (
   route: Route,
   author: RouteAuthorSource,
+  images: RouteImageViewSource,
 ): RouteDetails => {
   const createdBy: RouteAuthor = {
     id: author.id,
@@ -37,8 +42,8 @@ export const toRouteView = (
     elevationGainM: route.elevationGainM,
     durationH: route.durationH,
 
-    coverImageUrl: route.coverImageUrl,
-    imageUrls: asStringArray(route.imageUrlsJson),
+    coverImageUrl: images.coverImageUrl,
+    imageUrls: images.imageUrls,
 
     routeCoordinates: asCoordinates(route.routeCoordinatesJson) ?? [],
     elevationProfile: asElevationProfile(route.elevationProfileJson) ?? [],
@@ -48,7 +53,6 @@ export const toRouteView = (
     rating: route.rating,
     reviewCount: route.reviewCount,
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     createdBy,
 
     notes: route.notes,

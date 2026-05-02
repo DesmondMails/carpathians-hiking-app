@@ -10,6 +10,13 @@ export const useCreateRoute = () => {
   const resetRouteDraft = useRouteCreationStore(
     (state) => state.resetRouteDraft,
   )
+  const getPresignedUrl = useRouteCreationStore(
+    (state) => state.getPresignedUrl,
+  )
+  const completeImageUpload = useRouteCreationStore(
+    (state) => state.completeImageUpload,
+  )
+  const deleteImage = useRouteCreationStore((state) => state.deleteImage)
 
   return {
     isLoading,
@@ -19,5 +26,8 @@ export const useCreateRoute = () => {
     createRoute,
     finalizeRoute,
     resetRouteDraft,
+    getPresignedUrl,
+    completeImageUpload,
+    deleteImage,
   }
 }

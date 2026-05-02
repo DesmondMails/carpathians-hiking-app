@@ -52,7 +52,10 @@ export default function RouteScreen() {
   const handleDownloadGpx = async () => {
     try {
       const file = await ensureGpxFile(gpxFilename, () => loadGpxUrl(id))
+
       await shareGpxFile(file, 'Збереження GPX файлу')
+
+      toast.success('GPX файл завантажено')
     } catch (error) {
       console.error('GPX download failed', error)
       toast.error('Не вдалось завантажити GPX файл')

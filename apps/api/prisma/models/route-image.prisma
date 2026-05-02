@@ -1,0 +1,21 @@
+model RouteImage {
+  id               String   @id @default(uuid())
+  routeId          String
+  uploadedByUserId String
+  uploadedByUser   User @relation(fields: [uploadedByUserId], references: [id])
+  storageKey       String
+  status           RouteImageStatus @default(PENDING)
+  sortOrder        Int      @default(0)
+  createdAt        DateTime @default(now())
+
+  route Route @relation(fields: [routeId], references: [id], onDelete: Cascade)
+
+  @@index([routeId, status])
+  @@index([uploadedByUserId])
+}
+
+enum RouteImageStatus {
+  APPROVED
+  PENDING
+  REJECTED
+}

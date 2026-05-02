@@ -10,8 +10,8 @@ model Route {
   distanceM            Float?
   elevationGainM       Int?
   durationH            Float?
-  coverImageUrl        String?
-  imageUrlsJson        Json?
+  coverImageId         String?
+  images               RouteImage[]
   notes                String?
   routeCoordinatesJson Json?
   elevationProfileJson Json?

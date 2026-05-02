@@ -26,7 +26,6 @@ export function HeroSection({ route }: HeroSectionProps) {
 
   return (
     <View style={[styles.container, { height: totalHeight }]}>
-      {/* Content */}
       {mode === 'map' ? (
         <MapLibrePreview
           poiMarkers={route.poiMarkers}
@@ -36,7 +35,11 @@ export function HeroSection({ route }: HeroSectionProps) {
         <PhotosView imageUrls={route.imageUrls ?? []} height={totalHeight} />
       )}
 
-      <ModeSwitcher mode={mode} setMode={setMode} />
+      <ModeSwitcher
+        mode={mode}
+        setMode={setMode}
+        photosCount={route.imageUrls?.length ?? 0}
+      />
     </View>
   )
 }
