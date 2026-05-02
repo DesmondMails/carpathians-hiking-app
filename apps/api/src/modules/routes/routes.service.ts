@@ -68,8 +68,16 @@ export class RoutesService {
     const { createdByUser, ...route } =
       await this.findRouteWithAuthorById(routeId);
 
+    const imagesOrdered =
+      route.coverImageId != null
+        ? [
+            ...route.images.filter((img) => img.id === route.coverImageId),
+            ...route.images.filter((img) => img.id !== route.coverImageId),
+          ]
+        : route.images;
+
     const imageUrls = await Promise.all(
-      route.images.map((image) => this.resolveImageUrl(image.storageKey)),
+      imagesOrdered.map((image) => this.resolveImageUrl(image.storageKey)),
     );
 
     const coverImageKey = route.images.find(
