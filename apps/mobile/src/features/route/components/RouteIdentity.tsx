@@ -30,6 +30,8 @@ export const RouteIdentity: FC<RouteIdentityProps> = ({ route }) => {
             variant='caption'
             color={colors.textSecondary}
             style={styles.region}
+            numberOfLines={1}
+            ellipsizeMode='tail'
           >
             {route.region}
           </AppText>
@@ -65,5 +67,6 @@ const styles = StyleSheet.create({
   },
   region: {
     flexShrink: 1,
+    maxWidth: 240,
   },
 })

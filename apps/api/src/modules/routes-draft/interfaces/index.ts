@@ -41,6 +41,7 @@ export interface GpxElevationStats {
 export type ParsedGpx = {
   coordinates: Coordinate[];
   distanceM: number;
+  region: string | null;
   // elevation: GpxElevationStats;
   elevationGainM: number;
   elevationProfile: RouteElevationPoint[];
