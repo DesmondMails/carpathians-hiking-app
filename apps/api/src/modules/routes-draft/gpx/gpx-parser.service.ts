@@ -3,6 +3,8 @@ import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import * as turf from '@turf/turf';
 import { XMLParser } from 'fast-xml-parser';
 
+import { reverseGeocodeRegionGeoapify } from 'src/common/utils/geoapify-reverse-geocode';
+
 import { GPX_PARSER_OPTIONS } from '../configs';
 import {
   Coordinate,
@@ -19,7 +21,7 @@ export class GpxParserService {
   private readonly logger = new Logger(GpxParserService.name);
   private readonly xmlParser = new XMLParser(GPX_PARSER_OPTIONS);
 
-  parseGpx(file: Express.Multer.File): ParsedGpx {
+  async parseGpx(file: Express.Multer.File): Promise<ParsedGpx> {
     const gpx = this.toGpxDocument(file);
 
     const coordinates = this.extractCoordinates(gpx);
@@ -29,6 +31,11 @@ export class GpxParserService {
         `GPX файл не містить достатньо точок (мінімум ${MIN_COORDINATES_COUNT})`,
       );
     }
+
+    const region = await reverseGeocodeRegionGeoapify(coordinates[0], {
+      apiKey: process.env.GEOAPIFY_API_KEY,
+      warn: (message) => this.logger.warn(message),
+    });
 
     const distanceM = this.calculateDistanceM(coordinates);
     const elevation = this.calculateElevationStats(coordinates);
@@ -40,7 +47,13 @@ export class GpxParserService {
 
     const { elevationGainM } = elevation;
 
-    return { coordinates, distanceM, elevationGainM, elevationProfile };
+    return {
+      coordinates,
+      distanceM,
+      region,
+      elevationGainM,
+      elevationProfile,
+    };
   }
 
   private toGpxDocument(file: Express.Multer.File): GpxDocument {

@@ -24,6 +24,8 @@ export function HeroSection({ route }: HeroSectionProps) {
 
   const totalHeight = HERO_HEIGHT + top
 
+  const photosCount = route.imageUrls?.length ?? 0
+
   return (
     <View style={[styles.container, { height: totalHeight }]}>
       {mode === 'map' ? (
@@ -35,11 +37,9 @@ export function HeroSection({ route }: HeroSectionProps) {
         <PhotosView imageUrls={route.imageUrls ?? []} height={totalHeight} />
       )}
 
-      <ModeSwitcher
-        mode={mode}
-        setMode={setMode}
-        photosCount={route.imageUrls?.length ?? 0}
-      />
+      {photosCount > 0 && (
+        <ModeSwitcher mode={mode} setMode={setMode} photosCount={photosCount} />
+      )}
     </View>
   )
 }

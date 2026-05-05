@@ -175,7 +175,7 @@ export class RoutesDraftService {
     userId: string,
     file: Express.Multer.File,
   ): Promise<RouteDraft> {
-    const parsedGpx = this.gpxParserService.parseGpx(file);
+    const parsedGpx = await this.gpxParserService.parseGpx(file);
 
     const fileName = (file as { originalname: string }).originalname;
 

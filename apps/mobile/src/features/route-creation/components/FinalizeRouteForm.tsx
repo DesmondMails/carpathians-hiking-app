@@ -147,8 +147,8 @@ export const FinalizeRouteForm: FC<FinalizeRouteFormProps> = ({
           name='region'
           render={({ field: { value, onChange, onBlur } }) => (
             <AppInput
-              label='Регіон'
-              placeholder='Наприклад, Карпати'
+              label='Старт Маршруту'
+              placeholder='Введіть назву населеного пункту, де починається маршрут'
               value={value ?? ''}
               onChangeText={onChange}
               onBlur={onBlur}
