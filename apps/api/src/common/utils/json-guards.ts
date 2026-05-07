@@ -53,14 +53,15 @@ export function asCoordinates(
     const latitude = asNumber(item.latitude);
     const longitude = asNumber(item.longitude);
     const elevationRaw = item.elevationM;
-    const elevationM = elevationRaw === null ? null : asNumber(elevationRaw);
+    const elevationM =
+      elevationRaw === null ? undefined : asNumber(elevationRaw);
 
     if (latitude === undefined || longitude === undefined) continue;
 
     result.push({
       latitude,
       longitude,
-      elevationM: elevationM ?? 0,
+      ...(elevationM !== undefined ? { elevationM } : {}),
     });
   }
 

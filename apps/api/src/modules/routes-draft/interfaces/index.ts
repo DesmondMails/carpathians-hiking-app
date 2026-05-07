@@ -3,7 +3,7 @@ import { RouteElevationPoint } from '@hiking/shared';
 export type Coordinate = {
   longitude: number;
   latitude: number;
-  elevationM: number;
+  elevationM?: number;
 };
 
 export interface GpxPoint {

@@ -11,6 +11,7 @@ import {
   GpxDocument,
   GpxElevationStats,
   GpxPoint,
+  GpxTrackSegment,
   ParsedGpx,
 } from '../interfaces';
 
@@ -25,6 +26,7 @@ export class GpxParserService {
     const gpx = this.toGpxDocument(file);
 
     const coordinates = this.extractCoordinates(gpx);
+    const elevationSamples = this.buildElevationSamples(coordinates);
 
     if (coordinates.length < MIN_COORDINATES_COUNT) {
       throw new BadRequestException(
@@ -38,8 +40,8 @@ export class GpxParserService {
     });
 
     const distanceM = this.calculateDistanceM(coordinates);
-    const elevation = this.calculateElevationStats(coordinates);
-    const elevationProfile = this.getElevationProfile(coordinates);
+    const elevation = this.calculateElevationStats(elevationSamples);
+    const elevationProfile = this.getElevationProfile(elevationSamples);
 
     this.logger.log(
       `Parsed GPX: points=${coordinates.length}, distanceM=${distanceM.toFixed(1)}`,
@@ -71,9 +73,11 @@ export class GpxParserService {
   }
 
   private extractCoordinates(gpx: GpxDocument): Coordinate[] {
-    const trackPoints = (gpx.trk ?? []).flatMap((track) =>
-      (track.trkseg ?? []).flatMap((seg) => seg.trkpt ?? []),
+    const trackSegments = (gpx.trk ?? []).flatMap(
+      (track) => track.trkseg ?? [],
     );
+
+    const trackPoints = this.getLongestTrackSegment(trackSegments).trkpt ?? [];
 
     let routePoints: GpxPoint[] = [];
 
@@ -100,9 +104,13 @@ export class GpxParserService {
       return null;
     }
 
-    const ele = this.toNumber(pt.ele) ?? 0;
+    const ele = this.toNumber(pt.ele);
 
-    return { longitude: lon, latitude: lat, elevationM: ele };
+    return {
+      longitude: lon,
+      latitude: lat,
+      ...(ele !== null ? { elevationM: ele } : {}),
+    };
   }
 
   private toNumber(value: number | string | undefined): number | null {
@@ -119,9 +127,18 @@ export class GpxParserService {
   }
 
   private calculateElevationStats(
-    coordinates: Coordinate[],
+    elevationSamples: RouteElevationPoint[],
   ): GpxElevationStats {
-    const elevations = coordinates.map((c) => c.elevationM ?? 0);
+    const elevations = elevationSamples.map((sample) => sample.elevationM);
+
+    if (elevations.length === 0) {
+      return {
+        elevationGainM: 0,
+        elevationLossM: 0,
+        maxElevationM: 0,
+        minElevationM: 0,
+      };
+    }
 
     let elevationGainM = 0;
     let elevationLossM = 0;
@@ -142,69 +159,74 @@ export class GpxParserService {
   }
 
   private getElevationProfile(
-    coordinates: Coordinate[],
+    elevationSamples: RouteElevationPoint[],
   ): RouteElevationPoint[] {
-    if (coordinates.length < MIN_COORDINATES_COUNT) return [];
+    if (elevationSamples.length < MIN_COORDINATES_COUNT) return [];
 
-    const step = this.getProfileStep(coordinates.length);
+    const step = this.getProfileStep(elevationSamples.length);
     const profile: RouteElevationPoint[] = [];
-
-    let cumulativeDistanceM = 0;
     let lastSampledIndex = 0;
 
-    profile.push({
-      distanceM: 0,
-      elevationM: coordinates[0].elevationM ?? 0,
-    });
+    profile.push(elevationSamples[0]);
 
-    for (let i = step; i < coordinates.length; i += step) {
-      cumulativeDistanceM = this.appendSample(
-        profile,
-        coordinates,
-        lastSampledIndex,
-        i,
-        cumulativeDistanceM,
-      );
+    for (let i = step; i < elevationSamples.length; i += step) {
+      profile.push(elevationSamples[i]);
       lastSampledIndex = i;
     }
 
-    const finalIndex = coordinates.length - 1;
+    const finalIndex = elevationSamples.length - 1;
 
     if (lastSampledIndex !== finalIndex) {
-      this.appendSample(
-        profile,
-        coordinates,
-        lastSampledIndex,
-        finalIndex,
-        cumulativeDistanceM,
-      );
+      profile.push(elevationSamples[finalIndex]);
     }
 
     return profile;
-  }
-
-  private appendSample(
-    profile: RouteElevationPoint[],
-    coordinates: Coordinate[],
-    fromIndex: number,
-    toIndex: number,
-    cumulativeDistanceM: number,
-  ): number {
-    const nextCumulativeDistanceM =
-      cumulativeDistanceM +
-      this.calculateDistanceM([coordinates[fromIndex], coordinates[toIndex]]);
-
-    profile.push({
-      distanceM: parseFloat(nextCumulativeDistanceM.toFixed(1)),
-      elevationM: coordinates[toIndex].elevationM ?? 0,
-    });
-
-    return nextCumulativeDistanceM;
   }
 
   private getProfileStep(coordsCount: number): number {
     const TARGET_SAMPLES = 200;
 
     return Math.max(1, Math.floor(coordsCount / TARGET_SAMPLES));
+  }
+
+  private buildElevationSamples(
+    coordinates: Coordinate[],
+  ): RouteElevationPoint[] {
+    if (coordinates.length === 0) return [];
+
+    const samples: RouteElevationPoint[] = [];
+    let cumulativeDistanceM = 0;
+
+    for (let i = 0; i < coordinates.length; i++) {
+      if (i > 0) {
+        cumulativeDistanceM += this.calculateDistanceM([
+          coordinates[i - 1],
+          coordinates[i],
+        ]);
+      }
+
+      const elevationM = coordinates[i].elevationM;
+
+      if (elevationM === undefined) {
+        continue;
+      }
+
+      samples.push({
+        distanceM: parseFloat(cumulativeDistanceM.toFixed(1)),
+        elevationM,
+      });
+    }
+
+    return samples;
+  }
+
+  private getLongestTrackSegment(
+    trackSegments: GpxTrackSegment[],
+  ): GpxTrackSegment {
+    return trackSegments.reduce((longest, current) => {
+      return (current.trkpt?.length ?? 0) > (longest.trkpt?.length ?? 0)
+        ? current
+        : longest;
+    }, trackSegments[0]);
   }
 }
