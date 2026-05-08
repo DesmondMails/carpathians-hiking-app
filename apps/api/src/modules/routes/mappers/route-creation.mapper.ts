@@ -23,7 +23,6 @@ export const toRouteCreateInput = (
     description: finalize.description ?? draft.description,
     region: finalize.region ?? preview.region,
     difficulty: finalize.difficulty ?? Difficulty.MODERATE,
-    notes: finalize.notes,
 
     distanceM: preview.distanceM,
     elevationGainM: preview.elevationGainM,

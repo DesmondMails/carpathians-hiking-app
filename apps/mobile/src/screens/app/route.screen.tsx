@@ -2,8 +2,9 @@ import { useEffect, useState } from 'react'
 
 import { ScrollView, Share, StyleSheet, View } from 'react-native'
 
-import { useLocalSearchParams } from 'expo-router'
+import { useLocalSearchParams, useRouter } from 'expo-router'
 
+import { useAuth } from '@/src/features/auth/hooks/useAuth'
 import {
   DescriptionBlock,
   ElevationChart,
@@ -22,8 +23,10 @@ import { colors } from '@/src/theme/colors'
 
 export default function RouteScreen() {
   const { id } = useLocalSearchParams<{ id: string }>()
+  const router = useRouter()
 
   const { isLoading, route, loadRoute, loadGpxUrl } = useRoute()
+  const { user } = useAuth()
 
   const [saved, setSaved] = useState(false)
   const [scrollEnabled, setScrollEnabled] = useState(true)
@@ -72,6 +75,13 @@ export default function RouteScreen() {
     }
   }
 
+  const handleEdit = () => {
+    router.push({
+      pathname: '/(modals)/routes/[id]/edit',
+      params: { id },
+    })
+  }
+
   useEffect(() => {
     if (id) {
       loadRoute(id)
@@ -80,9 +90,16 @@ export default function RouteScreen() {
 
   if (!route) return null
 
+  const canEdit = route.createdBy.id === user?.id
+
   return (
     <View style={styles.root}>
-      <ControlsTop saved={saved} onSave={handleSave} onShare={handleShare} />
+      <ControlsTop
+        saved={saved}
+        onSave={handleSave}
+        onShare={handleShare}
+        onEdit={canEdit ? handleEdit : undefined}
+      />
 
       <ScrollView
         showsVerticalScrollIndicator={false}

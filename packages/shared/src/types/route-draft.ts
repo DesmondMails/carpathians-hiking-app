@@ -29,7 +29,6 @@ export interface FinalizeRouteDraftPayload {
   difficulty?: Difficulty
   imageIds?: string[]
   coverImageId?: string
-  notes?: string
 }
 
 export interface PresignedUrlResponse {

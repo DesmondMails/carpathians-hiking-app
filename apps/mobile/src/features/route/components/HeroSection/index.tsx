@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 
 import { StyleSheet, View } from 'react-native'
 
@@ -24,7 +24,16 @@ export function HeroSection({ route }: HeroSectionProps) {
 
   const totalHeight = HERO_HEIGHT + top
 
-  const photosCount = route.imageUrls?.length ?? 0
+  const photosCount = useMemo(
+    () => route.imageUrls?.length ?? 0,
+    [route.imageUrls],
+  )
+
+  useEffect(() => {
+    const isPhotoViewWithoutImages = photosCount === 0 && mode === 'photos'
+
+    if (isPhotoViewWithoutImages) setMode('map')
+  }, [photosCount, mode])
 
   return (
     <View style={[styles.container, { height: totalHeight }]}>

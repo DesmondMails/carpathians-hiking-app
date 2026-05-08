@@ -42,9 +42,4 @@ export class FinalizeRouteDraftDto {
   @IsOptional()
   @ApiPropertyOptional({ description: 'Ключ зображення покриття маршруту' })
   coverImageId?: string;
-
-  @IsString()
-  @IsOptional()
-  @ApiPropertyOptional({ description: 'Нотатки до маршруту' })
-  notes?: string;
 }
