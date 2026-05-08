@@ -61,7 +61,6 @@ export interface RouteDetails {
 
   createdBy: RouteAuthor
 
-  notes?: string | null
   status: 'DRAFT' | 'PUBLISHED' | 'ARCHIVED'
   createdAt: string
   updatedAt: string

@@ -11,12 +11,14 @@ import { colors } from '@/src/theme/colors'
 interface ControlsTopProps {
   onSave: () => void
   onShare: () => void
+  onEdit?: () => void
   saved: boolean
 }
 
 export const ControlsTop: FC<ControlsTopProps> = ({
   onSave,
   onShare,
+  onEdit,
   saved,
 }) => {
   const { top } = useSafeAreaInsets()
@@ -34,6 +36,12 @@ export const ControlsTop: FC<ControlsTopProps> = ({
       </Pressable>
 
       <View style={styles.rightCluster}>
+        {onEdit ? (
+          <Pressable style={styles.iconBtn} onPress={onEdit} hitSlop={8}>
+            <Feather name='edit-2' size={16} color={colors.textWhite} />
+          </Pressable>
+        ) : null}
+
         <Pressable style={styles.iconBtn} onPress={onSave} hitSlop={8}>
           <Ionicons
             name={saved ? 'bookmark' : 'bookmark-outline'}

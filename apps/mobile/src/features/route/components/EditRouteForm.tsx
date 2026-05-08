@@ -1,4 +1,4 @@
-import { FC, useState } from 'react'
+import { FC, useMemo, useState } from 'react'
 
 import {
   Alert,
@@ -9,27 +9,28 @@ import {
   View,
 } from 'react-native'
 
-import { FinalizeRouteDraftPayload, RouteDraft } from '@hiking/shared'
+import { EditableRoute, UpdateRoutePayload } from '@hiking/shared'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 
+import {
+  RouteMetadataFields,
+} from '@/src/features/route-creation/components'
+import {
+  RouteMetadataFormValues,
+  routeMetadataSchema,
+} from '@/src/features/route-creation/schemas/route-metadata.schema'
+import { DraftImageItem } from '@/src/features/route-creation/types'
 import { AppButton, AppText } from '@/src/shared/components'
 import { colors } from '@/src/theme/colors'
 import { spacing } from '@/src/theme/spacing'
 
-import { DraftImagesField } from './DraftImagesField'
-import { RouteDraftSummary } from './RouteDraftSummary'
-import { RouteMetadataFields } from './RouteMetadataFields'
-import {
-  FinalizeRouteFormValues,
-  finalizeRouteSchema,
-} from '../schemas/finalize-route.schema'
-import { DraftImageItem } from '../types'
+import { RouteImagesField } from './RouteImagesField'
 
-interface FinalizeRouteFormProps {
-  routeDraft: RouteDraft
+interface EditRouteFormProps {
+  route: EditableRoute
   isSubmitting: boolean
-  onSubmit: (payload: FinalizeRouteDraftPayload) => Promise<void>
+  onSubmit: (payload: UpdateRoutePayload) => Promise<void>
 }
 
 const trimToUndefined = (value?: string) => {
@@ -37,49 +38,55 @@ const trimToUndefined = (value?: string) => {
   return trimmed ? trimmed : undefined
 }
 
-export const FinalizeRouteForm: FC<FinalizeRouteFormProps> = ({
-  routeDraft,
+const toDraftImageItem = (route: EditableRoute): DraftImageItem[] =>
+  route.images.map((image) => ({
+    localId: image.id,
+    localUri: image.url,
+    fileName: `${image.id}.jpg`,
+    mimeType: 'image/jpeg',
+    imageId: image.id,
+    sortOrder: image.sortOrder,
+    status: 'uploaded',
+    isCover: image.isCover,
+  }))
+
+export const EditRouteForm: FC<EditRouteFormProps> = ({
+  route,
   isSubmitting,
   onSubmit,
 }) => {
+  const initialImages = useMemo(() => toDraftImageItem(route), [route])
+  const [images, setImages] = useState<DraftImageItem[]>(initialImages)
+
   const {
     control,
     handleSubmit,
     formState: { errors, isValid },
-  } = useForm<FinalizeRouteFormValues>({
-    resolver: zodResolver(finalizeRouteSchema),
+  } = useForm<RouteMetadataFormValues>({
+    resolver: zodResolver(routeMetadataSchema),
     mode: 'onChange',
     defaultValues: {
-      title: routeDraft.title ?? '',
-      description: routeDraft.description ?? '',
-      region: routeDraft.previewJson?.region ?? '',
-      difficulty: 'EASY',
+      title: route.title ?? '',
+      description: route.description ?? '',
+      region: route.region ?? '',
+      difficulty: route.difficulty ?? 'EASY',
+      notes: route.notes ?? '',
     },
   })
 
-  const [draftImages, setDraftImages] = useState<DraftImageItem[]>([])
-
-  const submit = async (values: FinalizeRouteFormValues) => {
-    const uploadedImages = draftImages.filter(
-      (image) => image.status === 'uploaded' && image.imageId,
-    )
-    const coverImageId =
-      uploadedImages.find((image) => image.isCover)?.imageId ??
-      uploadedImages[0]?.imageId
-
+  const submit = async (values: RouteMetadataFormValues) => {
     try {
       await onSubmit({
         title: values.title.trim(),
         description: trimToUndefined(values.description),
         region: trimToUndefined(values.region),
         difficulty: values.difficulty,
-        imageIds: uploadedImages.map((image) => image.imageId!),
-        coverImageId,
+        notes: trimToUndefined(values.notes),
       })
     } catch (error) {
       const message =
         (error as { response?: { data?: { message?: string | string[] } } })
-          ?.response?.data?.message ?? 'Не вдалося зберегти маршрут'
+          ?.response?.data?.message ?? 'Не вдалося зберегти зміни'
 
       Alert.alert(
         'Помилка',
@@ -88,9 +95,7 @@ export const FinalizeRouteForm: FC<FinalizeRouteFormProps> = ({
     }
   }
 
-  const hasUploadingImages = draftImages.some(
-    (image) => image.status === 'uploading',
-  )
+  const hasUploadingImages = images.some((image) => image.status === 'uploading')
 
   return (
     <KeyboardAvoidingView
@@ -105,19 +110,17 @@ export const FinalizeRouteForm: FC<FinalizeRouteFormProps> = ({
       >
         <View style={styles.header}>
           <AppText variant='h2' color={colors.textPrimary}>
-            Деталі маршруту
+            Редагувати маршрут
           </AppText>
           <AppText variant='body' color={colors.textSecondary}>
-            Перевірте та доповніть інформацію про ваш маршрут
+            Оновіть опис, складність і фото маршруту
           </AppText>
         </View>
 
-        <RouteDraftSummary routeDraft={routeDraft} />
-
-        <DraftImagesField
-          routeDraftId={routeDraft.id}
-          draftImages={draftImages}
-          setDraftImages={setDraftImages}
+        <RouteImagesField
+          routeId={route.id}
+          images={images}
+          setImages={setImages}
         />
 
         <RouteMetadataFields control={control} errors={errors} />
@@ -125,7 +128,7 @@ export const FinalizeRouteForm: FC<FinalizeRouteFormProps> = ({
 
       <View style={styles.footer}>
         <AppButton
-          title='Зберегти маршрут'
+          title='Зберегти зміни'
           onPress={handleSubmit(submit)}
           loading={isSubmitting}
           disabled={!isValid || isSubmitting || hasUploadingImages}

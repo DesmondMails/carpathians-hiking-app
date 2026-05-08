@@ -55,7 +55,6 @@ export const toRouteView = (
 
     createdBy,
 
-    notes: route.notes,
     status: route.status,
     createdAt: route.createdAt.toISOString(),
     updatedAt: route.updatedAt.toISOString(),
