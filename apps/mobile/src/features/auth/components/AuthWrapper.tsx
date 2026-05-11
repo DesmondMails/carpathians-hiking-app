@@ -29,7 +29,7 @@ export const AuthWrapper: FC<AuthWrapperProps> = ({
   return (
     <View style={styles.container}>
       <ImageBackground
-        source={require('@/assets/images/register-hero.png')}
+        source={require('@/assets/images/hoverla.jpeg')}
         resizeMode='cover'
         style={styles.hero}
       />
@@ -63,6 +63,8 @@ const styles = StyleSheet.create({
   },
   hero: {
     flex: 1,
+    position: 'relative',
+    top: -150,
   },
   bottomWrap: {
     position: 'absolute',
