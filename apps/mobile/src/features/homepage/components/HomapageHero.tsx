@@ -7,9 +7,6 @@ import { AppText } from '@/src/shared/components/AppText'
 import { colors } from '@/src/theme/colors'
 import { typography } from '@/src/theme/typography'
 
-const HERO_IMAGE =
-  'https://www.figma.com/api/mcp/asset/40be9126-5a87-43c4-b31b-0edd4eaddd80'
-
 export const HomapageHero = () => {
   const insets = useSafeAreaInsets()
 
@@ -18,12 +15,12 @@ export const HomapageHero = () => {
   return (
     <View style={[styles.hero, { height: HERO_HEIGHT }]}>
       <Image
-        source={{ uri: HERO_IMAGE }}
+        source={require('@/assets/images/sunset.jpeg')}
         style={StyleSheet.absoluteFill}
         contentFit='cover'
       />
       {/* dark gradient overlay via layered views */}
-      {[0.05, 0.1, 0.17, 0.25, 0.33, 0.41, 0.48, 0.54].map((opacity, i) => (
+      {[0.05, 0.1, 0.17, 0.25, 0.33].map((opacity, i) => (
         <View
           key={i}
           pointerEvents='none'
@@ -31,7 +28,7 @@ export const HomapageHero = () => {
             StyleSheet.absoluteFill,
             {
               backgroundColor: `rgba(10,30,18,${opacity})`,
-              top: `${i * 12.5}%`,
+              top: `${i * 30}%`,
             },
           ]}
         />
