@@ -25,7 +25,16 @@ export default function RouteScreen() {
   const { id } = useLocalSearchParams<{ id: string }>()
   const router = useRouter()
 
-  const { isLoading, route, loadRoute, loadGpxUrl } = useRoute()
+  const {
+    isLoading,
+    isPoisLoading,
+    poiMarkers,
+    poiStatus,
+    route,
+    loadRoute,
+    loadRoutePois,
+    loadGpxUrl,
+  } = useRoute()
   const { user } = useAuth()
 
   const [saved, setSaved] = useState(false)
@@ -84,9 +93,25 @@ export default function RouteScreen() {
 
   useEffect(() => {
     if (id) {
-      loadRoute(id)
+      void loadRoute(id)
     }
   }, [id, loadRoute])
+
+  useEffect(() => {
+    if (!id || !route) return
+
+    void loadRoutePois(id)
+  }, [id, route, loadRoutePois])
+
+  useEffect(() => {
+    if (!id || poiStatus !== 'PENDING') return
+
+    const timeout = setTimeout(() => {
+      void loadRoutePois(id)
+    }, 5000)
+
+    return () => clearTimeout(timeout)
+  }, [id, poiStatus, loadRoutePois])
 
   if (!route) return null
 
@@ -107,7 +132,12 @@ export default function RouteScreen() {
         scrollEnabled={scrollEnabled}
         bounces={false}
       >
-        <HeroSection route={route} />
+        <HeroSection
+          route={route}
+          poiMarkers={poiMarkers}
+          poiStatus={poiStatus}
+          isPoisLoading={isPoisLoading}
+        />
 
         <View style={styles.card}>
           <RouteIdentity route={route} />

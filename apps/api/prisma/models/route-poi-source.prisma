@@ -1,0 +1,23 @@
+model RoutePoiSource {
+  id                    String     @id @default(uuid())
+  provider              RoutePoiProvider
+  osmType               RoutePoiOsmType
+  osmId                 String
+  rawTagsJson           Json
+  rawGeometryCenterJson Json
+  fetchedAt             DateTime
+  hash                  String
+  routePois             RoutePoi[]
+
+  @@unique([provider, osmType, osmId])
+}
+
+enum RoutePoiProvider {
+  OVERPASS
+}
+
+enum RoutePoiOsmType {
+  NODE
+  WAY
+  RELATION
+}

@@ -1,7 +1,7 @@
 model Route {
-  id                   String      @id @default(uuid())
-  draftId              String?     @unique
-  draft                RouteDraft? @relation(fields: [draftId], references: [id])
+  id                   String       @id @default(uuid())
+  draftId              String?      @unique
+  draft                RouteDraft?  @relation(fields: [draftId], references: [id])
   title                String
   description          String?
   region               String?
@@ -14,16 +14,19 @@ model Route {
   images               RouteImage[]
   routeCoordinatesJson Json?
   elevationProfileJson Json?
-  poiMarkersJson       Json?
   gpxStorageKey        String?
-  gpxAvailable         Boolean     @default(false)
-  rating               Float       @default(0)
-  reviewCount          Int         @default(0)
-  status               RouteStatus @default(DRAFT)
+  gpxAvailable         Boolean      @default(false)
+  rating               Float        @default(0)
+  reviewCount          Int          @default(0)
+  status               RouteStatus  @default(DRAFT)
+  poiEnrichmentStatus  RoutePoiEnrichmentStatus @default(PENDING)
+  poiEnrichmentError   String?
+  poiEnrichedAt        DateTime?
   createdByUserId      String
-  createdByUser        User        @relation(fields: [createdByUserId], references: [id])
-  createdAt            DateTime    @default(now())
-  updatedAt            DateTime    @updatedAt
+  createdByUser        User         @relation(fields: [createdByUserId], references: [id])
+  createdAt            DateTime     @default(now())
+  updatedAt            DateTime     @updatedAt
+  routePois            RoutePoi[]
 
   @@index([createdByUserId])
   @@index([status])
@@ -46,4 +49,10 @@ enum RouteType {
   LOOP
   OUT_AND_BACK
   POINT_TO_POINT
+}
+
+enum RoutePoiEnrichmentStatus {
+  PENDING
+  READY
+  FAILED
 }

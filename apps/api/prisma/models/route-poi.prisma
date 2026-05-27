@@ -1,0 +1,50 @@
+model RoutePoi {
+  id                 String                  @id @default(uuid())
+  routeId            String
+  route              Route                   @relation(fields: [routeId], references: [id])
+  sourceId           String
+  source             RoutePoiSource          @relation(fields: [sourceId], references: [id])
+  type               RoutePoiType
+  subtype            String?
+  label              String
+  latitude           Float
+  longitude          Float
+  distanceFromRouteM Float
+  distanceFromStartM Float
+  confidence         RoutePoiConfidence
+  waterPotability    RoutePoiWaterPotability
+  access             RoutePoiAccess
+  sortOrder          Int
+  metadataJson       Json
+  createdAt          DateTime                @default(now())
+  updatedAt          DateTime                @updatedAt
+
+  @@index([routeId])
+  @@index([routeId, type])
+  @@index([routeId, sortOrder])
+  @@unique([routeId, sourceId])
+}
+
+enum RoutePoiType {
+  WATER
+  SHELTER
+  VIEWPOINT
+  PEAK
+}
+
+enum RoutePoiConfidence {
+  HIGH
+  MEDIUM
+  LOW
+}
+
+enum RoutePoiWaterPotability {
+  CONFIRMED
+  UNKNOWN
+  NON_POTABLE
+}
+
+enum RoutePoiAccess {
+  PUBLIC
+  PRIVATE
+}

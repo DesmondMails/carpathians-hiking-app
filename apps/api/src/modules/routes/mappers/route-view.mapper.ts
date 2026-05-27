@@ -1,11 +1,19 @@
-import type { RouteAuthor, RouteDetails } from '@hiking/shared';
+import type {
+  RouteAuthor,
+  RouteDetails,
+  RoutePoisResponse,
+} from '@hiking/shared';
+import type { RoutePoi as SharedRoutePoi } from '@hiking/shared/types/route-poi';
 
 import {
   asCoordinates,
   asElevationProfile,
-  asPoiMarkers,
 } from 'src/common/utils/json-guards';
-import type { Route } from 'src/prisma/generated/client';
+import type {
+  Route,
+  RoutePoi,
+  RoutePoiSource,
+} from 'src/prisma/generated/client';
 
 export interface RouteAuthorSource {
   id: string;
@@ -18,8 +26,54 @@ export interface RouteImageViewSource {
   imageUrls: string[];
 }
 
+export type RouteWithPois = Route & {
+  routePois: (RoutePoi & { source: RoutePoiSource })[];
+};
+
+function toRoutePoiView(
+  poi: RoutePoi & { source: RoutePoiSource },
+): SharedRoutePoi {
+  return {
+    id: poi.id,
+    type: poi.type,
+    subtype: poi.subtype,
+    label: poi.label,
+    latitude: poi.latitude,
+    longitude: poi.longitude,
+    distanceFromRouteM: poi.distanceFromRouteM,
+    distanceFromStartM: poi.distanceFromStartM,
+    confidence: poi.confidence,
+    waterPotability: poi.waterPotability,
+    access: poi.access,
+    sortOrder: poi.sortOrder,
+    metadata: poi.metadataJson as Record<string, any>,
+    updatedAt: poi.updatedAt.toISOString(),
+    createdAt: poi.createdAt.toISOString(),
+    source: {
+      id: poi.source.id,
+      provider: poi.source.provider,
+      osmType: poi.source.osmType,
+      osmId: poi.source.osmId,
+      rawTags: poi.source.rawTagsJson as Record<string, string>,
+      rawGeometryCenter: poi.source.rawGeometryCenterJson as Record<
+        string,
+        number
+      >,
+      fetchedAt: poi.source.fetchedAt.toISOString(),
+      hash: poi.source.hash,
+    },
+  };
+}
+
+export function toRoutePoisResponse(route: RouteWithPois): RoutePoisResponse {
+  return {
+    status: route.poiEnrichmentStatus,
+    poiMarkers: route.routePois.map(toRoutePoiView),
+  };
+}
+
 export const toRouteView = (
-  route: Route,
+  route: RouteWithPois,
   author: RouteAuthorSource,
   images: RouteImageViewSource,
 ): RouteDetails => {
@@ -47,7 +101,8 @@ export const toRouteView = (
 
     routeCoordinates: asCoordinates(route.routeCoordinatesJson) ?? [],
     elevationProfile: asElevationProfile(route.elevationProfileJson) ?? [],
-    poiMarkers: asPoiMarkers(route.poiMarkersJson) ?? [],
+    poiMarkers: route.routePois.map(toRoutePoiView),
+    poiEnrichmentStatus: route.poiEnrichmentStatus,
 
     gpxAvailable: route.gpxAvailable,
     rating: route.rating,

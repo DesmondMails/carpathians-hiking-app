@@ -2,6 +2,7 @@ import {
   EditableRoute,
   PresignedUrlResponse,
   RouteDetails,
+  RoutePoisResponse,
 } from '@hiking/shared';
 import {
   Body,
@@ -90,6 +91,14 @@ export class RoutesController {
   @ApiResponse({ status: 200, description: 'Всі маршрути успішно отримані' })
   async getAllRoutes(): Promise<Route[]> {
     return this.routesService.getAllRoutes();
+  }
+
+  @Get(':id/pois')
+  @ApiOperation({ summary: 'Отримати POI маршруту по id' })
+  @ApiResponse({ status: 200, description: 'POI маршруту успішно отримані' })
+  @ApiResponse({ status: 404, description: 'Маршрут не знайдено' })
+  async getRoutePois(@Param('id') routeId: string): Promise<RoutePoisResponse> {
+    return this.routesService.getRoutePois(routeId);
   }
 
   @Get(':id')
