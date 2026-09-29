@@ -1,6 +1,7 @@
+import { RoutePoi, RoutePoiEnrichmentStatus } from './route-poi'
+
 export type RouteDifficulty = 'EASY' | 'MODERATE' | 'HARD' | 'EXTREME'
 export type RouteType = 'LOOP' | 'OUT_AND_BACK' | 'POINT_TO_POINT'
-export type RoutePoiType = 'WATER' | 'SHELTER' | 'VIEWPOINT' | 'PEAK'
 
 export interface RouteCoordinate {
   latitude: number
@@ -11,14 +12,6 @@ export interface RouteCoordinate {
 export interface RouteElevationPoint {
   distanceM: number
   elevationM: number
-}
-
-export interface RoutePoi {
-  id: string
-  type: RoutePoiType
-  label: string
-  latitude: number
-  longitude: number
 }
 
 export interface RouteAuthor {
@@ -54,6 +47,8 @@ export interface RouteDetails {
   routeCoordinates: RouteCoordinate[]
   elevationProfile: RouteElevationPoint[]
   poiMarkers: RoutePoi[]
+  featuredPoiMarkers: RoutePoi[]
+  poiEnrichmentStatus: RoutePoiEnrichmentStatus
 
   gpxAvailable: boolean
   rating: number

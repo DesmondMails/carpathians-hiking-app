@@ -6,6 +6,9 @@
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
+    "debug:pois:compare": "ts-node --transpile-only -r tsconfig-paths/register scripts/compare-pois.ts",
+    "test:pois": "ts-node --transpile-only -r tsconfig-paths/register scripts/poi-regression.test.ts",
+    "debug:pois": "ts-node --transpile-only -r tsconfig-paths/register scripts/debug-pois.ts",
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",

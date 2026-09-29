@@ -1,0 +1,130 @@
+{
+  "routeId": "4911f453-9cd2-4859-b068-e07a16fae5cc",
+  "candidateCount": 6,
+  "featuredCount": 3,
+  "featuredPois": [
+    {
+      "id": "0a990cf8-555e-4c40-93b1-cae0038f92e3",
+      "routeId": "4911f453-9cd2-4859-b068-e07a16fae5cc",
+      "sourceId": "348400ba-b72e-45f2-bed4-fbb40d763e82",
+      "type": "WATER",
+      "subtype": "spring",
+      "label": "Spring",
+      "latitude": 48.2699497,
+      "longitude": 24.564585,
+      "distanceFromRouteM": 15,
+      "distanceFromStartM": 1141.8,
+      "confidence": "LOW",
+      "waterPotability": "UNKNOWN",
+      "access": "PUBLIC",
+      "sortOrder": 0,
+      "metadataJson": {
+        "manMade": null,
+        "drinkingWater": null,
+        "persistedOrder": 0
+      },
+      "createdAt": "2026-05-28T16:44:02.166Z",
+      "updatedAt": "2026-05-28T16:44:02.166Z",
+      "source": {
+        "id": "348400ba-b72e-45f2-bed4-fbb40d763e82",
+        "provider": "OVERPASS",
+        "osmType": "NODE",
+        "osmId": "9042246089",
+        "rawTagsJson": {
+          "natural": "spring"
+        },
+        "rawGeometryCenterJson": {
+          "latitude": 48.2699497,
+          "longitude": 24.564585
+        },
+        "fetchedAt": "2026-05-28T19:44:02.163",
+        "hash": "c167be1dce5dda32343b4fc071036000aff79ec5"
+      }
+    },
+    {
+      "id": "da2fd539-68e8-43d6-8151-a418dcc6632e",
+      "routeId": "4911f453-9cd2-4859-b068-e07a16fae5cc",
+      "sourceId": "094b3427-d54e-4ccb-baed-ce21c508b884",
+      "type": "CAMP",
+      "subtype": "camp_site",
+      "label": "Camp site",
+      "latitude": 48.2543999,
+      "longitude": 24.5562182,
+      "distanceFromRouteM": 3.8,
+      "distanceFromStartM": 3148.2,
+      "confidence": "HIGH",
+      "waterPotability": "UNKNOWN",
+      "access": "PUBLIC",
+      "sortOrder": 1,
+      "metadataJson": {
+        "tents": "yes",
+        "caravan": null,
+        "campSite": null,
+        "backcountry": "yes",
+        "persistedOrder": 1
+      },
+      "createdAt": "2026-05-28T16:44:02.171Z",
+      "updatedAt": "2026-05-28T16:44:02.171Z",
+      "source": {
+        "id": "094b3427-d54e-4ccb-baed-ce21c508b884",
+        "provider": "OVERPASS",
+        "osmType": "NODE",
+        "osmId": "9042246090",
+        "rawTagsJson": {
+          "tents": "yes",
+          "tourism": "camp_site",
+          "backcountry": "yes",
+          "capacity:tents": "1"
+        },
+        "rawGeometryCenterJson": {
+          "latitude": 48.2543999,
+          "longitude": 24.5562182
+        },
+        "fetchedAt": "2026-05-28T19:44:02.169",
+        "hash": "4186ad8e4e5c8e28c3fe34c227cade9a3ef4831f"
+      }
+    },
+    {
+      "id": "ab47d54f-a778-48a9-a001-f8aea64d896b",
+      "routeId": "4911f453-9cd2-4859-b068-e07a16fae5cc",
+      "sourceId": "c8e6c4f0-5f6e-4c9b-aeac-3ec97a8ca8e6",
+      "type": "CAMP",
+      "subtype": "camp_site",
+      "label": "Camp site",
+      "latitude": 48.2501752,
+      "longitude": 24.5536673,
+      "distanceFromRouteM": 95.7,
+      "distanceFromStartM": 3760.3,
+      "confidence": "HIGH",
+      "waterPotability": "UNKNOWN",
+      "access": "PUBLIC",
+      "sortOrder": 3,
+      "metadataJson": {
+        "tents": null,
+        "caravan": null,
+        "campSite": null,
+        "backcountry": null,
+        "persistedOrder": 3
+      },
+      "createdAt": "2026-05-28T16:44:02.175Z",
+      "updatedAt": "2026-05-28T16:44:02.175Z",
+      "source": {
+        "id": "c8e6c4f0-5f6e-4c9b-aeac-3ec97a8ca8e6",
+        "provider": "OVERPASS",
+        "osmType": "NODE",
+        "osmId": "10899597005",
+        "rawTagsJson": {
+          "tourism": "camp_site",
+          "description": "Місце для кемпінгу",
+          "description:uk": "Місце для кемпінгу"
+        },
+        "rawGeometryCenterJson": {
+          "latitude": 48.2501752,
+          "longitude": 24.5536673
+        },
+        "fetchedAt": "2026-05-28T19:44:02.174",
+        "hash": "9f8f56d8e8ea26f91150b9bc4f5b417ad94801fe"
+      }
+    }
+  ]
+}

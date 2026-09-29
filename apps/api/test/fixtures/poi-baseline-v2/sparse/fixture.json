@@ -1,0 +1,197 @@
+{
+  "version": 1,
+  "route": {
+    "id": "234bda91-99c5-4086-a487-44c3502b148f",
+    "title": "labyeska",
+    "distanceM": 349.1,
+    "coordinates": [
+      {
+        "latitude": 48.2267815,
+        "longitude": 24.5417029,
+        "elevationM": 1397.3
+      },
+      {
+        "latitude": 48.2267669,
+        "longitude": 24.5416626,
+        "elevationM": 1397.5
+      },
+      {
+        "latitude": 48.2267597,
+        "longitude": 24.5413166,
+        "elevationM": 1397.8
+      },
+      {
+        "latitude": 48.2265864,
+        "longitude": 24.5409384,
+        "elevationM": 1400.8
+      },
+      {
+        "latitude": 48.226238,
+        "longitude": 24.540689,
+        "elevationM": 1406.2
+      },
+      {
+        "latitude": 48.2259217,
+        "longitude": 24.5403913,
+        "elevationM": 1412.8
+      },
+      {
+        "latitude": 48.2258806,
+        "longitude": 24.5400962,
+        "elevationM": 1418.2
+      },
+      {
+        "latitude": 48.2256626,
+        "longitude": 24.5396698,
+        "elevationM": 1427.2
+      },
+      {
+        "latitude": 48.225441,
+        "longitude": 24.5394096,
+        "elevationM": 1433.5
+      },
+      {
+        "latitude": 48.225139,
+        "longitude": 24.5393801,
+        "elevationM": 1435.2
+      },
+      {
+        "latitude": 48.224846,
+        "longitude": 24.5392808,
+        "elevationM": 1437.5
+      },
+      {
+        "latitude": 48.2245279,
+        "longitude": 24.5391092,
+        "elevationM": 1438
+      },
+      {
+        "latitude": 48.2245561,
+        "longitude": 24.539088,
+        "elevationM": 1438.2
+      }
+    ],
+    "status": "READY"
+  },
+  "pois": [
+    {
+      "id": "8cc6ec6d-22cf-411b-8356-82ba20ea0d69",
+      "routeId": "234bda91-99c5-4086-a487-44c3502b148f",
+      "sourceId": "39c5bc44-0cd6-4024-89f6-f7ba07cb91b0",
+      "type": "VIEWPOINT",
+      "subtype": "tourism_viewpoint",
+      "label": "Viewpoint",
+      "latitude": 48.2267474,
+      "longitude": 24.5417537,
+      "distanceFromRouteM": 5.3,
+      "distanceFromStartM": 0,
+      "confidence": "HIGH",
+      "waterPotability": "UNKNOWN",
+      "access": "PUBLIC",
+      "sortOrder": 0,
+      "metadataJson": {
+        "direction": null,
+        "towerType": null,
+        "viewpoint": null,
+        "persistedOrder": 0
+      },
+      "createdAt": "2026-05-28T16:19:32.683Z",
+      "updatedAt": "2026-05-28T16:19:32.683Z",
+      "source": {
+        "id": "39c5bc44-0cd6-4024-89f6-f7ba07cb91b0",
+        "provider": "OVERPASS",
+        "osmType": "NODE",
+        "osmId": "9937041666",
+        "rawTagsJson": {
+          "tourism": "viewpoint"
+        },
+        "rawGeometryCenterJson": {
+          "latitude": 48.2267474,
+          "longitude": 24.5417537
+        },
+        "fetchedAt": "2026-05-28T19:19:32.673",
+        "hash": "c055514d3581b7caf0224f84521c3e46deaf54a4"
+      }
+    },
+    {
+      "id": "489d49a1-810f-4d13-8f98-14978e62450f",
+      "routeId": "234bda91-99c5-4086-a487-44c3502b148f",
+      "sourceId": "ed0835e4-1a84-41d8-848d-c39ef9fd43b6",
+      "type": "WATER",
+      "subtype": "spring",
+      "label": "Spring",
+      "latitude": 48.2281214,
+      "longitude": 24.5392544,
+      "distanceFromRouteM": 211.4,
+      "distanceFromStartM": 63,
+      "confidence": "LOW",
+      "waterPotability": "UNKNOWN",
+      "access": "PUBLIC",
+      "sortOrder": 1,
+      "metadataJson": {
+        "manMade": null,
+        "drinkingWater": null,
+        "persistedOrder": 1
+      },
+      "createdAt": "2026-05-28T16:19:32.688Z",
+      "updatedAt": "2026-05-28T16:19:32.688Z",
+      "source": {
+        "id": "ed0835e4-1a84-41d8-848d-c39ef9fd43b6",
+        "provider": "OVERPASS",
+        "osmType": "NODE",
+        "osmId": "3219920097",
+        "rawTagsJson": {
+          "natural": "spring"
+        },
+        "rawGeometryCenterJson": {
+          "latitude": 48.2281214,
+          "longitude": 24.5392544
+        },
+        "fetchedAt": "2026-05-28T19:19:32.686",
+        "hash": "41c2463735f1da36ff0559d41a55bf9f93aba8b4"
+      }
+    },
+    {
+      "id": "860fb75f-c2fb-4eaa-8fb0-0e6c0d429625",
+      "routeId": "234bda91-99c5-4086-a487-44c3502b148f",
+      "sourceId": "2ebfe457-631b-4188-82e0-94b11037912c",
+      "type": "WATER",
+      "subtype": "spring",
+      "label": "Spring",
+      "latitude": 48.2228401,
+      "longitude": 24.5351379,
+      "distanceFromRouteM": 349,
+      "distanceFromStartM": 345.5,
+      "confidence": "HIGH",
+      "waterPotability": "CONFIRMED",
+      "access": "PUBLIC",
+      "sortOrder": 2,
+      "metadataJson": {
+        "manMade": null,
+        "drinkingWater": "yes",
+        "persistedOrder": 2
+      },
+      "createdAt": "2026-05-28T16:19:32.692Z",
+      "updatedAt": "2026-05-28T16:19:32.692Z",
+      "source": {
+        "id": "2ebfe457-631b-4188-82e0-94b11037912c",
+        "provider": "OVERPASS",
+        "osmType": "NODE",
+        "osmId": "4246977655",
+        "rawTagsJson": {
+          "natural": "spring",
+          "description": "джерело біля смерічки",
+          "intermittent": "yes",
+          "description:uk": "джерело біля смерічки",
+          "drinking_water": "yes"
+        },
+        "rawGeometryCenterJson": {
+          "latitude": 48.2228401,
+          "longitude": 24.5351379
+        },
+        "fetchedAt": "2026-05-28T19:19:32.689",
+        "hash": "9b106ba673a3c7a22eec3865826d46bcb32bbae8"
+      }
+    }
+  ]
+}

@@ -6,7 +6,7 @@ model RouteDraftImage {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
-  draft      RouteDraft @relation(fields: [draftId], references: [id], onDelete: Cascade)
+  draft RouteDraft @relation(fields: [draftId], references: [id], onDelete: Cascade)
 
   @@index([draftId])
 }

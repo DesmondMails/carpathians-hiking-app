@@ -1,17 +1,17 @@
 model RouteDraft {
-  id              String           @id @default(uuid())
+  id              String            @id @default(uuid())
   createdByUserId String
-  createdByUser   User             @relation(fields: [createdByUserId], references: [id])
-  status          RouteDraftStatus @default(PROCESSING)
+  createdByUser   User              @relation(fields: [createdByUserId], references: [id])
+  status          RouteDraftStatus  @default(PROCESSING)
   sourceFileName  String
   gpxStorageKey   String?
   title           String?
   description     String?
   previewJson     Json?
   errorMessage    String?
-  createdAt       DateTime         @default(now())
-  updatedAt       DateTime         @updatedAt
-  expiresAt       DateTime         @default(dbgenerated("NOW() + INTERVAL '1 hour'"))
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  expiresAt       DateTime          @default(dbgenerated("NOW() + INTERVAL '1 hour'"))
   images          RouteDraftImage[]
 
   finalizedRoute Route?

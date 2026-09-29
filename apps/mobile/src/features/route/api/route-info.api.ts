@@ -1,10 +1,18 @@
-import { RouteDetails } from '@hiking/shared'
+import { RouteDetails, RoutePoisResponse } from '@hiking/shared'
 
 import { apiClient } from '@/src/shared/api/client'
 
 export const routeInfoApi = {
   async getRouteInfo(routeId: string): Promise<RouteDetails> {
     const { data } = await apiClient.get<RouteDetails>(`/routes/${routeId}`)
+
+    return data
+  },
+
+  async getRoutePois(routeId: string): Promise<RoutePoisResponse> {
+    const { data } = await apiClient.get<RoutePoisResponse>(
+      `/routes/${routeId}/pois`,
+    )
 
     return data
   },

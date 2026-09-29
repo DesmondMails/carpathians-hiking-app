@@ -12,6 +12,7 @@ export type RouteDraftPreviewRouteType =
 export type RouteDraftPreviewPoiType =
   | 'WATER'
   | 'SHELTER'
+  | 'CAMP'
   | 'VIEWPOINT'
   | 'PEAK'
 
@@ -26,14 +27,6 @@ export type RouteDraftPreviewElevationPoint = {
   elevationM: number
 }
 
-export type RouteDraftPreviewPoi = {
-  id: string
-  type: RouteDraftPreviewPoiType
-  label: string
-  latitude: number
-  longitude: number
-}
-
 export type RouteDraftPreview = {
   version: 1
   region?: string
@@ -42,5 +35,4 @@ export type RouteDraftPreview = {
   elevationGainM?: number
   coordinates?: RouteDraftPreviewCoordinate[]
   elevationProfile?: RouteDraftPreviewElevationPoint[]
-  poiMarkers?: RouteDraftPreviewPoi[]
 }

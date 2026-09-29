@@ -4,6 +4,7 @@ import {
   EditableRoute,
   PresignedUrlResponse,
   RouteDetails,
+  RoutePoisResponse,
   RouteDraftPreview,
 } from '@hiking/shared';
 import {
@@ -15,6 +16,7 @@ import {
 } from '@nestjs/common';
 
 import {
+  RouteWithPois,
   toEditableRoute,
   toRouteCreateInput,
   toRouteView,
@@ -33,7 +35,9 @@ import { CompleteRouteImageUploadDto } from './dto/complete-route-image-upload.d
 import { CreateRouteImagePresignedDto } from './dto/create-route-image-presigned.dto';
 import { CreateRouteDto } from './dto/create-route.dto';
 import { UpdateRouteDto } from './dto/update-route.dto';
+import { toRoutePoisResponse } from './mappers/route-view.mapper';
 import { calculateDerivedRouteValues } from './utils/calculate-derived-route-values';
+import { PoiEnrichmentService } from '../poi-enrichment/poi-enrichment.service';
 import { FinalizeRouteDraftDto } from '../routes-draft/dto/finalize-route-draft.dto';
 import { StorageService } from '../storage/storage.service';
 
@@ -44,6 +48,7 @@ export class RoutesService {
   constructor(
     private prisma: PrismaService,
     private storageService: StorageService,
+    private poiEnrichmentService: PoiEnrichmentService,
   ) {}
 
   async createRoute(
@@ -122,6 +127,16 @@ export class RoutesService {
       coverImageUrl,
       imageUrls,
     });
+  }
+
+  async getRoutePois(routeId: string): Promise<RoutePoisResponse> {
+    const route = await this.findRouteWithPoisById(routeId);
+
+    return toRoutePoisResponse(route);
+  }
+
+  scheduleRoutePoiEnrichment(routeId: string): void {
+    this.poiEnrichmentService.scheduleRoutePoiEnrichment(routeId);
   }
 
   async getAllRoutes(): Promise<Route[]> {
@@ -306,13 +321,17 @@ export class RoutesService {
 
   private findRouteWithAuthorById(
     routeId: string,
-  ): Promise<Route & { createdByUser: User; images: RouteImage[] }> {
+  ): Promise<RouteWithPois & { createdByUser: User; images: RouteImage[] }> {
     const request = this.prisma.route.findUnique({
       where: { id: routeId },
       include: {
         createdByUser: true,
         images: {
           orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }],
+        },
+        routePois: {
+          include: { source: true },
+          orderBy: { sortOrder: 'asc' },
         },
       },
     });
@@ -328,6 +347,20 @@ export class RoutesService {
       include: {
         images: {
           orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }],
+        },
+      },
+    });
+
+    return this.findRouteOrThrow(request);
+  }
+
+  private findRouteWithPoisById(routeId: string): Promise<RouteWithPois> {
+    const request = this.prisma.route.findUnique({
+      where: { id: routeId },
+      include: {
+        routePois: {
+          include: { source: true },
+          orderBy: { sortOrder: 'asc' },
         },
       },
     });
