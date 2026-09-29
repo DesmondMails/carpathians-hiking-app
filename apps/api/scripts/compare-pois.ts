@@ -99,6 +99,21 @@ async function main() {
       routeId: fixture.route.id,
       before: metrics(baseline, fixture.route.distanceM),
       after: metrics(current, fixture.route.distanceM),
+      byType: Object.fromEntries(
+        ['WATER', 'SHELTER', 'CAMP'].map((type) => [
+          type,
+          {
+            before: metrics(
+              baseline.filter((p) => p.type === type),
+              fixture.route.distanceM,
+            ),
+            after: metrics(
+              current.filter((p) => p.type === type),
+              fixture.route.distanceM,
+            ),
+          },
+        ]),
+      ),
       added: current.filter((p) => !beforeIds.has(p.id)),
       removed: baseline.filter((p) => !afterIds.has(p.id)),
       sameOrderedIds:

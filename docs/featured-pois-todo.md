@@ -43,6 +43,43 @@ Show only the most useful POI on the main route screen while keeping the full PO
 - [x] Add exact regression checks against all four frozen baseline results
 - [x] Make the length-based budget monotonic across 5 km and 25 km
 - [ ] Improve distribution within each category without replacing water with camps
+
+### Step 2: conservative post-selection swaps (current)
+
+The proximity penalty described below has been removed. Baseline anchor selection
+and ranked fill are restored, followed by same-type swaps. Each accepted swap
+strictly reduces that category's maximum gap including endpoints and cannot
+increase the overall maximum gap. Confidence, access, water potability, offset
+from track and aggregate quality score cannot regress. Existing same-type spacing
+and the baseline relaxed overall spacing floor are enforced for replacements.
+Counts and categories are preserved. Work is bounded to the initial selection
+size in passes and 20,000 candidate checks; this is not a global optimizer.
+
+All four fixtures retain their category counts and non-increasing gaps. Short,
+medium and sparse retain exact selections. Long changes two points: WATER gap
+16416 -> 13356 m, CAMP 24969 -> 22649 m; overall gap remains 6620 m.
+Visual review remains pending, especially the tradeoff between endpoint visibility
+and the worst gap; these metric guarantees do not guarantee user preference.
+
+### Rejected proximity-penalty experiment (historical)
+
+The current selector subtracts up to 60 score points for proximity to the nearest
+selected POI of the same type, with radius `routeDistanceM / typeQuota`. Other
+types incur no new penalty. Existing hard spacing, quotas and quality scores
+remain unchanged. Remaining-slot selection recomputes scores after every choice.
+Frozen fixtures/results are untouched; tests now assert category counts for
+medium/long rather than exact equality to the old selection. Short/sparse remain exact.
+
+- [x] Add bounded same-type penalty and dynamic remaining-slot ranking
+- [x] Test penalty isolation, confidence-tier bound and category counts
+- [x] Include per-type metrics in comparison JSON (`byType`)
+- [ ] Resolve medium-route regressions before accepting this as an improvement
+- [ ] Review resulting mobile previews
+
+Measured maximum gaps (including route endpoints): long SHELTER improves
+26802 -> 16140 m and CAMP 24969 -> 22649 m; WATER is unchanged. Medium worsens:
+WATER 7400 -> 9811 m, SHELTER 8095 -> 8690 m, CAMP 11187 -> 17483 m.
+This is a local heuristic, not a guarantee of improved category coverage.
 - [ ] Review actual mobile previews for all four baseline routes
 - [ ] Validate weights and the 16-marker cap on additional long/loop routes
 

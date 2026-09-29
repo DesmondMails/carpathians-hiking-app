@@ -19,6 +19,14 @@ type FeaturedRoutePoiWithSource = RoutePoiWithSource & {
   type: FeaturedSupportedPoiTypes;
 };
 
+type SwapSearchContext = {
+  routeLengthM: number;
+  preset: RouteLengthPreset;
+  candidates: RoutePoiWithSource[];
+  quality: Map<RoutePoiWithSource, number>;
+  remainingChecks: number;
+};
+
 const TYPE_PRIORITY_SCORE: Record<FeaturedSupportedPoiTypes, number> = {
   WATER: 140,
   SHELTER: 120,
@@ -35,6 +43,9 @@ const ROUTE_LENGTH_LIMITS_KM = {
   SHORT_MAX: 5,
   MEDIUM_MAX: 25,
 } as const;
+
+const MAX_SWAP_CHECKS = 20000;
+const POTABILITY_RANK = { NON_POTABLE: 0, UNKNOWN: 1, CONFIRMED: 2 };
 
 export function selectFeaturedRoutePois(
   routePois: RoutePoiWithSource[],
@@ -107,9 +118,11 @@ export function selectFeaturedRoutePois(
     });
   }
 
-  return selected.sort(
-    (left, right) => left.distanceFromStartM - right.distanceFromStartM,
-  );
+  return improveFeaturedDistribution(
+    selected,
+    rankedCandidates,
+    effectiveRouteDistanceM,
+  ).sort((left, right) => left.distanceFromStartM - right.distanceFromStartM);
 }
 
 function resolveRouteLengthPreset(
@@ -330,6 +343,142 @@ function canSelectCandidate(params: {
   return true;
 }
 
+function maximumGap(pois: RoutePoiWithSource[], length: number): number {
+  const positions = [
+    0,
+    ...pois.map((p) => p.distanceFromStartM).sort((a, b) => a - b),
+    length,
+  ];
+  return Math.max(...positions.slice(1).map((p, i) => p - positions[i]));
+}
+
+function isSafeReplacement(
+  current: RoutePoiWithSource,
+  candidate: RoutePoiWithSource,
+  context: SwapSearchContext,
+): boolean {
+  const progress = candidate.distanceFromStartM;
+  const offset = candidate.distanceFromRouteM;
+  if (
+    !Number.isFinite(progress) ||
+    progress < 0 ||
+    progress > context.routeLengthM ||
+    !Number.isFinite(offset) ||
+    offset < 0
+  )
+    return false;
+
+  return (
+    candidate.type === current.type &&
+    CONFIDENCE_SCORE[candidate.confidence] >=
+      CONFIDENCE_SCORE[current.confidence] &&
+    (current.access !== 'PUBLIC' || candidate.access === 'PUBLIC') &&
+    offset <= current.distanceFromRouteM &&
+    (current.type !== 'WATER' ||
+      POTABILITY_RANK[candidate.waterPotability] >=
+        POTABILITY_RANK[current.waterPotability]) &&
+    context.quality.get(candidate)! >= context.quality.get(current)!
+  );
+}
+
+function respectsReplacementSpacing(
+  candidate: RoutePoiWithSource,
+  others: RoutePoiWithSource[],
+  sameTypeSpacingM: number,
+  preset: RouteLengthPreset,
+): boolean {
+  return others.every(
+    (poi) =>
+      Math.abs(poi.distanceFromStartM - candidate.distanceFromStartM) >=
+      (poi.type === candidate.type
+        ? sameTypeSpacingM
+        : OVERALL_MIN_SPACING_M[preset] * 0.55),
+  );
+}
+
+/** Find one best safe swap; keep iteration order for deterministic ties and budget use. */
+function findBestReplacement(
+  selected: RoutePoiWithSource[],
+  context: SwapSearchContext,
+): RoutePoiWithSource[] | null {
+  const overallGap = maximumGap(selected, context.routeLengthM);
+  const selectedIds = new Set(selected.map((p) => p.id));
+  let best: RoutePoiWithSource[] | null = null;
+  let bestGain = 0;
+
+  for (const [index, current] of selected.entries()) {
+    if (!isFeaturedSupportedPoiType(current.type)) continue;
+    const sameTypeSpacingM =
+      FEATURED_RULES[context.preset][current.type].minSpacingM;
+    const others = selected.filter((_, i) => i !== index);
+    const sameTypeOthers = others.filter((p) => p.type === current.type);
+    const previousGap = maximumGap(
+      [...sameTypeOthers, current],
+      context.routeLengthM,
+    );
+
+    for (const candidate of context.candidates) {
+      if (--context.remainingChecks < 0) return best;
+      if (
+        selectedIds.has(candidate.id) ||
+        !isSafeReplacement(current, candidate, context)
+      )
+        continue;
+      if (
+        !respectsReplacementSpacing(
+          candidate,
+          others,
+          sameTypeSpacingM,
+          context.preset,
+        )
+      )
+        continue;
+
+      const gain =
+        previousGap -
+        maximumGap([...sameTypeOthers, candidate], context.routeLengthM);
+      if (gain <= bestGain) continue;
+      const replacement = selected.map((poi, i) =>
+        i === index ? candidate : poi,
+      );
+      if (maximumGap(replacement, context.routeLengthM) > overallGap) continue;
+      best = replacement;
+      bestGain = gain;
+    }
+  }
+  return best;
+}
+
+/** Start with baseline, apply bounded safe swaps, stop when no improvement remains. */
+export function improveFeaturedDistribution(
+  initial: RoutePoiWithSource[],
+  candidates: RoutePoiWithSource[],
+  length: number,
+): RoutePoiWithSource[] {
+  let selected = [...initial];
+  const context: SwapSearchContext = {
+    routeLengthM: length,
+    preset: resolveRouteLengthPreset(length),
+    candidates: [...candidates].sort((a, b) => a.id.localeCompare(b.id)),
+    quality: new Map(
+      [...initial, ...candidates].map((p) => [p, thisTypeScore(p)]),
+    ),
+    remainingChecks: MAX_SWAP_CHECKS,
+  };
+  for (
+    let pass = 0;
+    pass < initial.length && context.remainingChecks > 0;
+    pass++
+  ) {
+    const improved = findBestReplacement(selected, context);
+
+    if (!improved) break;
+
+    selected = improved;
+  }
+  return selected;
+}
+
 function fillRemainingSlots(params: {
   candidates: FeaturedRoutePoiWithSource[];
   targetPoiCount: number;
@@ -345,14 +494,8 @@ function fillRemainingSlots(params: {
   const { selected, selectedIds, countsByType } = selectionParams;
 
   for (const candidate of candidates) {
-    if (selected.length >= targetPoiCount) {
-      break;
-    }
-
-    if (!canSelectCandidate({ candidate, ...selectionParams })) {
-      continue;
-    }
-
+    if (selected.length >= targetPoiCount) break;
+    if (!canSelectCandidate({ candidate, ...selectionParams })) continue;
     rememberCandidate(candidate, selected, selectedIds, countsByType);
   }
 }

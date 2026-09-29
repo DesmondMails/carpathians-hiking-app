@@ -4,6 +4,7 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import {
   resolveTargetPoiCount,
+  improveFeaturedDistribution,
   selectFeaturedRoutePois,
 } from '../src/modules/routes/mappers/featured-route-pois';
 import type { RoutePoiWithSource } from '../src/modules/routes/types/featured-pois';
@@ -113,8 +114,69 @@ test('visual comparison embeds two isolated panels and escapes labels', () => {
   assert.ok(!panel.includes('<script>'));
 });
 
+test('safe swaps improve coverage without mutating input and reject quality regressions', () => {
+  const old: RoutePoiWithSource = {
+    ...sample,
+    id: 'old',
+    distanceFromStartM: 1000,
+    confidence: 'HIGH',
+    access: 'PUBLIC',
+    waterPotability: 'CONFIRMED',
+    distanceFromRouteM: 10,
+  };
+  const better = { ...old, id: 'better', distanceFromStartM: 5000 };
+  const initial = [old];
+  assert.deepEqual(improveFeaturedDistribution(initial, [better], 10000), [
+    better,
+  ]);
+  assert.deepEqual(initial, [old]);
+  for (const patch of [
+    { confidence: 'LOW' },
+    { access: 'PRIVATE' },
+    { waterPotability: 'UNKNOWN' },
+    { distanceFromRouteM: 11 },
+    { type: 'CAMP' },
+  ]) {
+    assert.deepEqual(
+      improveFeaturedDistribution(
+        initial,
+        [{ ...better, ...patch } as RoutePoiWithSource],
+        10000,
+      ),
+      initial,
+    );
+  }
+  assert.deepEqual(
+    improveFeaturedDistribution(
+      initial,
+      [{ ...better, distanceFromStartM: 9000 }],
+      10000,
+    ),
+    initial,
+  );
+});
+
+test('category improvement cannot increase the overall gap', () => {
+  const old = { ...sample, id: 'old', distanceFromStartM: 2000 };
+  const camp = {
+    ...sample,
+    id: 'camp',
+    type: 'CAMP' as const,
+    distanceFromStartM: 6500,
+  };
+  const initial = [old, camp];
+  assert.deepEqual(
+    improveFeaturedDistribution(
+      initial,
+      [{ ...old, id: 'new', distanceFromStartM: 5000 }],
+      10000,
+    ),
+    initial,
+  );
+});
+
 for (const name of ['short', 'medium', 'long', 'sparse']) {
-  test(`${name}: selection matches the frozen baseline`, () => {
+  test(`${name}: preserves baseline category counts`, () => {
     const fixture = load(name);
     const expected = JSON.parse(
       readFileSync(
@@ -122,10 +184,32 @@ for (const name of ['short', 'medium', 'long', 'sparse']) {
         'utf8',
       ),
     ).featuredPois;
-    assert.deepEqual(
-      selectFeaturedRoutePois(fixture.pois, fixture.route.distanceM),
-      expected,
+    const current = selectFeaturedRoutePois(
+      fixture.pois,
+      fixture.route.distanceM,
     );
+    assert.deepEqual(
+      metrics(current, fixture.route.distanceM).types,
+      metrics(expected, fixture.route.distanceM).types,
+    );
+    assert.ok(
+      metrics(current, fixture.route.distanceM).maxGapM <=
+        metrics(expected, fixture.route.distanceM).maxGapM,
+    );
+    for (const type of ['WATER', 'SHELTER', 'CAMP']) {
+      assert.ok(
+        metrics(
+          current.filter((p) => p.type === type),
+          fixture.route.distanceM,
+        ).maxGapM <=
+          metrics(
+            expected.filter((p) => p.type === type),
+            fixture.route.distanceM,
+          ).maxGapM,
+      );
+    }
+    if (name === 'short' || name === 'sparse' || name === 'medium')
+      assert.deepEqual(current, expected);
   });
   test(`${name}: valid, unique, ordered subset; deterministic and input unchanged`, () => {
     const fixture = load(name);
