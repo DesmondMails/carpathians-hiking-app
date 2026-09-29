@@ -22,6 +22,7 @@ export class PoiNormalizerService {
 
     return (
       this.normalizePeak(element, tags, coordinates) ??
+      this.normalizeCamp(element, tags, coordinates) ??
       this.normalizeViewpoint(element, tags, coordinates) ??
       this.normalizeShelter(element, tags, coordinates) ??
       this.normalizeWater(element, tags, coordinates)
@@ -78,6 +79,38 @@ export class PoiNormalizerService {
         direction: tags.direction ?? null,
         viewpoint: tags.viewpoint ?? null,
         towerType: tags['tower:type'] ?? null,
+      },
+    });
+  }
+
+  private normalizeCamp(
+    element: OverpassElement,
+    tags: Record<string, string>,
+    coordinates: { latitude: number; longitude: number },
+  ): NormalizedPoiCandidate | null {
+    const subtype = this.resolveCampSubtype(tags);
+
+    if (subtype === null) {
+      return null;
+    }
+
+    console.log('normalizeCamp element', element);
+    console.log('normalizeCamp tags', tags);
+    console.log('normalizeCamp subtype', subtype);
+
+    return this.buildCandidate(element, coordinates, {
+      type: 'CAMP',
+      subtype,
+      label: this.pickPreferredName(tags) ?? this.humanizeCampSubtype(subtype),
+      confidence: this.pickCampConfidence(tags, subtype),
+      waterPotability: 'UNKNOWN',
+      access: this.normalizeAccess(tags),
+      rawTags: tags,
+      metadata: {
+        campSite: tags.camp_site ?? null,
+        backcountry: tags.backcountry ?? null,
+        tents: tags.tents ?? null,
+        caravan: tags.caravan ?? null,
       },
     });
   }
@@ -250,6 +283,34 @@ export class PoiNormalizerService {
     return null;
   }
 
+  private resolveCampSubtype(tags: Record<string, string>): string | null {
+    if (tags.tourism === 'camp_site') {
+      if (tags.camp_site === 'wild') {
+        return 'wild_camp_site';
+      }
+
+      if (tags.camp_site === 'basic') {
+        return 'basic_camp_site';
+      }
+
+      return 'camp_site';
+    }
+
+    if (tags.tourism === 'camp_pitch') {
+      return 'camp_pitch';
+    }
+
+    if (tags.camp_site === 'wild') {
+      return 'wild_camp_site';
+    }
+
+    if (tags.camp_site === 'basic') {
+      return 'basic_camp_site';
+    }
+
+    return null;
+  }
+
   private isFallbackBuildingShelter(tags: Record<string, string>): boolean {
     return [
       tags.name,
@@ -274,6 +335,34 @@ export class PoiNormalizerService {
       default:
         return 'Shelter';
     }
+  }
+
+  private humanizeCampSubtype(subtype: string): string {
+    switch (subtype) {
+      case 'wild_camp_site':
+        return 'Wild camp';
+      case 'basic_camp_site':
+        return 'Basic camp';
+      case 'camp_pitch':
+        return 'Camp pitch';
+      default:
+        return 'Camp site';
+    }
+  }
+
+  private pickCampConfidence(
+    tags: Record<string, string>,
+    subtype: string,
+  ): RoutePoiConfidence {
+    if (tags.tourism === 'camp_site' || tags.tourism === 'camp_pitch') {
+      return 'HIGH';
+    }
+
+    if (subtype === 'wild_camp_site' || subtype === 'basic_camp_site') {
+      return 'MEDIUM';
+    }
+
+    return 'MEDIUM';
   }
 
   private resolveWaterSubtype(tags: Record<string, string>): string | null {

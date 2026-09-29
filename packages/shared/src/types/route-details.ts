@@ -47,6 +47,7 @@ export interface RouteDetails {
   routeCoordinates: RouteCoordinate[]
   elevationProfile: RouteElevationPoint[]
   poiMarkers: RoutePoi[]
+  featuredPoiMarkers: RoutePoi[]
   poiEnrichmentStatus: RoutePoiEnrichmentStatus
 
   gpxAvailable: boolean

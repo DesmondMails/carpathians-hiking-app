@@ -58,12 +58,14 @@ Default POI priority for the product:
 
 1. `WATER`
 2. `SHELTER`
-3. `VIEWPOINT`
-4. `PEAK`
+3. `CAMP`
+4. `VIEWPOINT`
+5. `PEAK`
 
 Why:
 
 - `WATER` and `SHELTER` are functional and often most important during real hiking
+- `CAMP` is more actionable for multi-hour and overnight hiking routes
 - `VIEWPOINT` is useful but can be numerous
 - `PEAK` is often already represented clearly on hiking basemaps
 
@@ -119,7 +121,8 @@ Suggested target limits:
 
 - `WATER`: up to `3`
 - `SHELTER`: up to `3`
-- `VIEWPOINT`: up to `4`
+- `CAMP`: up to `2`
+- `VIEWPOINT`: optional in preview, up to `4` if product brings it back later
 - `PEAK`: `0` by default
 
 Total target for route preview:
@@ -132,11 +135,20 @@ In addition to geo dedup, featured selection should use route progression spacin
 
 Use `distanceFromStartM` to avoid selecting many similar POI in the same route segment.
 
-Suggested minimum spacing:
+Suggested minimum spacing should depend on route length:
 
-- `WATER`: `700-1000 m`
-- `SHELTER`: `1000-1500 m`
-- `VIEWPOINT`: `1200-2000 m`
+- short routes: up to `10 km`
+  - `WATER`: `300 m`
+  - `SHELTER`: `450 m`
+  - `VIEWPOINT`: `600 m`
+- medium routes: `10-25 km`
+  - `WATER`: `600 m`
+  - `SHELTER`: `900 m`
+  - `VIEWPOINT`: `1200 m`
+- long routes: over `25 km`
+  - `WATER`: `900 m`
+  - `SHELTER`: `1200 m`
+  - `VIEWPOINT`: `1500 m`
 
 These are starting values and should be tuned using real routes.
 
@@ -179,10 +191,13 @@ It is not the place to show every possible POI.
 - if `poiEnrichmentStatus = PENDING`
   - show map
   - show POI loading overlay
+  - poll route details until `featuredPois` become available
 - if `poiEnrichmentStatus = READY`
   - render `featuredPois`
 - if `poiEnrichmentStatus = FAILED`
   - render route without POI
+
+Preview map should not replace `featuredPois` with the full POI payload from the dedicated POI endpoint.
 
 ## Full Map View Strategy
 

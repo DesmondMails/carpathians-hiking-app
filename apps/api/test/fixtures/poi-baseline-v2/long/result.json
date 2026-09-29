@@ -1,0 +1,698 @@
+{
+  "routeId": "19b6d7c0-5b84-4f15-aa52-56c7942cfe65",
+  "candidateCount": 187,
+  "featuredCount": 16,
+  "featuredPois": [
+    {
+      "id": "09354f8a-fe3b-4d41-baaa-ff0c75471582",
+      "routeId": "19b6d7c0-5b84-4f15-aa52-56c7942cfe65",
+      "sourceId": "97d44b4d-e0ae-4c55-83f8-e7ac85d39641",
+      "type": "WATER",
+      "subtype": "drinking_water",
+      "label": "Джерело «Буркут»",
+      "latitude": 48.1651241,
+      "longitude": 24.2830166,
+      "distanceFromRouteM": 112.2,
+      "distanceFromStartM": 0,
+      "confidence": "HIGH",
+      "waterPotability": "CONFIRMED",
+      "access": "PUBLIC",
+      "sortOrder": 1,
+      "metadataJson": {
+        "manMade": null,
+        "drinkingWater": "yes",
+        "persistedOrder": 1
+      },
+      "createdAt": "2026-05-28T16:47:53.125Z",
+      "updatedAt": "2026-05-28T16:47:53.125Z",
+      "source": {
+        "id": "97d44b4d-e0ae-4c55-83f8-e7ac85d39641",
+        "provider": "OVERPASS",
+        "osmType": "NODE",
+        "osmId": "1386142569",
+        "rawTagsJson": {
+          "name": "Джерело «Буркут»",
+          "amenity": "drinking_water",
+          "name:hu": "Borkút savanyú víz",
+          "name:uk": "Джерело «Буркут»",
+          "natural": "spring",
+          "alt_name": "Джерело №3",
+          "wikidata": "Q28707039",
+          "wikipedia": "uk:Джерело № 3 (Кваси)",
+          "description": "Вуглекисла, слабкої мінералізації, гідрокарбнатна, натрієво-магнієво-кальцієва, кисла",
+          "inscription": "Буркут",
+          "drinking_water": "yes"
+        },
+        "rawGeometryCenterJson": {
+          "latitude": 48.1651241,
+          "longitude": 24.2830166
+        },
+        "fetchedAt": "2026-05-28T20:19:51.339",
+        "hash": "2f811ae201697e462749eaec3cffac79ba45d683"
+      }
+    },
+    {
+      "id": "90ca5a85-0bdc-4009-91e8-850c2ada9b2e",
+      "routeId": "19b6d7c0-5b84-4f15-aa52-56c7942cfe65",
+      "sourceId": "bb366134-2b3f-4544-b6ae-414ee7b535f0",
+      "type": "WATER",
+      "subtype": "drinking_water",
+      "label": "Drinking water",
+      "latitude": 48.1579312,
+      "longitude": 24.3378486,
+      "distanceFromRouteM": 32.4,
+      "distanceFromStartM": 6373,
+      "confidence": "HIGH",
+      "waterPotability": "CONFIRMED",
+      "access": "PUBLIC",
+      "sortOrder": 19,
+      "metadataJson": {
+        "manMade": null,
+        "drinkingWater": null,
+        "persistedOrder": 19
+      },
+      "createdAt": "2026-05-28T16:47:53.147Z",
+      "updatedAt": "2026-05-28T16:47:53.147Z",
+      "source": {
+        "id": "bb366134-2b3f-4544-b6ae-414ee7b535f0",
+        "provider": "OVERPASS",
+        "osmType": "NODE",
+        "osmId": "13146945626",
+        "rawTagsJson": {
+          "amenity": "drinking_water",
+          "description": "Труба з краном джерельна вода"
+        },
+        "rawGeometryCenterJson": {
+          "latitude": 48.1579312,
+          "longitude": 24.3378486
+        },
+        "fetchedAt": "2026-05-28T20:19:51.372",
+        "hash": "a00bf5798297be8ddc2dd886b64f1642ff834558"
+      }
+    },
+    {
+      "id": "9a6219bd-893a-4a24-ae2f-8d61a09e66dd",
+      "routeId": "19b6d7c0-5b84-4f15-aa52-56c7942cfe65",
+      "sourceId": "a8f61142-d95f-4c18-97f0-31fa0024064d",
+      "type": "WATER",
+      "subtype": "spring",
+      "label": "Spring",
+      "latitude": 48.1542686,
+      "longitude": 24.3611555,
+      "distanceFromRouteM": 2.8,
+      "distanceFromStartM": 8469.1,
+      "confidence": "HIGH",
+      "waterPotability": "CONFIRMED",
+      "access": "PUBLIC",
+      "sortOrder": 32,
+      "metadataJson": {
+        "manMade": null,
+        "drinkingWater": "yes",
+        "persistedOrder": 32
+      },
+      "createdAt": "2026-05-28T16:47:53.160Z",
+      "updatedAt": "2026-05-28T16:47:53.160Z",
+      "source": {
+        "id": "a8f61142-d95f-4c18-97f0-31fa0024064d",
+        "provider": "OVERPASS",
+        "osmType": "NODE",
+        "osmId": "5375599825",
+        "rawTagsJson": {
+          "natural": "spring",
+          "drinking_water": "yes"
+        },
+        "rawGeometryCenterJson": {
+          "latitude": 48.1542686,
+          "longitude": 24.3611555
+        },
+        "fetchedAt": "2026-05-28T20:19:51.391",
+        "hash": "5f60b8106d5b5275cca1a9d8f8d3416da4fa4c6c"
+      }
+    },
+    {
+      "id": "42db794f-ec47-4fd1-aa04-ed6d28095c1d",
+      "routeId": "19b6d7c0-5b84-4f15-aa52-56c7942cfe65",
+      "sourceId": "0e7ac6ea-089b-4861-bb71-023ed352c4ba",
+      "type": "WATER",
+      "subtype": "spring",
+      "label": "Spring",
+      "latitude": 48.1622592,
+      "longitude": 24.3925193,
+      "distanceFromRouteM": 49.6,
+      "distanceFromStartM": 11413.1,
+      "confidence": "HIGH",
+      "waterPotability": "CONFIRMED",
+      "access": "PUBLIC",
+      "sortOrder": 51,
+      "metadataJson": {
+        "manMade": null,
+        "drinkingWater": "yes",
+        "persistedOrder": 51
+      },
+      "createdAt": "2026-05-28T16:47:53.178Z",
+      "updatedAt": "2026-05-28T16:47:53.178Z",
+      "source": {
+        "id": "0e7ac6ea-089b-4861-bb71-023ed352c4ba",
+        "provider": "OVERPASS",
+        "osmType": "NODE",
+        "osmId": "4945188821",
+        "rawTagsJson": {
+          "natural": "spring",
+          "intermittent": "yes",
+          "drinking_water": "yes"
+        },
+        "rawGeometryCenterJson": {
+          "latitude": 48.1622592,
+          "longitude": 24.3925193
+        },
+        "fetchedAt": "2026-05-28T20:19:51.418",
+        "hash": "98ebef5b58b7773b998e8b5948dfbce2015de81b"
+      }
+    },
+    {
+      "id": "9e7be447-9dc2-4762-9c1a-ad1d45135403",
+      "routeId": "19b6d7c0-5b84-4f15-aa52-56c7942cfe65",
+      "sourceId": "653e7034-7bba-475b-9056-8caa36a1460c",
+      "type": "SHELTER",
+      "subtype": "shelter_lean_to",
+      "label": "Навіс",
+      "latitude": 48.1680786,
+      "longitude": 24.4364039,
+      "distanceFromRouteM": 9.8,
+      "distanceFromStartM": 15599.4,
+      "confidence": "HIGH",
+      "waterPotability": "UNKNOWN",
+      "access": "PUBLIC",
+      "sortOrder": 62,
+      "metadataJson": {
+        "operator": null,
+        "fireplace": null,
+        "shelterType": "lean_to",
+        "persistedOrder": 62,
+        "fallbackBuilding": false,
+        "fallbackBuildingName": true
+      },
+      "createdAt": "2026-05-28T16:47:53.189Z",
+      "updatedAt": "2026-05-28T16:47:53.189Z",
+      "source": {
+        "id": "653e7034-7bba-475b-9056-8caa36a1460c",
+        "provider": "OVERPASS",
+        "osmType": "WAY",
+        "osmId": "1030355384",
+        "rawTagsJson": {
+          "bin": "no",
+          "lit": "no",
+          "name": "Навіс",
+          "bench": "yes",
+          "amenity": "shelter",
+          "name:uk": "Навіс",
+          "building": "yes",
+          "lockable": "no",
+          "wheelchair": "no",
+          "description": "На цій полонині часто крадуть речі з тамбурів наметів. Будьте обережні! Не лишайте речі без нагляду. Цінні речі на ніч ховайте в намет.",
+          "shelter_type": "lean_to"
+        },
+        "rawGeometryCenterJson": {
+          "latitude": 48.1680786,
+          "longitude": 24.4364039
+        },
+        "fetchedAt": "2026-05-28T20:19:51.43",
+        "hash": "ba666d8bbe0de4c3afc54c821caccf8b92d50129"
+      }
+    },
+    {
+      "id": "d57410b7-4284-4530-84b9-31359eb291a2",
+      "routeId": "19b6d7c0-5b84-4f15-aa52-56c7942cfe65",
+      "sourceId": "cf45b76b-0a10-4110-bbe7-53e9c133e482",
+      "type": "SHELTER",
+      "subtype": "wilderness_hut",
+      "label": "Екологічний пункт \"Перемичка\"",
+      "latitude": 48.1599158,
+      "longitude": 24.4673676,
+      "distanceFromRouteM": 12.7,
+      "distanceFromStartM": 18681.4,
+      "confidence": "HIGH",
+      "waterPotability": "UNKNOWN",
+      "access": "PUBLIC",
+      "sortOrder": 75,
+      "metadataJson": {
+        "operator": null,
+        "fireplace": "no",
+        "shelterType": "basic_hut",
+        "persistedOrder": 75,
+        "fallbackBuilding": false,
+        "fallbackBuildingName": true
+      },
+      "createdAt": "2026-05-28T16:47:53.201Z",
+      "updatedAt": "2026-05-28T16:47:53.201Z",
+      "source": {
+        "id": "cf45b76b-0a10-4110-bbe7-53e9c133e482",
+        "provider": "OVERPASS",
+        "osmType": "WAY",
+        "osmId": "322658491",
+        "rawTagsJson": {
+          "bin": "no",
+          "fee": "no",
+          "name": "Екологічний пункт \"Перемичка\"",
+          "bench": "yes",
+          "name:ru": "Экологический приют \"Перемычка\"",
+          "name:uk": "Екологічний пункт \"Перемичка\"",
+          "tourism": "wilderness_hut",
+          "building": "yes",
+          "fireplace": "no",
+          "shelter_type": "basic_hut",
+          "building:levels": "1",
+          "building:material": "wood"
+        },
+        "rawGeometryCenterJson": {
+          "latitude": 48.1599158,
+          "longitude": 24.4673676
+        },
+        "fetchedAt": "2026-05-28T20:19:51.445",
+        "hash": "065310989c6dfa6815b73ff8cc564e96feed7f81"
+      }
+    },
+    {
+      "id": "daea6c08-338f-4f1c-8734-2927cd680d63",
+      "routeId": "19b6d7c0-5b84-4f15-aa52-56c7942cfe65",
+      "sourceId": "8d64e2d3-f9c8-4be7-9867-882b61f622f7",
+      "type": "SHELTER",
+      "subtype": "wilderness_hut",
+      "label": "Екологічний пункт \"У підніжжі Говерли\"",
+      "latitude": 48.1617882,
+      "longitude": 24.4918433,
+      "distanceFromRouteM": 42.4,
+      "distanceFromStartM": 20857,
+      "confidence": "HIGH",
+      "waterPotability": "UNKNOWN",
+      "access": "PUBLIC",
+      "sortOrder": 87,
+      "metadataJson": {
+        "operator": null,
+        "fireplace": null,
+        "shelterType": "basic_hut",
+        "persistedOrder": 87,
+        "fallbackBuilding": false,
+        "fallbackBuildingName": true
+      },
+      "createdAt": "2026-05-28T16:47:53.211Z",
+      "updatedAt": "2026-05-28T16:47:53.211Z",
+      "source": {
+        "id": "8d64e2d3-f9c8-4be7-9867-882b61f622f7",
+        "provider": "OVERPASS",
+        "osmType": "NODE",
+        "osmId": "919034211",
+        "rawTagsJson": {
+          "fee": "no",
+          "name": "Екологічний пункт \"У підніжжі Говерли\"",
+          "bench": "no",
+          "name:ru": "Экологический пункт \"У подножья Говерлы\"",
+          "name:uk": "Екологічний пункт \"У підніжжі Говерли\"",
+          "tourism": "wilderness_hut",
+          "description": "4x4 m, proper doors and windows, wind save",
+          "shelter_type": "basic_hut"
+        },
+        "rawGeometryCenterJson": {
+          "latitude": 48.1617882,
+          "longitude": 24.4918433
+        },
+        "fetchedAt": "2026-05-28T20:19:51.458",
+        "hash": "b05889fb527391c3ec90b9b2a12ee45723e27df8"
+      }
+    },
+    {
+      "id": "b5f9a745-bd46-45d8-9d49-e2c8b7bb43c7",
+      "routeId": "19b6d7c0-5b84-4f15-aa52-56c7942cfe65",
+      "sourceId": "f08546fb-8d77-4da1-ad02-c0425f8d6e07",
+      "type": "CAMP",
+      "subtype": "camp_site",
+      "label": "Camp site",
+      "latitude": 48.1411756,
+      "longitude": 24.523943,
+      "distanceFromRouteM": 11.2,
+      "distanceFromStartM": 24969.3,
+      "confidence": "HIGH",
+      "waterPotability": "UNKNOWN",
+      "access": "PUBLIC",
+      "sortOrder": 100,
+      "metadataJson": {
+        "tents": "yes",
+        "caravan": null,
+        "campSite": null,
+        "backcountry": "yes",
+        "persistedOrder": 100
+      },
+      "createdAt": "2026-05-28T16:47:53.223Z",
+      "updatedAt": "2026-05-28T16:47:53.223Z",
+      "source": {
+        "id": "f08546fb-8d77-4da1-ad02-c0425f8d6e07",
+        "provider": "OVERPASS",
+        "osmType": "NODE",
+        "osmId": "8850757019",
+        "rawTagsJson": {
+          "tents": "yes",
+          "tourism": "camp_site",
+          "backcountry": "yes"
+        },
+        "rawGeometryCenterJson": {
+          "latitude": 48.1411756,
+          "longitude": 24.523943
+        },
+        "fetchedAt": "2026-05-28T20:19:51.472",
+        "hash": "76e4aadf39190584337d515434cbd049f981793f"
+      }
+    },
+    {
+      "id": "64814eb8-4c5e-4456-9f31-91083872efb8",
+      "routeId": "19b6d7c0-5b84-4f15-aa52-56c7942cfe65",
+      "sourceId": "7e15f61b-bc5c-4936-acd0-2616d9ee182d",
+      "type": "WATER",
+      "subtype": "spring",
+      "label": "Spring",
+      "latitude": 48.1228058,
+      "longitude": 24.5408956,
+      "distanceFromRouteM": 192.9,
+      "distanceFromStartM": 27829.1,
+      "confidence": "HIGH",
+      "waterPotability": "CONFIRMED",
+      "access": "PUBLIC",
+      "sortOrder": 106,
+      "metadataJson": {
+        "manMade": null,
+        "drinkingWater": "yes",
+        "persistedOrder": 106
+      },
+      "createdAt": "2026-05-28T16:47:53.228Z",
+      "updatedAt": "2026-05-28T16:47:53.228Z",
+      "source": {
+        "id": "7e15f61b-bc5c-4936-acd0-2616d9ee182d",
+        "provider": "OVERPASS",
+        "osmType": "NODE",
+        "osmId": "918795647",
+        "rawTagsJson": {
+          "natural": "spring",
+          "description": "Мощный родник, чистая, питьевая вода.",
+          "intermittent": "no",
+          "drinking_water": "yes"
+        },
+        "rawGeometryCenterJson": {
+          "latitude": 48.1228058,
+          "longitude": 24.5408956
+        },
+        "fetchedAt": "2026-05-28T20:19:51.478",
+        "hash": "1b09fa943c781e8d76c3e305f55fbcee05ed3044"
+      }
+    },
+    {
+      "id": "d7f86dd3-d85d-417f-9ca4-e0ee822df835",
+      "routeId": "19b6d7c0-5b84-4f15-aa52-56c7942cfe65",
+      "sourceId": "6bc35031-9d77-4c6f-88aa-0cce96f45265",
+      "type": "CAMP",
+      "subtype": "camp_site",
+      "label": "Camp site",
+      "latitude": 48.104586,
+      "longitude": 24.5630662,
+      "distanceFromRouteM": 34.5,
+      "distanceFromStartM": 32215.8,
+      "confidence": "HIGH",
+      "waterPotability": "UNKNOWN",
+      "access": "PUBLIC",
+      "sortOrder": 116,
+      "metadataJson": {
+        "tents": null,
+        "caravan": null,
+        "campSite": null,
+        "backcountry": null,
+        "persistedOrder": 116
+      },
+      "createdAt": "2026-05-28T16:47:53.238Z",
+      "updatedAt": "2026-05-28T16:47:53.238Z",
+      "source": {
+        "id": "6bc35031-9d77-4c6f-88aa-0cce96f45265",
+        "provider": "OVERPASS",
+        "osmType": "NODE",
+        "osmId": "6690884185",
+        "rawTagsJson": {
+          "tourism": "camp_site"
+        },
+        "rawGeometryCenterJson": {
+          "latitude": 48.104586,
+          "longitude": 24.5630662
+        },
+        "fetchedAt": "2026-05-28T20:19:51.487",
+        "hash": "04ccafe73a8e6d8d4dc261246e4b6b071734c880"
+      }
+    },
+    {
+      "id": "b7013bb5-97a8-4456-ba2e-79f397b16231",
+      "routeId": "19b6d7c0-5b84-4f15-aa52-56c7942cfe65",
+      "sourceId": "9c725ea5-7d92-4a83-97b6-1b0b3adff3cb",
+      "type": "CAMP",
+      "subtype": "camp_site",
+      "label": "Camp site",
+      "latitude": 48.0911992,
+      "longitude": 24.5888108,
+      "distanceFromRouteM": 15.7,
+      "distanceFromStartM": 34898.8,
+      "confidence": "HIGH",
+      "waterPotability": "UNKNOWN",
+      "access": "PUBLIC",
+      "sortOrder": 131,
+      "metadataJson": {
+        "tents": "yes",
+        "caravan": null,
+        "campSite": null,
+        "backcountry": "yes",
+        "persistedOrder": 131
+      },
+      "createdAt": "2026-05-28T16:47:53.252Z",
+      "updatedAt": "2026-05-28T16:47:53.252Z",
+      "source": {
+        "id": "9c725ea5-7d92-4a83-97b6-1b0b3adff3cb",
+        "provider": "OVERPASS",
+        "osmType": "NODE",
+        "osmId": "5413772227",
+        "rawTagsJson": {
+          "tents": "yes",
+          "tourism": "camp_site",
+          "backcountry": "yes",
+          "description": "Яма під 1 намет",
+          "capacity:tents": "1",
+          "description:ru": "Яма под 1 палатку",
+          "description:uk": "Яма під 1 намет"
+        },
+        "rawGeometryCenterJson": {
+          "latitude": 48.0911992,
+          "longitude": 24.5888108
+        },
+        "fetchedAt": "2026-05-28T20:19:51.502",
+        "hash": "8e52e4f65c644eedcecb0a8c460ffd43aad56827"
+      }
+    },
+    {
+      "id": "8eed3b89-3afc-4968-80cb-263cfbdb377a",
+      "routeId": "19b6d7c0-5b84-4f15-aa52-56c7942cfe65",
+      "sourceId": "cae106b7-6a83-443b-b85a-d60a5c73389d",
+      "type": "WATER",
+      "subtype": "spring",
+      "label": "Spring",
+      "latitude": 48.0446096,
+      "longitude": 24.6299938,
+      "distanceFromRouteM": 313.4,
+      "distanceFromStartM": 41039.1,
+      "confidence": "HIGH",
+      "waterPotability": "CONFIRMED",
+      "access": "PUBLIC",
+      "sortOrder": 143,
+      "metadataJson": {
+        "manMade": null,
+        "drinkingWater": "yes",
+        "persistedOrder": 143
+      },
+      "createdAt": "2026-05-28T16:47:53.263Z",
+      "updatedAt": "2026-05-28T16:47:53.263Z",
+      "source": {
+        "id": "cae106b7-6a83-443b-b85a-d60a5c73389d",
+        "provider": "OVERPASS",
+        "osmType": "NODE",
+        "osmId": "9198010937",
+        "rawTagsJson": {
+          "natural": "spring",
+          "drinking_water": "yes"
+        },
+        "rawGeometryCenterJson": {
+          "latitude": 48.0446096,
+          "longitude": 24.6299938
+        },
+        "fetchedAt": "2026-05-28T20:19:51.513",
+        "hash": "22d3edd848d8a9fcbf66fa3913125a3f06d55e69"
+      }
+    },
+    {
+      "id": "47aa4634-2370-4843-a446-4ff0ab73565c",
+      "routeId": "19b6d7c0-5b84-4f15-aa52-56c7942cfe65",
+      "sourceId": "dc126411-5689-465b-a7fc-c9bbb9d02da1",
+      "type": "SHELTER",
+      "subtype": "alpine_hut",
+      "label": "Колиба",
+      "latitude": 48.0823786,
+      "longitude": 24.6651411,
+      "distanceFromRouteM": 11.9,
+      "distanceFromStartM": 47659.2,
+      "confidence": "HIGH",
+      "waterPotability": "UNKNOWN",
+      "access": "PUBLIC",
+      "sortOrder": 171,
+      "metadataJson": {
+        "operator": null,
+        "fireplace": null,
+        "shelterType": null,
+        "persistedOrder": 171,
+        "fallbackBuilding": false,
+        "fallbackBuildingName": true
+      },
+      "createdAt": "2026-05-28T16:47:53.288Z",
+      "updatedAt": "2026-05-28T16:47:53.288Z",
+      "source": {
+        "id": "dc126411-5689-465b-a7fc-c9bbb9d02da1",
+        "provider": "OVERPASS",
+        "osmType": "NODE",
+        "osmId": "4408136393",
+        "rawTagsJson": {
+          "name": "Молочна Хата",
+          "name:ru": "Колыба Смотрич",
+          "name:uk": "Колиба",
+          "tourism": "alpine_hut",
+          "addr:street": "полонина Смотрич",
+          "description": "В сезон тут можно купить молока и сыра"
+        },
+        "rawGeometryCenterJson": {
+          "latitude": 48.0823786,
+          "longitude": 24.6651411
+        },
+        "fetchedAt": "2026-05-28T20:19:51.541",
+        "hash": "80936feaa026d74770950bfe58a4fd2d3c14ad42"
+      }
+    },
+    {
+      "id": "1ef39490-ed9d-4dbd-a329-7e70c160a55c",
+      "routeId": "19b6d7c0-5b84-4f15-aa52-56c7942cfe65",
+      "sourceId": "8d71cbd7-2ee7-4d08-b466-8a515a48412c",
+      "type": "SHELTER",
+      "subtype": "amenity_shelter",
+      "label": "Shelter",
+      "latitude": 48.0966508,
+      "longitude": 24.6948865,
+      "distanceFromRouteM": 10.9,
+      "distanceFromStartM": 50644.4,
+      "confidence": "HIGH",
+      "waterPotability": "UNKNOWN",
+      "access": "PUBLIC",
+      "sortOrder": 175,
+      "metadataJson": {
+        "operator": null,
+        "fireplace": null,
+        "shelterType": null,
+        "persistedOrder": 175,
+        "fallbackBuilding": false,
+        "fallbackBuildingName": false
+      },
+      "createdAt": "2026-05-28T16:47:53.291Z",
+      "updatedAt": "2026-05-28T16:47:53.291Z",
+      "source": {
+        "id": "8d71cbd7-2ee7-4d08-b466-8a515a48412c",
+        "provider": "OVERPASS",
+        "osmType": "NODE",
+        "osmId": "8914753401",
+        "rawTagsJson": {
+          "amenity": "shelter"
+        },
+        "rawGeometryCenterJson": {
+          "latitude": 48.0966508,
+          "longitude": 24.6948865
+        },
+        "fetchedAt": "2026-05-28T20:19:51.545",
+        "hash": "139a0e3dc6ab79aae1858045fc76d4815b3cc372"
+      }
+    },
+    {
+      "id": "f7e16cc9-c88a-46cd-881b-9159cb2f7393",
+      "routeId": "19b6d7c0-5b84-4f15-aa52-56c7942cfe65",
+      "sourceId": "9388d37b-27b3-4000-b28a-93a6c08bae8a",
+      "type": "SHELTER",
+      "subtype": "amenity_shelter",
+      "label": "Shelter",
+      "latitude": 48.0948445,
+      "longitude": 24.7122494,
+      "distanceFromRouteM": 6.4,
+      "distanceFromStartM": 52071.3,
+      "confidence": "HIGH",
+      "waterPotability": "UNKNOWN",
+      "access": "PUBLIC",
+      "sortOrder": 178,
+      "metadataJson": {
+        "operator": null,
+        "fireplace": null,
+        "shelterType": null,
+        "persistedOrder": 178,
+        "fallbackBuilding": false,
+        "fallbackBuildingName": false
+      },
+      "createdAt": "2026-05-28T16:47:53.294Z",
+      "updatedAt": "2026-05-28T16:47:53.294Z",
+      "source": {
+        "id": "9388d37b-27b3-4000-b28a-93a6c08bae8a",
+        "provider": "OVERPASS",
+        "osmType": "NODE",
+        "osmId": "3709748081",
+        "rawTagsJson": {
+          "amenity": "shelter"
+        },
+        "rawGeometryCenterJson": {
+          "latitude": 48.0948445,
+          "longitude": 24.7122494
+        },
+        "fetchedAt": "2026-05-28T20:19:51.547",
+        "hash": "7d9ab3ae66662e88504d9961ab5d13503b51d93b"
+      }
+    },
+    {
+      "id": "5a9ffb7d-7456-4227-95bd-d422715a2dd5",
+      "routeId": "19b6d7c0-5b84-4f15-aa52-56c7942cfe65",
+      "sourceId": "1eae8514-9842-4f59-a5a4-66be47c738a5",
+      "type": "WATER",
+      "subtype": "spring",
+      "label": "Spring",
+      "latitude": 48.10447,
+      "longitude": 24.730815,
+      "distanceFromRouteM": 7.1,
+      "distanceFromStartM": 54190.6,
+      "confidence": "LOW",
+      "waterPotability": "UNKNOWN",
+      "access": "PUBLIC",
+      "sortOrder": 185,
+      "metadataJson": {
+        "manMade": null,
+        "drinkingWater": null,
+        "persistedOrder": 185
+      },
+      "createdAt": "2026-05-28T16:47:53.300Z",
+      "updatedAt": "2026-05-28T16:47:53.300Z",
+      "source": {
+        "id": "1eae8514-9842-4f59-a5a4-66be47c738a5",
+        "provider": "OVERPASS",
+        "osmType": "NODE",
+        "osmId": "8849747945",
+        "rawTagsJson": {
+          "natural": "spring"
+        },
+        "rawGeometryCenterJson": {
+          "latitude": 48.10447,
+          "longitude": 24.730815
+        },
+        "fetchedAt": "2026-05-28T20:19:51.553",
+        "hash": "fb823340ee12c727ad613e6990f8b0da730d4bb1"
+      }
+    }
+  ]
+}

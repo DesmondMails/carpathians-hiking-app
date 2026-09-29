@@ -12,6 +12,7 @@ export type RouteDraftPreviewRouteType =
 export type RouteDraftPreviewPoiType =
   | 'WATER'
   | 'SHELTER'
+  | 'CAMP'
   | 'VIEWPOINT'
   | 'PEAK'
 

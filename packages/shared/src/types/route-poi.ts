@@ -3,7 +3,12 @@ export type RoutePoiWaterPotability = 'CONFIRMED' | 'UNKNOWN' | 'NON_POTABLE'
 export type RoutePoiAccess = 'PUBLIC' | 'PRIVATE'
 export type RoutePoiProvider = 'OVERPASS'
 export type RoutePoiOsmType = 'NODE' | 'WAY' | 'RELATION'
-export type RoutePoiType = 'WATER' | 'SHELTER' | 'VIEWPOINT' | 'PEAK'
+export type RoutePoiType =
+  | 'WATER'
+  | 'SHELTER'
+  | 'CAMP'
+  | 'VIEWPOINT'
+  | 'PEAK'
 export type RoutePoiEnrichmentStatus = 'PENDING' | 'READY' | 'FAILED'
 
 export interface RoutePoi {

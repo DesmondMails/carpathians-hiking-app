@@ -1,0 +1,45 @@
+{
+  "routeId": "234bda91-99c5-4086-a487-44c3502b148f",
+  "candidateCount": 3,
+  "featuredCount": 1,
+  "featuredPois": [
+    {
+      "id": "489d49a1-810f-4d13-8f98-14978e62450f",
+      "routeId": "234bda91-99c5-4086-a487-44c3502b148f",
+      "sourceId": "ed0835e4-1a84-41d8-848d-c39ef9fd43b6",
+      "type": "WATER",
+      "subtype": "spring",
+      "label": "Spring",
+      "latitude": 48.2281214,
+      "longitude": 24.5392544,
+      "distanceFromRouteM": 211.4,
+      "distanceFromStartM": 63,
+      "confidence": "LOW",
+      "waterPotability": "UNKNOWN",
+      "access": "PUBLIC",
+      "sortOrder": 1,
+      "metadataJson": {
+        "manMade": null,
+        "drinkingWater": null,
+        "persistedOrder": 1
+      },
+      "createdAt": "2026-05-28T16:19:32.688Z",
+      "updatedAt": "2026-05-28T16:19:32.688Z",
+      "source": {
+        "id": "ed0835e4-1a84-41d8-848d-c39ef9fd43b6",
+        "provider": "OVERPASS",
+        "osmType": "NODE",
+        "osmId": "3219920097",
+        "rawTagsJson": {
+          "natural": "spring"
+        },
+        "rawGeometryCenterJson": {
+          "latitude": 48.2281214,
+          "longitude": 24.5392544
+        },
+        "fetchedAt": "2026-05-28T19:19:32.686",
+        "hash": "41c2463735f1da36ff0559d41a55bf9f93aba8b4"
+      }
+    }
+  ]
+}

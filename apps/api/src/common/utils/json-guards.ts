@@ -98,6 +98,7 @@ export function asElevationProfile(
 const POI_TYPES = [
   'WATER',
   'SHELTER',
+  'CAMP',
   'VIEWPOINT',
   'PEAK',
 ] as const satisfies readonly RoutePoiType[];

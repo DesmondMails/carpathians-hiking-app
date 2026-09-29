@@ -9,6 +9,7 @@ Architecture note:
 - POI are not stored in `RouteDraftPreview`
 - POI enrichment starts only after route publish/finalize
 - mobile should use route-level POI status and a dedicated POI endpoint
+- route screen should render `featuredPois`, while full map can later consume `GET /routes/:id/pois`
 
 ## Status Legend
 

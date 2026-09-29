@@ -22,15 +22,9 @@ interface HeroSectionProps {
   route: RouteDetails
   poiMarkers: RoutePoi[]
   poiStatus: RoutePoiEnrichmentStatus
-  isPoisLoading: boolean
 }
 
-export function HeroSection({
-  route,
-  poiMarkers,
-  poiStatus,
-  isPoisLoading,
-}: HeroSectionProps) {
+export function HeroSection({ route, poiMarkers, poiStatus }: HeroSectionProps) {
   const [mode, setMode] = useState<HeroMode>('map')
 
   const { top } = useSafeAreaInsets()
@@ -60,9 +54,7 @@ export function HeroSection({
           {poiStatus === 'PENDING' && (
             <View style={styles.poiOverlay}>
               <ActivityIndicator color={colors.textWhite} size='small' />
-              <AppText style={styles.poiOverlayText}>
-                {isPoisLoading ? 'Завантажуємо POI...' : 'Шукаємо POI...'}
-              </AppText>
+              <AppText style={styles.poiOverlayText}>Шукаємо POI...</AppText>
             </View>
           )}
 

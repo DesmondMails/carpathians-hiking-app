@@ -28,6 +28,7 @@ model RoutePoi {
 enum RoutePoiType {
   WATER
   SHELTER
+  CAMP
   VIEWPOINT
   PEAK
 }

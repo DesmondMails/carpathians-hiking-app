@@ -26,13 +26,13 @@ export default function RouteScreen() {
   const router = useRouter()
 
   const {
+    activeRouteId,
     isLoading,
-    isPoisLoading,
-    poiMarkers,
+    featuredPoiMarkers,
     poiStatus,
     route,
+    setActiveRouteId,
     loadRoute,
-    loadRoutePois,
     loadGpxUrl,
   } = useRoute()
   const { user } = useAuth()
@@ -93,27 +93,27 @@ export default function RouteScreen() {
 
   useEffect(() => {
     if (id) {
+      setActiveRouteId(id)
       void loadRoute(id)
     }
-  }, [id, loadRoute])
+  }, [id, loadRoute, setActiveRouteId])
 
   useEffect(() => {
-    if (!id || !route) return
+    const isPoiStatusNotPending = poiStatus !== 'PENDING'
+    const isThereIncorrectId = activeRouteId !== id || !id
 
-    void loadRoutePois(id)
-  }, [id, route, loadRoutePois])
-
-  useEffect(() => {
-    if (!id || poiStatus !== 'PENDING') return
+    if (isThereIncorrectId || isPoiStatusNotPending || isLoading) {
+      return
+    }
 
     const timeout = setTimeout(() => {
-      void loadRoutePois(id)
-    }, 5000)
+      void loadRoute(id)
+    }, 3000)
 
     return () => clearTimeout(timeout)
-  }, [id, poiStatus, loadRoutePois])
+  }, [activeRouteId, id, poiStatus, isLoading, loadRoute])
 
-  if (!route) return null
+  if (!route || route.id !== id) return null
 
   const canEdit = route.createdBy.id === user?.id
 
@@ -134,9 +134,8 @@ export default function RouteScreen() {
       >
         <HeroSection
           route={route}
-          poiMarkers={poiMarkers}
+          poiMarkers={featuredPoiMarkers}
           poiStatus={poiStatus}
-          isPoisLoading={isPoisLoading}
         />
 
         <View style={styles.card}>

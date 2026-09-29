@@ -21,6 +21,16 @@ const OVERPASS_BBOX_PADDING_M = 500;
 const MAX_DISTANCE_FROM_ROUTE_M = 350;
 const FALLBACK_BUILDING_MAX_DISTANCE_M = 150;
 const NEARBY_DEDUP_DISTANCE_M = 30;
+const GENERIC_POI_LABELS = [
+  'Shelter',
+  'Water',
+  'Camp site',
+  'Camp pitch',
+  'Wild camp',
+  'Basic camp',
+  'Peak',
+  'Viewpoint',
+];
 
 @Injectable()
 export class PoiEnrichmentService {
@@ -92,14 +102,14 @@ export class PoiEnrichmentService {
 
       const rawElements = await this.overpassClient.fetchPoiElements(bbox);
 
-      const normalizedCandidates = this.deduplicateExactCandidates(
-        rawElements
-          .map((element) => this.poiNormalizer.normalizeElement(element))
-          .filter(
-            (candidate): candidate is NormalizedPoiCandidate =>
-              candidate !== null,
-          ),
-      );
+      const candidates = rawElements
+        .map((element) => this.poiNormalizer.normalizeElement(element))
+        .filter(
+          (candidate): candidate is NormalizedPoiCandidate =>
+            candidate !== null,
+        );
+
+      const normalizedCandidates = this.deduplicateExactCandidates(candidates);
       const persistableCandidates = this.prepareCandidatesForPersistence(
         routeCoordinates,
         normalizedCandidates,
@@ -227,12 +237,7 @@ export class PoiEnrichmentService {
       score += 2;
     }
 
-    if (
-      candidate.label !== 'Shelter' &&
-      candidate.label !== 'Water' &&
-      candidate.label !== 'Peak' &&
-      candidate.label !== 'Viewpoint'
-    ) {
+    if (!GENERIC_POI_LABELS.includes(candidate.label)) {
       score += 2;
     }
 

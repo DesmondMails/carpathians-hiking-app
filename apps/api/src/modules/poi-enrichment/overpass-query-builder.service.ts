@@ -18,6 +18,11 @@ export class OverpassQueryBuilderService {
   way["tourism"="viewpoint"]${area};
   relation["tourism"="viewpoint"]${area};
 
+  nwr["tourism"="camp_site"]${area};
+  nwr["tourism"="camp_pitch"]${area};
+  nwr["camp_site"="wild"]${area};
+  nwr["camp_site"="basic"]${area};
+
   nwr["amenity"="shelter"]${area};
   nwr["tourism"="wilderness_hut"]${area};
   nwr["tourism"="alpine_hut"]${area};
