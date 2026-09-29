@@ -41,10 +41,22 @@ Show only the most useful POI on the main route screen while keeping the full PO
 - [x] Remove the experimental coverage selector; keep baseline as the only implementation
 - [x] Use the same selector in route details, debug runner and comparison
 - [x] Add exact regression checks against all four frozen baseline results
-- [ ] Make the length-based budget monotonic across 5 km and 25 km
+- [x] Make the length-based budget monotonic across 5 km and 25 km
 - [ ] Improve distribution within each category without replacing water with camps
 - [ ] Review actual mobile previews for all four baseline routes
 - [ ] Validate weights and the 16-marker cap on additional long/loop routes
 
 The side-by-side HTML compares frozen results with the current implementation,
 not two live algorithms. See [experiment history](featured-pois-coverage.md).
+
+### Step 1: monotonic budget
+
+Keep baseline formulas, but raise the medium minimum from 6 to 8 and the long
+minimum from 10 to 12. With L in km: up to 5 km use
+`clamp(ceil(1.6 * L), 4, 8)`; up to 25 km use
+`clamp(ceil(0.5 * L + 2), 8, 12)`; above 25 km use
+`clamp(ceil(0.22 * L + 4), 12, 16)`.
+This changes only the target budget, not scoring, spacing or quota formulas.
+Actual selection may contain fewer points; its count is not guaranteed monotonic.
+Tests cover both boundaries, integer/bounded monotonic growth through 200 km,
+and unchanged results for the four frozen fixtures.

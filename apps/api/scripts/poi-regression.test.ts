@@ -2,9 +2,46 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { selectFeaturedRoutePois } from '../src/modules/routes/mappers/featured-route-pois';
+import {
+  resolveTargetPoiCount,
+  selectFeaturedRoutePois,
+} from '../src/modules/routes/mappers/featured-route-pois';
 import type { RoutePoiWithSource } from '../src/modules/routes/types/featured-pois';
 import { comparisonPanel, metrics } from './compare-pois';
+
+test('budget remains stable immediately around length boundaries', () => {
+  for (const distance of [4999, 5000, 5001]) {
+    assert.equal(resolveTargetPoiCount(distance), 8);
+  }
+  for (const distance of [24999, 25000, 25001]) {
+    assert.equal(resolveTargetPoiCount(distance), 12);
+  }
+});
+
+test('budget is an integer, bounded and monotonic from zero to 200 km', () => {
+  let previous = 4;
+  for (let distance = 0; distance <= 200000; distance++) {
+    const budget = resolveTargetPoiCount(distance);
+    assert.ok(Number.isInteger(budget));
+    assert.ok(budget >= previous && budget <= 16);
+    previous = budget;
+  }
+  assert.equal(resolveTargetPoiCount(1000000), 16);
+});
+
+test('budget preserves existing growth away from corrected floors', () => {
+  for (const [distance, expected] of [
+    [1000, 4],
+    [4000, 7],
+    [15000, 10],
+    [20000, 12],
+    [40000, 13],
+    [50000, 15],
+    [60000, 16],
+  ]) {
+    assert.equal(resolveTargetPoiCount(distance), expected);
+  }
+});
 
 test('selection is independent of candidate order', () => {
   const fixture = load('long');

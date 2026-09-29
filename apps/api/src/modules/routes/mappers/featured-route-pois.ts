@@ -130,7 +130,7 @@ function resolveRouteLengthPreset(
   return 'LONG';
 }
 
-function resolveTargetPoiCount(routeDistanceM: number): number {
+export function resolveTargetPoiCount(routeDistanceM: number): number {
   const distanceKm = routeDistanceM / 1000;
 
   if (distanceKm <= ROUTE_LENGTH_LIMITS_KM.SHORT_MAX) {
@@ -138,10 +138,10 @@ function resolveTargetPoiCount(routeDistanceM: number): number {
   }
 
   if (distanceKm <= ROUTE_LENGTH_LIMITS_KM.MEDIUM_MAX) {
-    return clamp(Math.ceil(distanceKm * 0.5 + 2), 6, 12);
+    return clamp(Math.ceil(distanceKm * 0.5 + 2), 8, 12);
   }
 
-  return clamp(Math.ceil(distanceKm * 0.22 + 4), 10, 16);
+  return clamp(Math.ceil(distanceKm * 0.22 + 4), 12, 16);
 }
 
 function resolveTypeQuotas(
