@@ -1,61 +1,92 @@
+import {
+  SESv2Client,
+  SendEmailCommand,
+  SendEmailCommandOutput,
+} from '@aws-sdk/client-sesv2';
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import sgMail from '@sendgrid/mail';
+
+import { getEmailVerificationTemplate } from './templates/verification-email.template';
 
 @Injectable()
 export class EmailService {
   private readonly logger = new Logger(EmailService.name);
-  private readonly isConfigured: boolean;
+  private readonly sesClient: SESv2Client;
+  private readonly fromEmail: string;
 
-  constructor(private config: ConfigService) {
-    const apiKey = this.config.get<string>('SENDGRID_API_KEY');
+  constructor(private configService: ConfigService) {
+    this.sesClient = new SESv2Client({
+      region: this.configService.getOrThrow<string>('AWS_REGION'),
+      credentials: {
+        accessKeyId: this.configService.getOrThrow<string>('AWS_ACCESS_KEY_ID'),
+        secretAccessKey: this.configService.getOrThrow<string>(
+          'AWS_SECRET_ACCESS_KEY',
+        ),
+      },
+    });
 
-    if (apiKey && !apiKey.startsWith('SG.your_')) {
-      sgMail.setApiKey(apiKey);
-      this.isConfigured = true;
-    } else {
-      this.isConfigured = false;
-      this.logger.warn(
-        'SendGrid API key not configured — emails will be logged to console only',
+    this.fromEmail = this.configService.getOrThrow<string>('SES_FROM_EMAIL');
+  }
+
+  async sendEmail(params: {
+    to: string;
+    subject: string;
+    html: string;
+    text?: string;
+  }) {
+    try {
+      const command = new SendEmailCommand({
+        FromEmailAddress: this.fromEmail,
+        Destination: {
+          ToAddresses: [params.to],
+        },
+        Content: {
+          Simple: {
+            Subject: {
+              Data: params.subject,
+              Charset: 'UTF-8',
+            },
+            Body: {
+              Html: {
+                Data: params.html,
+                Charset: 'UTF-8',
+              },
+              ...(params.text && {
+                Text: {
+                  Data: params.text,
+                  Charset: 'UTF-8',
+                },
+              }),
+            },
+          },
+        },
+      });
+
+      const result = await this.sesClient.send(command);
+
+      this.logger.log(
+        `Email sent to ${params.to}, messageId=${result.MessageId}`,
       );
+
+      return result;
+    } catch (error) {
+      this.logger.error(
+        `Failed to send email to ${params.to}`,
+        error instanceof Error ? error.stack : undefined,
+      );
+
+      throw error;
     }
   }
 
-  async sendVerificationCode(email: string, code: string): Promise<void> {
-    const from = {
-      email:
-        this.config.get<string>('SENDGRID_FROM_EMAIL') ??
-        'noreply@hiking-app.com',
-      name: this.config.get<string>('SENDGRID_FROM_NAME') ?? 'Hiking App',
-    };
-
+  async sendVerificationCode(
+    email: string,
+    code: string,
+  ): Promise<SendEmailCommandOutput> {
     const subject = 'Підтвердження email — Hiking App';
-    const html = `
-      <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto; padding: 32px;">
-        <h2 style="color: #0a7ea4;">Підтвердіть ваш email</h2>
-        <p>Ваш код підтвердження:</p>
-        <div style="
-          display: inline-block;
-          background: #f0f4f8;
-          border-radius: 12px;
-          padding: 16px 32px;
-          font-size: 36px;
-          font-weight: 700;
-          letter-spacing: 8px;
-          color: #11181C;
-          margin: 16px 0;
-        ">${code}</div>
-        <p style="color: #687076; font-size: 14px;">Код дійсний 15 хвилин. Не передавайте його нікому.</p>
-      </div>
-    `;
+    const html = getEmailVerificationTemplate(code);
+    const text = `Ваш код підтвердження: ${code}. Код дійсний 15 хвилин.`;
 
-    if (!this.isConfigured) {
-      this.logger.log(
-        `[EMAIL STUB] To: ${email} | Subject: ${subject} | Code: ${code}`,
-      );
-      return;
-    }
-
-    await sgMail.send({ to: email, from, subject, html });
+    return this.sendEmail({ to: email, subject, html, text });
   }
 }
