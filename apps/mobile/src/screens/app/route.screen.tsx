@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react'
 
 import { ScrollView, Share, StyleSheet, View } from 'react-native'
 
-import { RoutePoiEnrichmentStatusOptions } from '@hiking/shared'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 
 import { useAuth } from '@/src/features/auth/hooks/useAuth'
@@ -16,6 +15,7 @@ import {
   RouteIdentity,
   StatsRow,
 } from '@/src/features/route/components'
+import { useFeaturedPoisPolling } from '@/src/features/route/hooks/useFeaturedPoisPolling'
 import { useRoute } from '@/src/features/route/hooks/useRoute'
 import { ensureGpxFile, shareGpxFile } from '@/src/features/route/utils/gpxFile'
 import { buildRouteLink } from '@/src/features/route/utils/routeLink'
@@ -27,15 +27,13 @@ export default function RouteScreen() {
   const router = useRouter()
 
   const {
-    activeRouteId,
     featuredPoiMarkers,
     poiStatus,
-    isFeaturedPoisLoading,
+    featuredPoisError,
     route,
     setActiveRouteId,
     loadRoute,
     loadGpxUrl,
-    loadFeaturedRoutePois,
   } = useRoute()
   const { user } = useAuth()
 
@@ -97,35 +95,13 @@ export default function RouteScreen() {
   useEffect(() => {
     if (id) {
       setActiveRouteId(id)
-      void loadRoute(id)
-      void loadFeaturedRoutePois(id)
+      void loadRoute(id).catch(() => {
+        toast.error('Не вдалося завантажити маршрут')
+      })
     }
-  }, [id, loadRoute, setActiveRouteId, loadFeaturedRoutePois])
+  }, [id, loadRoute, setActiveRouteId])
 
-  useEffect(() => {
-    const isPoiStatusNotPending =
-      poiStatus !== RoutePoiEnrichmentStatusOptions.PENDING
-    const isThereIncorrectId = activeRouteId !== id || !id
-
-    const shoulNotLoadFeaturedPois =
-      isThereIncorrectId || isPoiStatusNotPending || isFeaturedPoisLoading
-
-    if (shoulNotLoadFeaturedPois) {
-      return
-    }
-
-    const timeout = setTimeout(() => {
-      void loadFeaturedRoutePois(id)
-    }, 3000)
-
-    return () => clearTimeout(timeout)
-  }, [
-    id,
-    activeRouteId,
-    poiStatus,
-    isFeaturedPoisLoading,
-    loadFeaturedRoutePois,
-  ])
+  useFeaturedPoisPolling(id)
 
   if (!route || route.id !== id) return null
 
@@ -150,6 +126,7 @@ export default function RouteScreen() {
           route={route}
           previewPoiMarkers={featuredPoiMarkers}
           poiStatus={poiStatus}
+          poiError={featuredPoisError}
         />
 
         <View style={styles.card}>

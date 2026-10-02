@@ -21,12 +21,14 @@ interface HeroSectionProps {
   route: RouteDetails
   previewPoiMarkers: RoutePoi[]
   poiStatus: RoutePoiEnrichmentStatus
+  poiError?: string | null
 }
 
 export function HeroSection({
   route,
   previewPoiMarkers,
   poiStatus,
+  poiError,
 }: HeroSectionProps) {
   const [mode, setMode] = useState<HeroMode>(HeroMode.MAP)
 
@@ -55,17 +57,17 @@ export function HeroSection({
             routeCoordinates={route.routeCoordinates}
           />
 
-          {poiStatus === 'PENDING' && (
+          {!poiError && poiStatus === 'PENDING' && (
             <View style={styles.poiOverlay}>
               <ActivityIndicator color={colors.textWhite} size='small' />
               <AppText style={styles.poiOverlayText}>Шукаємо POI...</AppText>
             </View>
           )}
 
-          {poiStatus === 'FAILED' && (
+          {(poiError || poiStatus === 'FAILED') && (
             <View style={styles.poiOverlay}>
               <AppText style={styles.poiOverlayText}>
-                POI тимчасово недоступні
+                {poiError ?? 'POI тимчасово недоступні'}
               </AppText>
             </View>
           )}

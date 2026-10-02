@@ -73,7 +73,7 @@ export function toRoutePoisResponse(route: RouteWithPois): RoutePoisResponse {
 }
 
 export const toRouteView = (
-  route: RouteWithPois,
+  route: Route,
   author: RouteAuthorSource,
   images: RouteImageViewSource,
 ): RouteDetails => {

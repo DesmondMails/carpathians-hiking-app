@@ -317,8 +317,8 @@ export class RoutesService {
     });
   }
 
-  async getGpxUrl(routeId: string, userId: string): Promise<string> {
-    const route = await this.findOwnedRouteById(routeId, userId);
+  async getGpxUrl(routeId: string): Promise<string> {
+    const route = await this.findRouteById(routeId);
 
     if (!route.gpxStorageKey) {
       throw new NotFoundException('GPX-файл не знайдено');
@@ -348,17 +348,13 @@ export class RoutesService {
 
   private findRouteWithAuthorById(
     routeId: string,
-  ): Promise<RouteWithPois & { createdByUser: User; images: RouteImage[] }> {
+  ): Promise<Route & { createdByUser: User; images: RouteImage[] }> {
     const request = this.prisma.route.findUnique({
       where: { id: routeId },
       include: {
         createdByUser: true,
         images: {
           orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }],
-        },
-        routePois: {
-          include: { source: true },
-          orderBy: { sortOrder: 'asc' },
         },
       },
     });
