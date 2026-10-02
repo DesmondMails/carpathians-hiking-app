@@ -15,17 +15,22 @@ import { AppText } from '@/src/shared/components/AppText'
 import { colors } from '@/src/theme/colors'
 
 import { ModeSwitcher, PhotosView } from './components'
-
-type HeroMode = 'map' | 'photos'
+import { HeroMode } from '../../types'
 
 interface HeroSectionProps {
   route: RouteDetails
-  poiMarkers: RoutePoi[]
+  previewPoiMarkers: RoutePoi[]
   poiStatus: RoutePoiEnrichmentStatus
+  poiError?: string | null
 }
 
-export function HeroSection({ route, poiMarkers, poiStatus }: HeroSectionProps) {
-  const [mode, setMode] = useState<HeroMode>('map')
+export function HeroSection({
+  route,
+  previewPoiMarkers,
+  poiStatus,
+  poiError,
+}: HeroSectionProps) {
+  const [mode, setMode] = useState<HeroMode>(HeroMode.MAP)
 
   const { top } = useSafeAreaInsets()
 
@@ -37,31 +42,32 @@ export function HeroSection({ route, poiMarkers, poiStatus }: HeroSectionProps) 
   )
 
   useEffect(() => {
-    const isPhotoViewWithoutImages = photosCount === 0 && mode === 'photos'
+    const isPhotoViewWithoutImages =
+      photosCount === 0 && mode === HeroMode.PHOTOS
 
-    if (isPhotoViewWithoutImages) setMode('map')
+    if (isPhotoViewWithoutImages) setMode(HeroMode.MAP)
   }, [photosCount, mode])
 
   return (
     <View style={[styles.container, { height: totalHeight }]}>
-      {mode === 'map' ? (
+      {mode === HeroMode.MAP ? (
         <>
           <MapLibrePreview
-            poiMarkers={poiMarkers}
+            poiMarkers={previewPoiMarkers}
             routeCoordinates={route.routeCoordinates}
           />
 
-          {poiStatus === 'PENDING' && (
+          {!poiError && poiStatus === 'PENDING' && (
             <View style={styles.poiOverlay}>
               <ActivityIndicator color={colors.textWhite} size='small' />
               <AppText style={styles.poiOverlayText}>Шукаємо POI...</AppText>
             </View>
           )}
 
-          {poiStatus === 'FAILED' && (
+          {(poiError || poiStatus === 'FAILED') && (
             <View style={styles.poiOverlay}>
               <AppText style={styles.poiOverlayText}>
-                POI тимчасово недоступні
+                {poiError ?? 'POI тимчасово недоступні'}
               </AppText>
             </View>
           )}

@@ -3,13 +3,16 @@ export type RoutePoiWaterPotability = 'CONFIRMED' | 'UNKNOWN' | 'NON_POTABLE'
 export type RoutePoiAccess = 'PUBLIC' | 'PRIVATE'
 export type RoutePoiProvider = 'OVERPASS'
 export type RoutePoiOsmType = 'NODE' | 'WAY' | 'RELATION'
-export type RoutePoiType =
-  | 'WATER'
-  | 'SHELTER'
-  | 'CAMP'
-  | 'VIEWPOINT'
-  | 'PEAK'
-export type RoutePoiEnrichmentStatus = 'PENDING' | 'READY' | 'FAILED'
+export type RoutePoiType = 'WATER' | 'SHELTER' | 'CAMP' | 'VIEWPOINT' | 'PEAK'
+
+export const RoutePoiEnrichmentStatusOptions = {
+  PENDING: 'PENDING',
+  READY: 'READY',
+  FAILED: 'FAILED',
+} as const
+
+export type RoutePoiEnrichmentStatus =
+  (typeof RoutePoiEnrichmentStatusOptions)[keyof typeof RoutePoiEnrichmentStatusOptions]
 
 export interface RoutePoi {
   id: string

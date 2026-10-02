@@ -101,6 +101,19 @@ export class RoutesController {
     return this.routesService.getRoutePois(routeId);
   }
 
+  @Get(':id/pois/featured')
+  @ApiOperation({ summary: 'Отримати Featured POI маршруту по id' })
+  @ApiResponse({
+    status: 200,
+    description: 'Featured POI маршруту успішно отримані',
+  })
+  @ApiResponse({ status: 404, description: 'Маршрут не знайдено' })
+  async getFeaturedRoutePois(
+    @Param('id') routeId: string,
+  ): Promise<RoutePoisResponse> {
+    return this.routesService.getFeaturedRoutePois(routeId);
+  }
+
   @Get(':id')
   @ApiOperation({ summary: 'Отримати маршрут по id' })
   @ApiResponse({ status: 200, description: 'Маршрут успішно отриманий' })
@@ -114,12 +127,9 @@ export class RoutesController {
   @ApiOperation({ summary: 'Отримати URL GPX-файлу' })
   @ApiResponse({ status: 200, description: 'URL GPX-файлу успішно отриманий' })
   @ApiResponse({ status: 401, description: 'Користувач не авторизований' })
-  @ApiResponse({ status: 404, description: 'Draft не знайдено' })
-  async getGpxUrl(
-    @CurrentUser() user: User,
-    @Param('id') routeId: string,
-  ): Promise<string> {
-    return this.routesService.getGpxUrl(routeId, user.id);
+  @ApiResponse({ status: 404, description: 'Маршрут або GPX-файл не знайдено' })
+  async getGpxUrl(@Param('id') routeId: string): Promise<string> {
+    return this.routesService.getGpxUrl(routeId);
   }
 
   @Post(':id/images/presigned')

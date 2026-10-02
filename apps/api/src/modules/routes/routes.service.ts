@@ -6,6 +6,7 @@ import {
   RouteDetails,
   RoutePoisResponse,
   RouteDraftPreview,
+  RoutePoiEnrichmentStatusOptions,
 } from '@hiking/shared';
 import {
   BadRequestException,
@@ -18,6 +19,7 @@ import {
 import {
   RouteWithPois,
   toEditableRoute,
+  toRoutePoiView,
   toRouteCreateInput,
   toRouteView,
 } from 'src/modules/routes/mappers';
@@ -40,6 +42,7 @@ import { calculateDerivedRouteValues } from './utils/calculate-derived-route-val
 import { PoiEnrichmentService } from '../poi-enrichment/poi-enrichment.service';
 import { FinalizeRouteDraftDto } from '../routes-draft/dto/finalize-route-draft.dto';
 import { StorageService } from '../storage/storage.service';
+import { selectFeaturedRoutePois } from './mappers/featured-route-pois';
 
 @Injectable()
 export class RoutesService {
@@ -133,6 +136,30 @@ export class RoutesService {
     const route = await this.findRouteWithPoisById(routeId);
 
     return toRoutePoisResponse(route);
+  }
+
+  async getFeaturedRoutePois(routeId: string): Promise<RoutePoisResponse> {
+    const status =
+      await this.poiEnrichmentService.getRoutePoiEnrichmentStatus(routeId);
+
+    if (status !== RoutePoiEnrichmentStatusOptions.READY) {
+      return {
+        status,
+        poiMarkers: [],
+      };
+    }
+
+    const route = await this.findRouteWithPoisById(routeId);
+
+    const featuredPois = selectFeaturedRoutePois(
+      route.routePois,
+      route.distanceM,
+    ).map(toRoutePoiView);
+
+    return {
+      status,
+      poiMarkers: featuredPois,
+    };
   }
 
   scheduleRoutePoiEnrichment(routeId: string): void {
@@ -290,8 +317,8 @@ export class RoutesService {
     });
   }
 
-  async getGpxUrl(routeId: string, userId: string): Promise<string> {
-    const route = await this.findOwnedRouteById(routeId, userId);
+  async getGpxUrl(routeId: string): Promise<string> {
+    const route = await this.findRouteById(routeId);
 
     if (!route.gpxStorageKey) {
       throw new NotFoundException('GPX-файл не знайдено');
@@ -321,17 +348,13 @@ export class RoutesService {
 
   private findRouteWithAuthorById(
     routeId: string,
-  ): Promise<RouteWithPois & { createdByUser: User; images: RouteImage[] }> {
+  ): Promise<Route & { createdByUser: User; images: RouteImage[] }> {
     const request = this.prisma.route.findUnique({
       where: { id: routeId },
       include: {
         createdByUser: true,
         images: {
           orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }],
-        },
-        routePois: {
-          include: { source: true },
-          orderBy: { sortOrder: 'asc' },
         },
       },
     });

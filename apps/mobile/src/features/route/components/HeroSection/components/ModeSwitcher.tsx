@@ -8,9 +8,11 @@ import { AppText } from '@/src/shared/components/AppText'
 import { colors } from '@/src/theme/colors'
 import { typography } from '@/src/theme/typography'
 
+import { HeroMode } from '../../../types'
+
 interface ModeSwitcherProps {
-  mode: 'map' | 'photos'
-  setMode: Dispatch<SetStateAction<'map' | 'photos'>>
+  mode: HeroMode
+  setMode: Dispatch<SetStateAction<HeroMode>>
   photosCount?: number
 }
 
@@ -20,10 +22,10 @@ export const ModeSwitcher: FC<ModeSwitcherProps> = ({
   photosCount = 3,
 }) => {
   const handlePress = () => {
-    setMode((m) => (m === 'map' ? 'photos' : 'map'))
+    setMode((m) => (m === HeroMode.MAP ? HeroMode.PHOTOS : HeroMode.MAP))
   }
 
-  const isMapMode = mode === 'map'
+  const isMapMode = mode === HeroMode.MAP
 
   return (
     <Pressable style={styles.toggleBtn} onPress={handlePress} hitSlop={8}>

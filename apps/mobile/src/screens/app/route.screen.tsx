@@ -15,6 +15,7 @@ import {
   RouteIdentity,
   StatsRow,
 } from '@/src/features/route/components'
+import { useFeaturedPoisPolling } from '@/src/features/route/hooks/useFeaturedPoisPolling'
 import { useRoute } from '@/src/features/route/hooks/useRoute'
 import { ensureGpxFile, shareGpxFile } from '@/src/features/route/utils/gpxFile'
 import { buildRouteLink } from '@/src/features/route/utils/routeLink'
@@ -26,10 +27,9 @@ export default function RouteScreen() {
   const router = useRouter()
 
   const {
-    activeRouteId,
-    isLoading,
     featuredPoiMarkers,
     poiStatus,
+    featuredPoisError,
     route,
     setActiveRouteId,
     loadRoute,
@@ -77,6 +77,7 @@ export default function RouteScreen() {
   const handleOpenExternal = async () => {
     try {
       const file = await ensureGpxFile(gpxFilename, () => loadGpxUrl(id))
+
       await shareGpxFile(file, 'Відкрити в додатку для карт')
     } catch (error) {
       console.error('GPX open failed', error)
@@ -94,24 +95,13 @@ export default function RouteScreen() {
   useEffect(() => {
     if (id) {
       setActiveRouteId(id)
-      void loadRoute(id)
+      void loadRoute(id).catch(() => {
+        toast.error('Не вдалося завантажити маршрут')
+      })
     }
   }, [id, loadRoute, setActiveRouteId])
 
-  useEffect(() => {
-    const isPoiStatusNotPending = poiStatus !== 'PENDING'
-    const isThereIncorrectId = activeRouteId !== id || !id
-
-    if (isThereIncorrectId || isPoiStatusNotPending || isLoading) {
-      return
-    }
-
-    const timeout = setTimeout(() => {
-      void loadRoute(id)
-    }, 3000)
-
-    return () => clearTimeout(timeout)
-  }, [activeRouteId, id, poiStatus, isLoading, loadRoute])
+  useFeaturedPoisPolling(id)
 
   if (!route || route.id !== id) return null
 
@@ -134,8 +124,9 @@ export default function RouteScreen() {
       >
         <HeroSection
           route={route}
-          poiMarkers={featuredPoiMarkers}
+          previewPoiMarkers={featuredPoiMarkers}
           poiStatus={poiStatus}
+          poiError={featuredPoisError}
         />
 
         <View style={styles.card}>
@@ -164,7 +155,6 @@ export default function RouteScreen() {
       </ScrollView>
 
       <PrimaryActions
-        isLoading={isLoading}
         onDownloadGpx={handleDownloadGpx}
         onOpenExternal={handleOpenExternal}
         gpxAvailable={route.gpxAvailable}

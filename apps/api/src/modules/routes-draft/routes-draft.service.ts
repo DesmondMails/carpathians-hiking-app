@@ -179,7 +179,7 @@ export class RoutesDraftService {
   ): Promise<RouteDraft> {
     const parsedGpx = await this.gpxParserService.parseGpx(file);
 
-    const fileName = (file as { originalname: string }).originalname;
+    const fileName = this.decodeFileName(file.originalname);
 
     const title = this.extractTitleFromFileName(fileName);
 
@@ -381,5 +381,13 @@ export class RoutesDraftService {
 
   private extractTitleFromFileName(fileName: string): string {
     return fileName.split('.').slice(0, -1).join(' ');
+  }
+
+  private decodeFileName(fileName: string): string {
+    try {
+      return decodeURIComponent(fileName);
+    } catch {
+      return fileName;
+    }
   }
 }
