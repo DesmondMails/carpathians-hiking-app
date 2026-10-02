@@ -2,10 +2,14 @@
   "name": "@hiking/shared",
   "version": "1.0.0",
   "private": true,
-  "main": "src/index.ts",
-  "types": "src/index.ts",
+  "main": "./runtime.js",
+  "types": "./src/index.ts",
   "exports": {
-    ".": "./src/index.ts",
+    ".": {
+      "types": "./src/index.ts",
+      "require": "./runtime.js",
+      "default": "./runtime.js"
+    },
     "./*": "./src/*.ts"
   }
 }

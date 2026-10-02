@@ -15,8 +15,6 @@ import type {
   RoutePoiSource,
 } from 'src/prisma/generated/client';
 
-import { selectFeaturedRoutePois } from './featured-route-pois';
-
 export interface RouteAuthorSource {
   id: string;
   email: string;
@@ -32,7 +30,7 @@ export type RouteWithPois = Route & {
   routePois: (RoutePoi & { source: RoutePoiSource })[];
 };
 
-function toRoutePoiView(
+export function toRoutePoiView(
   poi: RoutePoi & { source: RoutePoiSource },
 ): SharedRoutePoi {
   return {
@@ -79,10 +77,6 @@ export const toRouteView = (
   author: RouteAuthorSource,
   images: RouteImageViewSource,
 ): RouteDetails => {
-  const featuredPois = selectFeaturedRoutePois(
-    route.routePois,
-    route.distanceM,
-  ).map(toRoutePoiView);
   const createdBy: RouteAuthor = {
     id: author.id,
     // TODO: replace with a real display-name column once the User model has one.
@@ -107,8 +101,6 @@ export const toRouteView = (
 
     routeCoordinates: asCoordinates(route.routeCoordinatesJson) ?? [],
     elevationProfile: asElevationProfile(route.elevationProfileJson) ?? [],
-    poiMarkers: featuredPois,
-    featuredPoiMarkers: featuredPois,
     poiEnrichmentStatus: route.poiEnrichmentStatus,
 
     gpxAvailable: route.gpxAvailable,

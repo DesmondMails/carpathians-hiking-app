@@ -1,6 +1,10 @@
 import { createHash } from 'node:crypto';
 
-import type { RouteCoordinate, RoutePoisResponse } from '@hiking/shared';
+import type {
+  RouteCoordinate,
+  RoutePoiEnrichmentStatus,
+  RoutePoisResponse,
+} from '@hiking/shared';
 import { type RoutePoiConfidence } from '@hiking/shared';
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 
@@ -144,6 +148,23 @@ export class PoiEnrichmentService {
         },
       });
     }
+  }
+
+  async getRoutePoiEnrichmentStatus(
+    routeId: string,
+  ): Promise<RoutePoiEnrichmentStatus> {
+    const route = await this.prisma.route.findUnique({
+      where: { id: routeId },
+      select: {
+        poiEnrichmentStatus: true,
+      },
+    });
+
+    if (!route) {
+      throw new NotFoundException('Маршрут не знайдено');
+    }
+
+    return route.poiEnrichmentStatus;
   }
 
   private async markRouteEnrichmentPending(routeId: string): Promise<void> {

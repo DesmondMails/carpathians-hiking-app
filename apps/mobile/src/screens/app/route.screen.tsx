@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 
 import { ScrollView, Share, StyleSheet, View } from 'react-native'
 
+import { RoutePoiEnrichmentStatusOptions } from '@hiking/shared'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 
 import { useAuth } from '@/src/features/auth/hooks/useAuth'
@@ -27,13 +28,14 @@ export default function RouteScreen() {
 
   const {
     activeRouteId,
-    isLoading,
     featuredPoiMarkers,
     poiStatus,
+    isFeaturedPoisLoading,
     route,
     setActiveRouteId,
     loadRoute,
     loadGpxUrl,
+    loadFeaturedRoutePois,
   } = useRoute()
   const { user } = useAuth()
 
@@ -77,6 +79,7 @@ export default function RouteScreen() {
   const handleOpenExternal = async () => {
     try {
       const file = await ensureGpxFile(gpxFilename, () => loadGpxUrl(id))
+
       await shareGpxFile(file, 'Відкрити в додатку для карт')
     } catch (error) {
       console.error('GPX open failed', error)
@@ -95,23 +98,34 @@ export default function RouteScreen() {
     if (id) {
       setActiveRouteId(id)
       void loadRoute(id)
+      void loadFeaturedRoutePois(id)
     }
-  }, [id, loadRoute, setActiveRouteId])
+  }, [id, loadRoute, setActiveRouteId, loadFeaturedRoutePois])
 
   useEffect(() => {
-    const isPoiStatusNotPending = poiStatus !== 'PENDING'
+    const isPoiStatusNotPending =
+      poiStatus !== RoutePoiEnrichmentStatusOptions.PENDING
     const isThereIncorrectId = activeRouteId !== id || !id
 
-    if (isThereIncorrectId || isPoiStatusNotPending || isLoading) {
+    const shoulNotLoadFeaturedPois =
+      isThereIncorrectId || isPoiStatusNotPending || isFeaturedPoisLoading
+
+    if (shoulNotLoadFeaturedPois) {
       return
     }
 
     const timeout = setTimeout(() => {
-      void loadRoute(id)
+      void loadFeaturedRoutePois(id)
     }, 3000)
 
     return () => clearTimeout(timeout)
-  }, [activeRouteId, id, poiStatus, isLoading, loadRoute])
+  }, [
+    id,
+    activeRouteId,
+    poiStatus,
+    isFeaturedPoisLoading,
+    loadFeaturedRoutePois,
+  ])
 
   if (!route || route.id !== id) return null
 
@@ -134,7 +148,7 @@ export default function RouteScreen() {
       >
         <HeroSection
           route={route}
-          poiMarkers={featuredPoiMarkers}
+          previewPoiMarkers={featuredPoiMarkers}
           poiStatus={poiStatus}
         />
 
@@ -164,7 +178,6 @@ export default function RouteScreen() {
       </ScrollView>
 
       <PrimaryActions
-        isLoading={isLoading}
         onDownloadGpx={handleDownloadGpx}
         onOpenExternal={handleOpenExternal}
         gpxAvailable={route.gpxAvailable}

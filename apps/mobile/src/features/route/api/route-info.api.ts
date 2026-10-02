@@ -17,6 +17,14 @@ export const routeInfoApi = {
     return data
   },
 
+  async getFeaturedRoutePois(routeId: string): Promise<RoutePoisResponse> {
+    const { data } = await apiClient.get<RoutePoisResponse>(
+      `/routes/${routeId}/pois/featured`,
+    )
+
+    return data
+  },
+
   async getGpxUrl(routeId: string): Promise<string> {
     const { data } = await apiClient.get<string>(`/routes/${routeId}/gpx-url`)
 

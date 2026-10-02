@@ -3,6 +3,7 @@ import { useRouteStore } from '../store/route.store'
 export const useRoute = () => {
   const activeRouteId = useRouteStore((state) => state.activeRouteId)
   const isLoading = useRouteStore((state) => state.isLoading)
+  const isFeaturedPoisLoading = useRouteStore((state) => state.isFeaturedPoisLoading)
   const featuredPoiMarkers = useRouteStore((state) => state.featuredPoiMarkers)
   const allPoiMarkers = useRouteStore((state) => state.allPoiMarkers)
   const poiStatus = useRouteStore((state) => state.poiStatus)
@@ -10,11 +11,13 @@ export const useRoute = () => {
   const setActiveRouteId = useRouteStore((state) => state.setActiveRouteId)
   const loadRoute = useRouteStore((state) => state.loadRoute)
   const loadRoutePois = useRouteStore((state) => state.loadRoutePois)
+  const loadFeaturedRoutePois = useRouteStore((state) => state.loadFeaturedRoutePois)
   const loadGpxUrl = useRouteStore((state) => state.loadGpxUrl)
 
   return {
     activeRouteId,
     isLoading,
+    isFeaturedPoisLoading,
     featuredPoiMarkers,
     allPoiMarkers,
     poiStatus,
@@ -22,6 +25,7 @@ export const useRoute = () => {
     setActiveRouteId,
     loadRoute,
     loadRoutePois,
+    loadFeaturedRoutePois,
     loadGpxUrl,
   }
 }

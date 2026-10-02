@@ -101,6 +101,19 @@ export class RoutesController {
     return this.routesService.getRoutePois(routeId);
   }
 
+  @Get(':id/pois/featured')
+  @ApiOperation({ summary: 'Отримати Featured POI маршруту по id' })
+  @ApiResponse({
+    status: 200,
+    description: 'Featured POI маршруту успішно отримані',
+  })
+  @ApiResponse({ status: 404, description: 'Маршрут не знайдено' })
+  async getFeaturedRoutePois(
+    @Param('id') routeId: string,
+  ): Promise<RoutePoisResponse> {
+    return this.routesService.getFeaturedRoutePois(routeId);
+  }
+
   @Get(':id')
   @ApiOperation({ summary: 'Отримати маршрут по id' })
   @ApiResponse({ status: 200, description: 'Маршрут успішно отриманий' })

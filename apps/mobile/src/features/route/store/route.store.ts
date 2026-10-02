@@ -2,6 +2,7 @@ import {
   RouteDetails,
   RoutePoi,
   RoutePoiEnrichmentStatus,
+  RoutePoiEnrichmentStatusOptions,
 } from '@hiking/shared'
 import { create } from 'zustand'
 
@@ -11,6 +12,7 @@ interface RouteState {
   activeRouteId: string | null
   isLoading: boolean
   isPoisLoading: boolean
+  isFeaturedPoisLoading: boolean
   gpxUrl: string | null
   featuredPoiMarkers: RoutePoi[]
   allPoiMarkers: RoutePoi[]
@@ -19,6 +21,7 @@ interface RouteState {
   setActiveRouteId: (routeId: string | null) => void
   loadRoute: (routeId: string) => Promise<void>
   loadRoutePois: (routeId: string) => Promise<void>
+  loadFeaturedRoutePois: (routeId: string) => Promise<void>
   loadGpxUrl: (routeId: string) => Promise<string>
 }
 
@@ -26,6 +29,7 @@ export const useRouteStore = create<RouteState>((set) => ({
   activeRouteId: null,
   isLoading: false,
   isPoisLoading: false,
+  isFeaturedPoisLoading: false,
   gpxUrl: null,
   featuredPoiMarkers: [],
   allPoiMarkers: [],
@@ -34,7 +38,6 @@ export const useRouteStore = create<RouteState>((set) => ({
 
   setActiveRouteId: (routeId) =>
     set((state) => {
-      console.log('setActiveRouteId', routeId)
       if (state.activeRouteId === routeId) {
         return state
       }
@@ -44,7 +47,7 @@ export const useRouteStore = create<RouteState>((set) => ({
         route: null,
         featuredPoiMarkers: [],
         allPoiMarkers: [],
-        poiStatus: 'PENDING',
+        poiStatus: RoutePoiEnrichmentStatusOptions.PENDING,
       }
     }),
 
@@ -61,8 +64,6 @@ export const useRouteStore = create<RouteState>((set) => ({
 
         return {
           route,
-          featuredPoiMarkers: route.featuredPoiMarkers,
-          poiStatus: route.poiEnrichmentStatus,
         }
       })
     } catch (error) {
@@ -74,9 +75,7 @@ export const useRouteStore = create<RouteState>((set) => ({
         return {
           isLoading: false,
           route: null,
-          featuredPoiMarkers: [],
           allPoiMarkers: [],
-          poiStatus: 'FAILED',
         }
       })
       throw error
@@ -98,8 +97,8 @@ export const useRouteStore = create<RouteState>((set) => ({
         console.log('response loadRoutePois', response)
 
         return {
-          allPoiMarkers: response.poiMarkers,
           poiStatus: response.status,
+          allPoiMarkers: response.poiMarkers,
         }
       })
     } catch (error) {
@@ -109,7 +108,7 @@ export const useRouteStore = create<RouteState>((set) => ({
         }
 
         return {
-          poiStatus: 'FAILED',
+          poiStatus: RoutePoiEnrichmentStatusOptions.FAILED,
         }
       })
       throw error
@@ -117,9 +116,39 @@ export const useRouteStore = create<RouteState>((set) => ({
       set({ isPoisLoading: false })
     }
   },
-  loadGpxUrl: async (routeId: string) => {
-    set({ isLoading: true })
+  loadFeaturedRoutePois: async (routeId: string) => {
+    set({ isFeaturedPoisLoading: true })
 
+    try {
+      const response = await routeInfoApi.getFeaturedRoutePois(routeId)
+
+      set((state) => {
+        if (state.activeRouteId !== routeId) {
+          return { isFeaturedPoisLoading: false }
+        }
+
+        return {
+          poiStatus: response.status,
+          featuredPoiMarkers: response.poiMarkers,
+        }
+      })
+    } catch (error) {
+      set((state) => {
+        if (state.activeRouteId !== routeId) {
+          return { isFeaturedPoisLoading: false }
+        }
+
+        return {
+          poiStatus: RoutePoiEnrichmentStatusOptions.FAILED,
+          featuredPoiMarkers: [],
+        }
+      })
+      throw error
+    } finally {
+      set({ isFeaturedPoisLoading: false })
+    }
+  },
+  loadGpxUrl: async (routeId: string) => {
     try {
       const gpxUrl = await routeInfoApi.getGpxUrl(routeId)
 
@@ -127,10 +156,7 @@ export const useRouteStore = create<RouteState>((set) => ({
 
       return gpxUrl
     } catch (error) {
-      set({ isLoading: false })
       throw error
-    } finally {
-      set({ isLoading: false })
     }
   },
 }))
