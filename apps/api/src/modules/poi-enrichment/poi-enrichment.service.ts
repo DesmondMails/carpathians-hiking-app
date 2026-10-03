@@ -5,7 +5,10 @@ import type {
   RoutePoiEnrichmentStatus,
   RoutePoisResponse,
 } from '@hiking/shared';
-import { type RoutePoiConfidence } from '@hiking/shared';
+import {
+  RoutePoiEnrichmentStatusOptions,
+  type RoutePoiConfidence,
+} from '@hiking/shared';
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 
 import { asCoordinates } from 'src/common/utils/json-guards';
@@ -121,15 +124,6 @@ export class PoiEnrichmentService {
 
       await this.persistRoutePois(routeId, persistableCandidates);
 
-      await this.prisma.route.update({
-        where: { id: routeId },
-        data: {
-          poiEnrichmentStatus: 'READY',
-          poiEnrichmentError: null,
-          poiEnrichedAt: new Date(),
-        },
-      });
-
       this.logger.log(
         `POI enrichment completed for route=${routeId}, persisted=${persistableCandidates.length}`,
       );
@@ -140,10 +134,10 @@ export class PoiEnrichmentService {
         `POI enrichment failed for route=${routeId}: ${message}`,
       );
 
-      await this.prisma.route.update({
+      await this.prisma.route.updateMany({
         where: { id: routeId },
         data: {
-          poiEnrichmentStatus: 'FAILED',
+          poiEnrichmentStatus: RoutePoiEnrichmentStatusOptions.FAILED,
           poiEnrichmentError: message.slice(0, 500),
         },
       });
@@ -171,7 +165,7 @@ export class PoiEnrichmentService {
     await this.prisma.route.update({
       where: { id: routeId },
       data: {
-        poiEnrichmentStatus: 'PENDING',
+        poiEnrichmentStatus: RoutePoiEnrichmentStatusOptions.PENDING,
         poiEnrichmentError: null,
       },
     });
@@ -419,6 +413,15 @@ export class PoiEnrichmentService {
           },
         });
       }
+
+      await tx.route.update({
+        where: { id: routeId },
+        data: {
+          poiEnrichmentStatus: RoutePoiEnrichmentStatusOptions.READY,
+          poiEnrichmentError: null,
+          poiEnrichedAt: new Date(),
+        },
+      });
     });
   }
 

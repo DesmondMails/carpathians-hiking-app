@@ -10,8 +10,10 @@ import {
 const DEFAULT_OVERPASS_URL = 'https://overpass-api.de/api/interpreter';
 const DEFAULT_OVERPASS_USER_AGENT =
   'hiking-app-poi-enrichment/1.0 (contact: support@hiking.app)';
-const REQUEST_TIMEOUT_MS = 15000;
+const REQUEST_TIMEOUT_MS = 27000;
 const MAX_ATTEMPTS = 3;
+
+const retriableErrorCodes = [408, 429, 500, 502, 503, 504];
 
 @Injectable()
 export class OverpassClientService {
@@ -29,6 +31,7 @@ export class OverpassClientService {
 
     for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt += 1) {
       const controller = new AbortController();
+
       const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
 
       try {
@@ -43,10 +46,10 @@ export class OverpassClientService {
           signal: controller.signal,
         });
 
-        clearTimeout(timeout);
-
         if (!response.ok) {
-          throw new Error(`Overpass HTTP ${response.status}`);
+          throw new Error(`Overpass HTTP ${response.status}`, {
+            cause: response.status,
+          });
         }
 
         const payload = (await response.json()) as OverpassResponse;
@@ -60,20 +63,36 @@ export class OverpassClientService {
 
         return elements;
       } catch (error) {
-        clearTimeout(timeout);
-
         const message = error instanceof Error ? error.message : String(error);
 
         this.logger.warn(
           `Overpass request failed attempt=${attempt}/${MAX_ATTEMPTS}: ${message}`,
         );
 
-        if (attempt === MAX_ATTEMPTS) {
+        const isRetriableErrorCode =
+          error instanceof Error &&
+          typeof error.cause === 'number' &&
+          retriableErrorCodes.includes(error.cause);
+
+        const isRequestAborted =
+          error instanceof Error && controller.signal.aborted;
+
+        const shouldRetry = isRetriableErrorCode || isRequestAborted;
+
+        const shouldStop = attempt === MAX_ATTEMPTS || !shouldRetry;
+
+        if (shouldStop) {
           throw error;
         }
-
-        await this.delay(attempt * 500);
+      } finally {
+        clearTimeout(timeout);
       }
+
+      const randomNumber = Math.floor(Math.random() * 1000);
+
+      const delayTimeMs = attempt * 500 + randomNumber;
+
+      await this.delay(delayTimeMs);
     }
 
     return [];
