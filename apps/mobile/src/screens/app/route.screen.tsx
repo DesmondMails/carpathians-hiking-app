@@ -16,6 +16,7 @@ import {
   StatsRow,
 } from '@/src/features/route/components'
 import { useFeaturedPoisPolling } from '@/src/features/route/hooks/useFeaturedPoisPolling'
+import { usePoiEnrichmentRetry } from '@/src/features/route/hooks/usePoiEnrichmentRetry'
 import { useRoute } from '@/src/features/route/hooks/useRoute'
 import { ensureGpxFile, shareGpxFile } from '@/src/features/route/utils/gpxFile'
 import { buildRouteLink } from '@/src/features/route/utils/routeLink'
@@ -101,11 +102,13 @@ export default function RouteScreen() {
     }
   }, [id, loadRoute, setActiveRouteId])
 
+  const isOwner = route?.id === id && route.createdBy.id === user?.id
+
+  usePoiEnrichmentRetry(id, isOwner)
+
   useFeaturedPoisPolling(id)
 
   if (!route || route.id !== id) return null
-
-  const canEdit = route.createdBy.id === user?.id
 
   return (
     <View style={styles.root}>
@@ -113,7 +116,7 @@ export default function RouteScreen() {
         saved={saved}
         onSave={handleSave}
         onShare={handleShare}
-        onEdit={canEdit ? handleEdit : undefined}
+        onEdit={isOwner ? handleEdit : undefined}
       />
 
       <ScrollView

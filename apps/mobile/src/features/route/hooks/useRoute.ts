@@ -6,7 +6,9 @@ export const useRoute = () => {
   const isFeaturedPoisLoading = useRouteStore(
     (state) => state.isFeaturedPoisLoading,
   )
-  const featuredPoisError = useRouteStore((state) => state.featuredPoisError)
+  const featuredPoisError = useRouteStore(
+    (state) => state.reEnrichmentError ?? state.featuredPoisError,
+  )
   const featuredPoiMarkers = useRouteStore((state) => state.featuredPoiMarkers)
   const allPoiMarkers = useRouteStore((state) => state.allPoiMarkers)
   const poiStatus = useRouteStore((state) => state.poiStatus)
@@ -18,6 +20,7 @@ export const useRoute = () => {
     (state) => state.loadFeaturedRoutePois,
   )
   const loadGpxUrl = useRouteStore((state) => state.loadGpxUrl)
+  const reEnrichRoutePois = useRouteStore((state) => state.reEnrichRoutePois)
 
   return {
     activeRouteId,
@@ -33,5 +36,6 @@ export const useRoute = () => {
     loadRoutePois,
     loadFeaturedRoutePois,
     loadGpxUrl,
+    reEnrichRoutePois,
   }
 }

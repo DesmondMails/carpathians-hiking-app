@@ -52,6 +52,9 @@ export interface RouteDetails {
   rating: number
   reviewCount: number
 
+  poiEnrichedFailedAt: string | null
+  poiEnrichedFailedError: string | null
+
   createdBy: RouteAuthor
 
   status: 'DRAFT' | 'PUBLISHED' | 'ARCHIVED'

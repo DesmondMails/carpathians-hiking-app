@@ -34,4 +34,8 @@ export const routeInfoApi = {
 
     return data
   },
+
+  async reEnrichRoutePois(routeId: string): Promise<void> {
+    await apiClient.post(`/routes/${routeId}/poi-enrichment`)
+  },
 }

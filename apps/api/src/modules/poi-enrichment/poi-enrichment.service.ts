@@ -1,10 +1,6 @@
 import { createHash } from 'node:crypto';
 
-import type {
-  RouteCoordinate,
-  RoutePoiEnrichmentStatus,
-  RoutePoisResponse,
-} from '@hiking/shared';
+import type { RouteCoordinate, RoutePoisResponse } from '@hiking/shared';
 import {
   RoutePoiEnrichmentStatusOptions,
   type RoutePoiConfidence,
@@ -140,13 +136,14 @@ export class PoiEnrichmentService {
     }
   }
 
-  async getRoutePoiEnrichmentStatus(
+  async getRoutePoiEnrichmentState(
     routeId: string,
-  ): Promise<RoutePoiEnrichmentStatus> {
+  ): Promise<Pick<RoutePoisResponse, 'status' | 'poiEnrichedFailedAt'>> {
     const route = await this.prisma.route.findUnique({
       where: { id: routeId },
       select: {
         poiEnrichmentStatus: true,
+        poiEnrichedFailedAt: true,
       },
     });
 
@@ -154,7 +151,10 @@ export class PoiEnrichmentService {
       throw new NotFoundException('Маршрут не знайдено');
     }
 
-    return route.poiEnrichmentStatus;
+    return {
+      status: route.poiEnrichmentStatus,
+      poiEnrichedFailedAt: route.poiEnrichedFailedAt?.toISOString() ?? null,
+    };
   }
 
   async markRouteEnrichmentFailed(
@@ -168,6 +168,7 @@ export class PoiEnrichmentService {
       data: {
         poiEnrichmentStatus: RoutePoiEnrichmentStatusOptions.FAILED,
         poiEnrichmentError: message.slice(0, 500),
+        poiEnrichedFailedAt: new Date(),
       },
     });
   }

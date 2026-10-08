@@ -184,6 +184,18 @@ export class RoutesController {
     );
   }
 
+  @Post(':id/poi-enrichment')
+  @ApiOperation({ summary: 'Запланувати enrichment POI маршруту' })
+  @ApiResponse({ status: 200, description: 'Enrichment POI заплановано' })
+  @ApiResponse({ status: 401, description: 'Користувач не авторизований' })
+  @ApiResponse({ status: 404, description: 'Маршрут не знайдено' })
+  async reEnrichRoutePois(
+    @Param('id') routeId: string,
+    @CurrentUser() user: User,
+  ): Promise<void> {
+    return this.routesService.reEnrichRoutePois(routeId, user.id);
+  }
+
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Видалити маршрут' })
@@ -211,13 +223,5 @@ export class RoutesController {
     @Param('imageId') imageId: string,
   ): Promise<void> {
     return this.routesService.deleteRouteImage(routeId, imageId, user.id);
-  }
-
-  @Post('test-queue')
-  @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Тестова черга' })
-  @ApiResponse({ status: 200, description: 'Тестова черга успішно створена' })
-  async testQueue(): Promise<void> {
-    return this.routesService.testQueue();
   }
 }

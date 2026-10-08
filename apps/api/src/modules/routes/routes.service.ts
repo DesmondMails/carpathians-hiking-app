@@ -8,7 +8,6 @@ import {
   RouteDraftPreview,
   RoutePoiEnrichmentStatusOptions,
 } from '@hiking/shared';
-import { InjectQueue } from '@nestjs/bullmq';
 import {
   BadRequestException,
   ForbiddenException,
@@ -16,7 +15,6 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
-import { Queue } from 'bullmq';
 
 import {
   RouteWithPois,
@@ -54,12 +52,7 @@ export class RoutesService {
     private prisma: PrismaService,
     private storageService: StorageService,
     private poiEnrichmentService: PoiEnrichmentService,
-    @InjectQueue('test-queue') private readonly queue: Queue,
   ) {}
-
-  async testQueue(): Promise<void> {
-    await this.queue.add('test-job', { message: 'Hello, world!' });
-  }
 
   async createRoute(
     userId: string,
@@ -146,12 +139,12 @@ export class RoutesService {
   }
 
   async getFeaturedRoutePois(routeId: string): Promise<RoutePoisResponse> {
-    const status =
-      await this.poiEnrichmentService.getRoutePoiEnrichmentStatus(routeId);
+    const enrichment =
+      await this.poiEnrichmentService.getRoutePoiEnrichmentState(routeId);
 
-    if (status !== RoutePoiEnrichmentStatusOptions.READY) {
+    if (enrichment.status !== RoutePoiEnrichmentStatusOptions.READY) {
       return {
-        status,
+        ...enrichment,
         poiMarkers: [],
       };
     }
@@ -164,7 +157,8 @@ export class RoutesService {
     ).map(toRoutePoiView);
 
     return {
-      status,
+      status: route.poiEnrichmentStatus,
+      poiEnrichedFailedAt: route.poiEnrichedFailedAt?.toISOString() ?? null,
       poiMarkers: featuredPois,
     };
   }
@@ -334,6 +328,26 @@ export class RoutesService {
     return this.storageService.createPresignedDownloadUrl({
       key: route.gpxStorageKey,
     });
+  }
+
+  async reEnrichRoutePois(routeId: string, userId: string): Promise<void> {
+    const route = await this.findOwnedRouteById(routeId, userId);
+
+    if (route.poiEnrichmentStatus !== RoutePoiEnrichmentStatusOptions.FAILED) {
+      throw new BadRequestException('Маршрут не має статусу READY');
+    }
+
+    const enRichFailedLessThan10MinutesAgo =
+      route.poiEnrichedFailedAt &&
+      route.poiEnrichedFailedAt.getTime() > Date.now() - 10 * 60 * 1000;
+
+    if (enRichFailedLessThan10MinutesAgo) {
+      throw new BadRequestException(
+        'Yе можна  менше шукати точки менш ніж через 10 хвилин після помилки',
+      );
+    }
+
+    await this.poiEnrichmentService.scheduleRoutePoiEnrichment(routeId);
   }
 
   private findRouteById(routeId: string): Promise<Route> {
