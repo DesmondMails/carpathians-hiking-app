@@ -184,6 +184,18 @@ export class RoutesController {
     );
   }
 
+  @Post(':id/poi-enrichment')
+  @ApiOperation({ summary: 'Запланувати enrichment POI маршруту' })
+  @ApiResponse({ status: 200, description: 'Enrichment POI заплановано' })
+  @ApiResponse({ status: 401, description: 'Користувач не авторизований' })
+  @ApiResponse({ status: 404, description: 'Маршрут не знайдено' })
+  async reEnrichRoutePois(
+    @Param('id') routeId: string,
+    @CurrentUser() user: User,
+  ): Promise<void> {
+    return this.routesService.reEnrichRoutePois(routeId, user.id);
+  }
+
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Видалити маршрут' })

@@ -11,6 +11,7 @@ require('ts-node').register({
 
 // Isolate the store from the native API client; control response ordering.
 const requests = []
+const retryRequests = []
 const apiPath = require.resolve('../src/features/route/api/route-info.api.ts')
 require.cache[apiPath] = {
   id: apiPath,
@@ -18,6 +19,10 @@ require.cache[apiPath] = {
   loaded: true,
   exports: {
     routeInfoApi: {
+      reEnrichRoutePois: (routeId) =>
+        new Promise((resolve, reject) => {
+          retryRequests.push({ routeId, resolve, reject })
+        }),
       getFeaturedRoutePois: (routeId, signal) =>
         new Promise((resolve, reject) => {
           requests.push({ routeId, signal, resolve, reject })
@@ -62,13 +67,11 @@ test('featured POI state preserves data and rejects stale work', async (t) => {
     async () => {
       activate('missing')
       const pending = load('missing')
-      requests
-        .shift()
-        .reject(
-          new AxiosError('missing', 'ERR_BAD_REQUEST', undefined, undefined, {
-            status: 404,
-          }),
-        )
+      requests.shift().reject(
+        new AxiosError('missing', 'ERR_BAD_REQUEST', undefined, undefined, {
+          status: 404,
+        }),
+      )
       assert.deepEqual(await pending, { kind: 'error', retryable: false })
       assert.equal(state().poiStatus, 'PENDING')
     },
@@ -141,7 +144,15 @@ test('polling schedules bounded retries and stops on READY or cleanup', async (t
   const originalStore = require.cache[storePath].exports
   require.cache[reactPath].exports = {
     ...originalReact,
-    useEffect: (effect) => {
+    useEffect: (effect, deps) => {
+      assert.ok(
+        deps.includes(state().featuredPoisPollVersion),
+        'polling observes explicit restart version',
+      )
+      assert.ok(
+        deps.includes(state().isReEnriching),
+        'polling observes POST lifecycle',
+      )
       cleanup = effect()
     },
   }
@@ -199,5 +210,147 @@ test('polling schedules bounded retries and stops on READY or cleanup', async (t
   } finally {
     require.cache[reactPath].exports = originalReact
     require.cache[storePath].exports = originalStore
+  }
+})
+
+test('accepted retry restarts preview polling and tolerates the queued job still showing old FAILED', async () => {
+  activate('retry-flow')
+  const failedAt = '2026-10-08T10:00:00.000Z'
+  const initial = load('retry-flow')
+  requests
+    .shift()
+    .resolve({
+      status: 'FAILED',
+      poiEnrichedFailedAt: failedAt,
+      poiMarkers: [],
+    })
+  await initial
+  assert.equal(state().poiEnrichedFailedAt, failedAt)
+  const stale = load('retry-flow')
+  const staleRequest = requests.shift()
+  const version = state().featuredPoisPollVersion
+  const retry = state().reEnrichRoutePois('retry-flow')
+  await state().reEnrichRoutePois('retry-flow')
+  assert.equal(retryRequests.length, 1, 'coalesces concurrent POSTs')
+  retryRequests.shift().resolve()
+  await retry
+  assert.equal(state().poiStatus, 'PENDING')
+  assert.equal(state().featuredPoisPollVersion, version + 1)
+  staleRequest.resolve({
+    status: 'FAILED',
+    poiEnrichedFailedAt: failedAt,
+    poiMarkers: [],
+  })
+  assert.deepEqual(await stale, { kind: 'cancelled' })
+  const queued = load('retry-flow')
+  requests
+    .shift()
+    .resolve({
+      status: 'FAILED',
+      poiEnrichedFailedAt: failedAt,
+      poiMarkers: [],
+    })
+  assert.deepEqual(await queued, { kind: 'success', status: 'PENDING' })
+  const final = load('retry-flow')
+  requests
+    .shift()
+    .resolve({
+      status: 'FAILED',
+      poiEnrichedFailedAt: '2026-10-08T10:15:00.000Z',
+      poiMarkers: [],
+    })
+  assert.deepEqual(await final, { kind: 'success', status: 'FAILED' })
+})
+
+test('POST failures are handled and obsolete completions do not mutate another route', async () => {
+  activate('post-error')
+  store.setState({ poiStatus: 'FAILED', poiEnrichedFailedAt: null })
+  const retry = state().reEnrichRoutePois('post-error')
+  retryRequests.shift().reject(new AxiosError('offline', 'ERR_NETWORK'))
+  await assert.doesNotReject(retry)
+  assert.equal(state().poiStatus, 'FAILED')
+  assert.equal(state().isReEnriching, false)
+  assert.ok(state().reEnrichmentError)
+  const old = state().reEnrichRoutePois('post-error')
+  const oldRequest = retryRequests.shift()
+  activate('other')
+  const version = state().featuredPoisPollVersion
+  oldRequest.resolve()
+  await old
+  assert.equal(state().featuredPoisPollVersion, version)
+  assert.equal(state().reEnrichmentError, null)
+})
+
+test('auto retry respects cooldown, late ownership, route changes and one POST per failure', async (t) => {
+  const reactPath = require.resolve('react')
+  const storePath =
+    require.resolve('../src/features/route/store/route.store.ts')
+  const hookPath =
+    require.resolve('../src/features/route/hooks/usePoiEnrichmentRetry.ts')
+  const originalReact = require.cache[reactPath].exports
+  const originalStore = require.cache[storePath].exports
+  const ref = { current: new Set() }
+  let cleanup
+  require.cache[reactPath].exports = {
+    ...originalReact,
+    useRef: () => ref,
+    useEffect: (effect) => {
+      cleanup?.()
+      cleanup = effect()
+    },
+  }
+  require.cache[storePath].exports = {
+    useRouteStore: (selector) => selector(state()),
+  }
+  delete require.cache[hookPath]
+  const { usePoiEnrichmentRetry } = require(hookPath)
+  const timers = []
+  let now = Date.parse('2026-10-08T10:09:00.000Z')
+  t.mock.method(Date, 'now', () => now)
+  t.mock.method(global, 'setTimeout', (callback, delay) => {
+    const timer = { callback, delay }
+    timers.push(timer)
+    return timer
+  })
+  t.mock.method(global, 'clearTimeout', (timer) => {
+    const index = timers.indexOf(timer)
+    if (index >= 0) timers.splice(index, 1)
+  })
+  try {
+    activate('auto')
+    store.setState({
+      poiStatus: 'FAILED',
+      poiEnrichedFailedAt: '2026-10-08T10:00:00.000Z',
+    })
+    usePoiEnrichmentRetry('auto', false)
+    assert.equal(timers.length, 0)
+    usePoiEnrichmentRetry('auto', true)
+    assert.equal(timers[0].delay, 60000)
+    activate('elsewhere')
+    usePoiEnrichmentRetry('auto', true)
+    assert.equal(timers.length, 0, 'route change cancels timer')
+    activate('auto')
+    store.setState({
+      poiStatus: 'FAILED',
+      poiEnrichedFailedAt: '2026-10-08T10:00:00.000Z',
+    })
+    now += 60000
+    usePoiEnrichmentRetry('auto', true)
+    assert.equal(timers[0].delay, 0, 'eligible exactly at 10 minutes')
+    timers.shift().callback()
+    assert.equal(retryRequests.length, 1)
+    retryRequests.shift().reject(new AxiosError('offline', 'ERR_NETWORK'))
+    await new Promise(setImmediate)
+    usePoiEnrichmentRetry('auto', true)
+    assert.equal(timers.length, 0, 'no repeated POST loop after rejection')
+    store.setState({ poiEnrichedFailedAt: '2026-10-08T10:10:00.000Z' })
+    usePoiEnrichmentRetry('auto', true)
+    assert.equal(timers[0].delay, 600000, 'fresh failure has a fresh cooldown')
+    cleanup()
+    assert.equal(timers.length, 0)
+  } finally {
+    require.cache[reactPath].exports = originalReact
+    require.cache[storePath].exports = originalStore
+    delete require.cache[hookPath]
   }
 })

@@ -20,11 +20,15 @@ interface RouteState {
   isPoisLoading: boolean
   isFeaturedPoisLoading: boolean
   featuredPoisError: string | null
+  reEnrichmentError: string | null
   gpxUrl: string | null
   featuredPoiMarkers: RoutePoi[]
   allPoiMarkers: RoutePoi[]
   poiStatus: RoutePoiEnrichmentStatus
   route: RouteDetails | null
+  isReEnriching: boolean
+  poiEnrichedFailedAt: string | null
+  featuredPoisPollVersion: number
   setActiveRouteId: (routeId: string | null) => void
   loadRoute: (routeId: string) => Promise<void>
   loadRoutePois: (routeId: string) => Promise<void>
@@ -33,10 +37,14 @@ interface RouteState {
     signal?: AbortSignal,
   ) => Promise<FeaturedPoisLoadResult>
   loadGpxUrl: (routeId: string) => Promise<string>
+  reEnrichRoutePois: (routeId: string) => Promise<void>
 }
 
 export const useRouteStore = create<RouteState>((set, get) => {
   let featuredRequestId = 0
+  let retryRequestId = 0
+  // An accepted job may still expose the previous FAILED until the worker starts.
+  let awaitingFailureAt: string | null | undefined
 
   return {
     activeRouteId: null,
@@ -44,12 +52,15 @@ export const useRouteStore = create<RouteState>((set, get) => {
     isPoisLoading: false,
     isFeaturedPoisLoading: false,
     featuredPoisError: null,
+    reEnrichmentError: null,
     gpxUrl: null,
     featuredPoiMarkers: [],
     allPoiMarkers: [],
     poiStatus: 'PENDING',
     route: null,
-
+    isReEnriching: false,
+    poiEnrichedFailedAt: null,
+    featuredPoisPollVersion: 0,
     setActiveRouteId: (routeId) =>
       set((state) => {
         if (state.activeRouteId === routeId) {
@@ -57,10 +68,15 @@ export const useRouteStore = create<RouteState>((set, get) => {
         }
 
         featuredRequestId += 1
+        retryRequestId += 1
+        awaitingFailureAt = undefined
 
         return {
           isFeaturedPoisLoading: false,
+          isReEnriching: false,
+          poiEnrichedFailedAt: null,
           featuredPoisError: null,
+          reEnrichmentError: null,
           activeRouteId: routeId,
           route: null,
           featuredPoiMarkers: [],
@@ -112,30 +128,22 @@ export const useRouteStore = create<RouteState>((set, get) => {
             return { isPoisLoading: false }
           }
 
-          console.log('response loadRoutePois', response)
-
           return {
-            poiStatus: response.status,
             allPoiMarkers: response.poiMarkers,
           }
         })
       } catch (error) {
-        set((state) => {
-          if (state.activeRouteId !== routeId) {
-            return { isPoisLoading: false }
-          }
-
-          return {
-            poiStatus: RoutePoiEnrichmentStatusOptions.FAILED,
-          }
-        })
         throw error
       } finally {
         set({ isPoisLoading: false })
       }
     },
     loadFeaturedRoutePois: async (routeId, signal) => {
-      if (get().activeRouteId !== routeId || signal?.aborted) {
+      if (
+        get().activeRouteId !== routeId ||
+        signal?.aborted ||
+        get().isReEnriching
+      ) {
         return { kind: 'cancelled' }
       }
 
@@ -155,12 +163,23 @@ export const useRouteStore = create<RouteState>((set, get) => {
           return { kind: 'cancelled' }
         }
 
+        const failedAt = response.poiEnrichedFailedAt ?? null
+        const isPreviousFailure =
+          awaitingFailureAt !== undefined &&
+          response.status === RoutePoiEnrichmentStatusOptions.FAILED &&
+          failedAt === awaitingFailureAt
+        const status = isPreviousFailure
+          ? RoutePoiEnrichmentStatusOptions.PENDING
+          : response.status
+        if (!isPreviousFailure) awaitingFailureAt = undefined
+
         set({
-          poiStatus: response.status,
+          poiStatus: status,
+          poiEnrichedFailedAt: failedAt,
           featuredPoiMarkers: response.poiMarkers,
           featuredPoisError: null,
         })
-        return { kind: 'success', status: response.status }
+        return { kind: 'success', status }
       } catch (error) {
         if (!isCurrentRequest() || signal?.aborted) {
           return { kind: 'cancelled' }
@@ -196,6 +215,45 @@ export const useRouteStore = create<RouteState>((set, get) => {
         return gpxUrl
       } catch (error) {
         throw error
+      }
+    },
+
+    reEnrichRoutePois: async (routeId: string) => {
+      if (get().activeRouteId !== routeId || get().isReEnriching) return
+
+      const requestId = ++retryRequestId
+      const isCurrentRequest = () =>
+        requestId === retryRequestId && get().activeRouteId === routeId
+      const failedAt = get().poiEnrichedFailedAt
+      featuredRequestId += 1
+      set({
+        isReEnriching: true,
+        isFeaturedPoisLoading: false,
+        reEnrichmentError: null,
+      })
+      try {
+        await routeInfoApi.reEnrichRoutePois(routeId)
+        if (!isCurrentRequest()) return
+
+        awaitingFailureAt = failedAt
+        set((state) => ({
+          poiStatus: RoutePoiEnrichmentStatusOptions.PENDING,
+          featuredPoisError: null,
+          featuredPoisPollVersion: state.featuredPoisPollVersion + 1,
+        }))
+      } catch (error) {
+        if (!isCurrentRequest()) return
+        const serverMessage = isAxiosError(error)
+          ? error.response?.data?.message
+          : null
+        set({
+          reEnrichmentError:
+            typeof serverMessage === 'string'
+              ? serverMessage
+              : 'Не вдалося повторно запустити пошук POI. Спробуйте відкрити маршрут ще раз.',
+        })
+      } finally {
+        if (isCurrentRequest()) set({ isReEnriching: false })
       }
     },
   }

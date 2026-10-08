@@ -139,12 +139,12 @@ export class RoutesService {
   }
 
   async getFeaturedRoutePois(routeId: string): Promise<RoutePoisResponse> {
-    const status =
-      await this.poiEnrichmentService.getRoutePoiEnrichmentStatus(routeId);
+    const enrichment =
+      await this.poiEnrichmentService.getRoutePoiEnrichmentState(routeId);
 
-    if (status !== RoutePoiEnrichmentStatusOptions.READY) {
+    if (enrichment.status !== RoutePoiEnrichmentStatusOptions.READY) {
       return {
-        status,
+        ...enrichment,
         poiMarkers: [],
       };
     }
@@ -157,13 +157,14 @@ export class RoutesService {
     ).map(toRoutePoiView);
 
     return {
-      status,
+      status: route.poiEnrichmentStatus,
+      poiEnrichedFailedAt: route.poiEnrichedFailedAt?.toISOString() ?? null,
       poiMarkers: featuredPois,
     };
   }
 
-  scheduleRoutePoiEnrichment(routeId: string): void {
-    this.poiEnrichmentService.scheduleRoutePoiEnrichment(routeId);
+  async scheduleRoutePoiEnrichment(routeId: string): Promise<void> {
+    await this.poiEnrichmentService.scheduleRoutePoiEnrichment(routeId);
   }
 
   async getAllRoutes(): Promise<Route[]> {
@@ -327,6 +328,26 @@ export class RoutesService {
     return this.storageService.createPresignedDownloadUrl({
       key: route.gpxStorageKey,
     });
+  }
+
+  async reEnrichRoutePois(routeId: string, userId: string): Promise<void> {
+    const route = await this.findOwnedRouteById(routeId, userId);
+
+    if (route.poiEnrichmentStatus !== RoutePoiEnrichmentStatusOptions.FAILED) {
+      throw new BadRequestException('Маршрут не має статусу READY');
+    }
+
+    const enRichFailedLessThan10MinutesAgo =
+      route.poiEnrichedFailedAt &&
+      route.poiEnrichedFailedAt.getTime() > Date.now() - 10 * 60 * 1000;
+
+    if (enRichFailedLessThan10MinutesAgo) {
+      throw new BadRequestException(
+        'Yе можна  менше шукати точки менш ніж через 10 хвилин після помилки',
+      );
+    }
+
+    await this.poiEnrichmentService.scheduleRoutePoiEnrichment(routeId);
   }
 
   private findRouteById(routeId: string): Promise<Route> {

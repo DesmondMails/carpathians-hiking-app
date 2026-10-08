@@ -1,17 +1,19 @@
 import { createHash } from 'node:crypto';
 
-import type {
-  RouteCoordinate,
-  RoutePoiEnrichmentStatus,
-  RoutePoisResponse,
+import type { RouteCoordinate, RoutePoisResponse } from '@hiking/shared';
+import {
+  RoutePoiEnrichmentStatusOptions,
+  type RoutePoiConfidence,
 } from '@hiking/shared';
-import { type RoutePoiConfidence } from '@hiking/shared';
+import { InjectQueue } from '@nestjs/bullmq';
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { Queue } from 'bullmq';
 
 import { asCoordinates } from 'src/common/utils/json-guards';
 import { Prisma } from 'src/prisma/generated/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 
+import { POI_ENRICHMENT_JOB_NAME } from './constants';
 import { OverpassClientService } from './overpass-client.service';
 import {
   PersistablePoiCandidate,
@@ -45,12 +47,11 @@ export class PoiEnrichmentService {
     private readonly overpassClient: OverpassClientService,
     private readonly poiNormalizer: PoiNormalizerService,
     private readonly poiGeometry: PoiRouteGeometryService,
+    @InjectQueue('enrichment-pois') private readonly enrichmentPoisQueue: Queue,
   ) {}
 
-  scheduleRoutePoiEnrichment(routeId: string): void {
-    setImmediate(() => {
-      void this.enrichRoutePois(routeId);
-    });
+  async scheduleRoutePoiEnrichment(routeId: string): Promise<void> {
+    await this.enrichmentPoisQueue.add(POI_ENRICHMENT_JOB_NAME, { routeId });
   }
 
   async getRoutePois(routeId: string): Promise<RoutePoisResponse> {
@@ -121,15 +122,6 @@ export class PoiEnrichmentService {
 
       await this.persistRoutePois(routeId, persistableCandidates);
 
-      await this.prisma.route.update({
-        where: { id: routeId },
-        data: {
-          poiEnrichmentStatus: 'READY',
-          poiEnrichmentError: null,
-          poiEnrichedAt: new Date(),
-        },
-      });
-
       this.logger.log(
         `POI enrichment completed for route=${routeId}, persisted=${persistableCandidates.length}`,
       );
@@ -140,23 +132,18 @@ export class PoiEnrichmentService {
         `POI enrichment failed for route=${routeId}: ${message}`,
       );
 
-      await this.prisma.route.update({
-        where: { id: routeId },
-        data: {
-          poiEnrichmentStatus: 'FAILED',
-          poiEnrichmentError: message.slice(0, 500),
-        },
-      });
+      throw error;
     }
   }
 
-  async getRoutePoiEnrichmentStatus(
+  async getRoutePoiEnrichmentState(
     routeId: string,
-  ): Promise<RoutePoiEnrichmentStatus> {
+  ): Promise<Pick<RoutePoisResponse, 'status' | 'poiEnrichedFailedAt'>> {
     const route = await this.prisma.route.findUnique({
       where: { id: routeId },
       select: {
         poiEnrichmentStatus: true,
+        poiEnrichedFailedAt: true,
       },
     });
 
@@ -164,14 +151,33 @@ export class PoiEnrichmentService {
       throw new NotFoundException('Маршрут не знайдено');
     }
 
-    return route.poiEnrichmentStatus;
+    return {
+      status: route.poiEnrichmentStatus,
+      poiEnrichedFailedAt: route.poiEnrichedFailedAt?.toISOString() ?? null,
+    };
+  }
+
+  async markRouteEnrichmentFailed(
+    routeId: string,
+    error: Error,
+  ): Promise<void> {
+    const message = error instanceof Error ? error.message : String(error);
+
+    await this.prisma.route.updateMany({
+      where: { id: routeId },
+      data: {
+        poiEnrichmentStatus: RoutePoiEnrichmentStatusOptions.FAILED,
+        poiEnrichmentError: message.slice(0, 500),
+        poiEnrichedFailedAt: new Date(),
+      },
+    });
   }
 
   private async markRouteEnrichmentPending(routeId: string): Promise<void> {
     await this.prisma.route.update({
       where: { id: routeId },
       data: {
-        poiEnrichmentStatus: 'PENDING',
+        poiEnrichmentStatus: RoutePoiEnrichmentStatusOptions.PENDING,
         poiEnrichmentError: null,
       },
     });
@@ -419,6 +425,15 @@ export class PoiEnrichmentService {
           },
         });
       }
+
+      await tx.route.update({
+        where: { id: routeId },
+        data: {
+          poiEnrichmentStatus: RoutePoiEnrichmentStatusOptions.READY,
+          poiEnrichmentError: null,
+          poiEnrichedAt: new Date(),
+        },
+      });
     });
   }
 

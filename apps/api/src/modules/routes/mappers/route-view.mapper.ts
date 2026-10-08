@@ -68,6 +68,7 @@ export function toRoutePoiView(
 export function toRoutePoisResponse(route: RouteWithPois): RoutePoisResponse {
   return {
     status: route.poiEnrichmentStatus,
+    poiEnrichedFailedAt: route.poiEnrichedFailedAt?.toISOString() ?? null,
     poiMarkers: route.routePois.map(toRoutePoiView),
   };
 }
@@ -102,6 +103,8 @@ export const toRouteView = (
     routeCoordinates: asCoordinates(route.routeCoordinatesJson) ?? [],
     elevationProfile: asElevationProfile(route.elevationProfileJson) ?? [],
     poiEnrichmentStatus: route.poiEnrichmentStatus,
+    poiEnrichedFailedAt: route.poiEnrichedFailedAt?.toISOString() ?? null,
+    poiEnrichedFailedError: route.poiEnrichmentError ?? null,
 
     gpxAvailable: route.gpxAvailable,
     rating: route.rating,

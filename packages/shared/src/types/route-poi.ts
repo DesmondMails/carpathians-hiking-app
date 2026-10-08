@@ -45,6 +45,7 @@ export interface RoutePoiSource {
 }
 
 export interface RoutePoisResponse {
+  poiEnrichedFailedAt: string | null
   status: RoutePoiEnrichmentStatus
   poiMarkers: RoutePoi[]
 }

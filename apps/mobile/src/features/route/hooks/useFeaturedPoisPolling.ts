@@ -8,6 +8,8 @@ const POLL_INTERVAL_MS = 3000
 const MAX_CONSECUTIVE_ERRORS = 3
 
 export function useFeaturedPoisPolling(routeId: string) {
+  const isReEnriching = useRouteStore((state) => state.isReEnriching)
+  const pollVersion = useRouteStore((state) => state.featuredPoisPollVersion)
   const activeRouteId = useRouteStore((state) => state.activeRouteId)
 
   const loadFeaturedRoutePois = useRouteStore(
@@ -15,7 +17,7 @@ export function useFeaturedPoisPolling(routeId: string) {
   )
 
   useEffect(() => {
-    if (!routeId || activeRouteId !== routeId) return
+    if (!routeId || activeRouteId !== routeId || isReEnriching) return
 
     const controller = new AbortController()
     let timer: ReturnType<typeof setTimeout> | undefined
@@ -47,5 +49,11 @@ export function useFeaturedPoisPolling(routeId: string) {
 
       clearTimeout(timer)
     }
-  }, [routeId, activeRouteId, loadFeaturedRoutePois])
+  }, [
+    routeId,
+    activeRouteId,
+    loadFeaturedRoutePois,
+    isReEnriching,
+    pollVersion,
+  ])
 }
