@@ -168,7 +168,7 @@ export class RoutesDraftService {
       return createdRoute;
     });
 
-    this.routesService.scheduleRoutePoiEnrichment(route.id);
+    await this.routesService.scheduleRoutePoiEnrichment(route.id);
 
     return route;
   }

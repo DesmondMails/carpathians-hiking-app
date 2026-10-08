@@ -8,6 +8,7 @@ import {
   RouteDraftPreview,
   RoutePoiEnrichmentStatusOptions,
 } from '@hiking/shared';
+import { InjectQueue } from '@nestjs/bullmq';
 import {
   BadRequestException,
   ForbiddenException,
@@ -15,6 +16,7 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
+import { Queue } from 'bullmq';
 
 import {
   RouteWithPois,
@@ -52,7 +54,12 @@ export class RoutesService {
     private prisma: PrismaService,
     private storageService: StorageService,
     private poiEnrichmentService: PoiEnrichmentService,
+    @InjectQueue('test-queue') private readonly queue: Queue,
   ) {}
+
+  async testQueue(): Promise<void> {
+    await this.queue.add('test-job', { message: 'Hello, world!' });
+  }
 
   async createRoute(
     userId: string,
@@ -162,8 +169,8 @@ export class RoutesService {
     };
   }
 
-  scheduleRoutePoiEnrichment(routeId: string): void {
-    this.poiEnrichmentService.scheduleRoutePoiEnrichment(routeId);
+  async scheduleRoutePoiEnrichment(routeId: string): Promise<void> {
+    await this.poiEnrichmentService.scheduleRoutePoiEnrichment(routeId);
   }
 
   async getAllRoutes(): Promise<Route[]> {

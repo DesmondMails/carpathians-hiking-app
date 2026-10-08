@@ -9,12 +9,15 @@ import {
   RoutePoiEnrichmentStatusOptions,
   type RoutePoiConfidence,
 } from '@hiking/shared';
+import { InjectQueue } from '@nestjs/bullmq';
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { Queue } from 'bullmq';
 
 import { asCoordinates } from 'src/common/utils/json-guards';
 import { Prisma } from 'src/prisma/generated/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 
+import { POI_ENRICHMENT_JOB_NAME } from './constants';
 import { OverpassClientService } from './overpass-client.service';
 import {
   PersistablePoiCandidate,
@@ -48,12 +51,11 @@ export class PoiEnrichmentService {
     private readonly overpassClient: OverpassClientService,
     private readonly poiNormalizer: PoiNormalizerService,
     private readonly poiGeometry: PoiRouteGeometryService,
+    @InjectQueue('enrichment-pois') private readonly enrichmentPoisQueue: Queue,
   ) {}
 
-  scheduleRoutePoiEnrichment(routeId: string): void {
-    setImmediate(() => {
-      void this.enrichRoutePois(routeId);
-    });
+  async scheduleRoutePoiEnrichment(routeId: string): Promise<void> {
+    await this.enrichmentPoisQueue.add(POI_ENRICHMENT_JOB_NAME, { routeId });
   }
 
   async getRoutePois(routeId: string): Promise<RoutePoisResponse> {
@@ -134,13 +136,7 @@ export class PoiEnrichmentService {
         `POI enrichment failed for route=${routeId}: ${message}`,
       );
 
-      await this.prisma.route.updateMany({
-        where: { id: routeId },
-        data: {
-          poiEnrichmentStatus: RoutePoiEnrichmentStatusOptions.FAILED,
-          poiEnrichmentError: message.slice(0, 500),
-        },
-      });
+      throw error;
     }
   }
 
@@ -159,6 +155,21 @@ export class PoiEnrichmentService {
     }
 
     return route.poiEnrichmentStatus;
+  }
+
+  async markRouteEnrichmentFailed(
+    routeId: string,
+    error: Error,
+  ): Promise<void> {
+    const message = error instanceof Error ? error.message : String(error);
+
+    await this.prisma.route.updateMany({
+      where: { id: routeId },
+      data: {
+        poiEnrichmentStatus: RoutePoiEnrichmentStatusOptions.FAILED,
+        poiEnrichmentError: message.slice(0, 500),
+      },
+    });
   }
 
   private async markRouteEnrichmentPending(routeId: string): Promise<void> {

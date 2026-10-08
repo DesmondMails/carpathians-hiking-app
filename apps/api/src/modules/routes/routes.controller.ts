@@ -212,4 +212,12 @@ export class RoutesController {
   ): Promise<void> {
     return this.routesService.deleteRouteImage(routeId, imageId, user.id);
   }
+
+  @Post('test-queue')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Тестова черга' })
+  @ApiResponse({ status: 200, description: 'Тестова черга успішно створена' })
+  async testQueue(): Promise<void> {
+    return this.routesService.testQueue();
+  }
 }
