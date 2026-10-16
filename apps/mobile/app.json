@@ -13,7 +13,9 @@
       "bundleIdentifier": "com.hiking.mobile",
       "infoPlist": {
         "NSPhotoLibraryUsageDescription": "Додаток потребує доступу до ваших фото, щоб ви могли додавати зображення маршруту.",
-        "NSPhotoLibraryAddUsageDescription": "Додаток може зберігати або поширювати вибрані зображення маршруту."
+        "NSPhotoLibraryAddUsageDescription": "Додаток може зберігати або поширювати вибрані зображення маршруту.",
+        "NSLocationWhenInUseUsageDescription": "Додаток використовує ваше місцезнаходження, щоб показувати маршрути поруч із вами.",
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "Додаток використовує ваше місцезнаходження, щоб показувати маршрути поруч із вами."
       }
     },
     "android": {
@@ -65,6 +67,13 @@
           "colors": {
             "cropToolbarColor": "#389d75"
           }
+        }
+      ],
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Додаток використовує ваше місцезнаходження, щоб показувати маршрути поруч із вами.",
+          "locationWhenInUsePermission": "Додаток використовує ваше місцезнаходження, щоб показувати маршрути поруч із вами."
         }
       ]
     ],

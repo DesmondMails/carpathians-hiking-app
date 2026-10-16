@@ -24,6 +24,7 @@ const lengthTuple = z
 export const searchFormSchema = z.object({
   difficulty: z.array(z.enum(DIFFICULTY_VALUES)).optional(),
   length: lengthTuple,
+  nearMe: z.boolean(),
   radius: z
     .number()
     .min(MIN_NEAR_DISTANCE_KM)

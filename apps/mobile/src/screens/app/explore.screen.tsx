@@ -15,8 +15,10 @@ import {
   EXPLORE_CATEGORIES,
 } from '@/src/features/explore/data/mock-routes'
 import { AppSearch } from '@/src/shared/components'
+import { useUserLocation } from '@/src/shared/hooks'
 
 export default function ExploreScreen() {
+  const userLocation = useUserLocation()
   const [activeCategory, setActiveCategory] = useState('Поруч')
   const [saved, setSaved] = useState<Set<string>>(new Set())
   const sheetRef = useRef<BottomSheetModal>(null)
@@ -67,7 +69,7 @@ export default function ExploreScreen() {
         </View>
       </ScrollView>
 
-      <FiltersBottomSheet sheetRef={sheetRef} />
+      <FiltersBottomSheet sheetRef={sheetRef} userLocation={userLocation} />
     </SafeAreaView>
   )
 }
