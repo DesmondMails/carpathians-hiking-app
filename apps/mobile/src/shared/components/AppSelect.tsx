@@ -14,13 +14,15 @@ import { AppText } from './AppText'
 
 export type AppSelectStatus = 'default' | 'success' | 'error'
 
-export type SelectOption<T extends string = string> = {
+export type SelectValue = string | number | null
+
+export type SelectOption<T extends SelectValue = string> = {
   label: string
   value: T
   description?: string
 }
 
-type AppSelectProps<T extends string = string> = {
+type AppSelectProps<T extends SelectValue = string> = {
   label?: string
   helperText?: string
   status?: AppSelectStatus
@@ -34,7 +36,7 @@ type AppSelectProps<T extends string = string> = {
   emptyStateText?: string
 }
 
-export function AppSelect<T extends string = string>({
+export function AppSelect<T extends SelectValue = string>({
   label,
   helperText,
   status = 'default',
@@ -163,7 +165,7 @@ export function AppSelect<T extends string = string>({
 
                   return (
                     <Pressable
-                      key={option.value}
+                      key={String(option.value)}
                       onPress={() => handleSelect(option.value)}
                       style={[
                         styles.optionRow,

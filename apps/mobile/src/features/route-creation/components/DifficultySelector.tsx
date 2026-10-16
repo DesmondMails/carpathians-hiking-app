@@ -1,10 +1,10 @@
 import { FC } from 'react'
 
-import { Pressable, StyleSheet, View } from 'react-native'
+import { StyleSheet, View } from 'react-native'
 
 import { Difficulty, DIFFICULTY_VALUES } from '@hiking/shared'
 
-import { AppText } from '@/src/shared/components'
+import { ButtonChip } from '@/src/shared/components'
 import { colors } from '@/src/theme/colors'
 import { spacing } from '@/src/theme/spacing'
 
@@ -34,18 +34,12 @@ export const DifficultySelector: FC<DifficultySelectorProps> = ({
         }
 
         return (
-          <Pressable
+          <ButtonChip
             key={item}
-            onPress={handlePress}
-            style={[styles.chip, isActive && styles.chipActive]}
-          >
-            <AppText
-              variant='bodyMedium'
-              color={isActive ? colors.white : colors.textPrimary}
-            >
-              {DIFFICULTY_LABELS[item]}
-            </AppText>
-          </Pressable>
+            isActive={isActive}
+            label={DIFFICULTY_LABELS[item]}
+            handlePress={handlePress}
+          />
         )
       })}
     </View>

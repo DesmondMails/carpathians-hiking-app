@@ -1,24 +1,25 @@
-import { useState } from 'react'
+import { useCallback, useRef, useState } from 'react'
 
 import { ScrollView, StyleSheet, View } from 'react-native'
 
+import { BottomSheetModal } from '@gorhom/bottom-sheet'
 import { SafeAreaView } from 'react-native-safe-area-context'
-
 
 import {
   AllRouteCard,
   CategoryChips,
-  ExploreHeader,
+  FiltersBottomSheet,
 } from '@/src/features/explore/components'
 import {
   ALL_ROUTES,
   EXPLORE_CATEGORIES,
 } from '@/src/features/explore/data/mock-routes'
-import { AppSearch } from '@/src/shared/components/AppSearch'
+import { AppSearch } from '@/src/shared/components'
 
 export default function ExploreScreen() {
   const [activeCategory, setActiveCategory] = useState('Поруч')
   const [saved, setSaved] = useState<Set<string>>(new Set())
+  const sheetRef = useRef<BottomSheetModal>(null)
 
   const toggleSave = (id: string) =>
     setSaved((prev) => {
@@ -26,6 +27,10 @@ export default function ExploreScreen() {
       next.has(id) ? next.delete(id) : next.add(id)
       return next
     })
+
+  const handleOpenSheet = useCallback(() => {
+    sheetRef.current?.present()
+  }, [])
 
   return (
     <SafeAreaView style={styles.root} edges={['top']}>
@@ -35,6 +40,7 @@ export default function ExploreScreen() {
         placeholder='Пошук маршрутів, локацій, POI'
         preIconName='search'
         postIconName='sliders'
+        onFilterPress={handleOpenSheet}
       />
 
       <View style={styles.categoryChips}>
@@ -60,6 +66,8 @@ export default function ExploreScreen() {
           ))}
         </View>
       </ScrollView>
+
+      <FiltersBottomSheet sheetRef={sheetRef} />
     </SafeAreaView>
   )
 }
