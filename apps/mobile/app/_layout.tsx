@@ -1,10 +1,12 @@
 import { useCallback, useEffect, useState } from 'react'
 
+import { BottomSheetModalProvider } from '@gorhom/bottom-sheet'
 import { DefaultTheme, ThemeProvider } from '@react-navigation/native'
 import * as Font from 'expo-font'
 import { Stack } from 'expo-router'
 import * as SplashScreen from 'expo-splash-screen'
 import { StatusBar } from 'expo-status-bar'
+import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import 'react-native-reanimated'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 
@@ -60,24 +62,31 @@ export default function RootLayout() {
   }
 
   return (
-    <SafeAreaProvider>
-      <ThemeProvider value={DefaultTheme}>
-        <Stack>
-          <Stack.Screen name='(app)' options={{ headerShown: false }} />
-          <Stack.Screen name='(auth)' options={{ headerShown: false }} />
-          <Stack.Screen
-            name='(modals)'
-            options={{ presentation: 'fullScreenModal', headerShown: false }}
-          />
-        </Stack>
-        <StatusBar style='auto' />
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <SafeAreaProvider>
+        <ThemeProvider value={DefaultTheme}>
+          <BottomSheetModalProvider>
+            <Stack>
+              <Stack.Screen name='(app)' options={{ headerShown: false }} />
+              <Stack.Screen name='(auth)' options={{ headerShown: false }} />
+              <Stack.Screen
+                name='(modals)'
+                options={{
+                  presentation: 'fullScreenModal',
+                  headerShown: false,
+                }}
+              />
+            </Stack>
+          </BottomSheetModalProvider>
+          <StatusBar style='auto' />
 
-        <ToastHost />
+          <ToastHost />
 
-        {showAnimatedSplash ? (
-          <AnimatedSplash onFinish={() => setShowAnimatedSplash(false)} />
-        ) : null}
-      </ThemeProvider>
-    </SafeAreaProvider>
+          {showAnimatedSplash ? (
+            <AnimatedSplash onFinish={() => setShowAnimatedSplash(false)} />
+          ) : null}
+        </ThemeProvider>
+      </SafeAreaProvider>
+    </GestureHandlerRootView>
   )
 }

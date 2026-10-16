@@ -15,8 +15,10 @@
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.3",
+    "@gorhom/bottom-sheet": "^5.2.14",
     "@hookform/resolvers": "^5.2.2",
     "@maplibre/maplibre-react-native": "^10.4.2",
+    "@react-native-assets/slider": "^11.0.12",
     "@react-native-google-signin/google-signin": "^16.1.2",
     "@react-navigation/bottom-tabs": "^7.4.0",
     "@react-navigation/elements": "^2.6.3",
