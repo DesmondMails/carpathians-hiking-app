@@ -1,4 +1,4 @@
-import { FC, RefObject, useMemo, useState } from 'react'
+import { FC, RefObject, useMemo } from 'react'
 
 import { useWindowDimensions } from 'react-native'
 
@@ -8,6 +8,7 @@ import { Controller, useForm } from 'react-hook-form'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { BottomSheet } from '@/src/shared/components'
+import type { useUserLocation } from '@/src/shared/hooks'
 
 import { BottomControllers } from './BottomControllers'
 import { DifficultyFilter } from './DifficultyFilter'
@@ -19,10 +20,12 @@ import { searchFormSchema, SearchFormValues } from '../../schemas/search.schema'
 
 type FiltersBottomSheetProps = {
   sheetRef: RefObject<BottomSheetModal | null>
+  userLocation: ReturnType<typeof useUserLocation>
 }
 
 export const FiltersBottomSheet: FC<FiltersBottomSheetProps> = ({
   sheetRef,
+  userLocation,
 }) => {
   const { height } = useWindowDimensions()
   const insets = useSafeAreaInsets()
@@ -31,20 +34,28 @@ export const FiltersBottomSheet: FC<FiltersBottomSheetProps> = ({
     [height, insets.top, insets.bottom],
   )
 
+  const { location, isLoading } = userLocation
+  const locationAvailable = !!location && !isLoading
+
   const { control, reset, handleSubmit } = useForm<SearchFormValues>({
     resolver: zodResolver(searchFormSchema),
     defaultValues: {
       length: [5, 30],
+      nearMe: false,
+      radius: 50,
       minRating: null,
       maxElevationGainM: null,
       maxDurationH: null,
     },
   })
 
-  const [nearEnabled, setNearEnabled] = useState(false)
-
   const onSubmit = async (searchForm: SearchFormValues) => {
-    console.log('Form values', searchForm)
+    const nearMe = searchForm.nearMe && locationAvailable
+    console.log('Form values', {
+      ...searchForm,
+      nearMe,
+      radius: nearMe ? searchForm.radius : undefined,
+    })
   }
 
   return (
@@ -79,13 +90,22 @@ export const FiltersBottomSheet: FC<FiltersBottomSheetProps> = ({
       />
 
       <Controller
-        name='radius'
+        name='nearMe'
         control={control}
-        render={({ field: { onChange, value } }) => (
-          <NearDistance
-            value={value}
-            onChange={onChange}
-            enabled={nearEnabled}
+        render={({ field: nearMeField }) => (
+          <Controller
+            name='radius'
+            control={control}
+            render={({ field: { onChange, value } }) => (
+              <NearDistance
+                value={value}
+                onChange={onChange}
+                nearMe={nearMeField.value}
+                onNearMeChange={nearMeField.onChange}
+                locationAvailable={locationAvailable}
+                isLoading={isLoading}
+              />
+            )}
           />
         )}
       />
