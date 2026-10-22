@@ -18,4 +18,6 @@ export interface CreateRoutePayload {
 
 export interface SearchRoutePayload {
   difficulty?: Difficulty[]
+  distanceFromM?: number
+  distanceToM?: number
 }

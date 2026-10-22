@@ -32,7 +32,6 @@ export const BottomControllers: FC<BottomControllersProps> = ({
       <AppButton
         title='Показати маршрути'
         disabled={isLoadingRoutes}
-        loading={isLoadingRoutes}
         onPress={onApply}
       />
     </View>
