@@ -4,7 +4,6 @@ import { Pressable, StyleSheet, View } from 'react-native'
 
 import { Ionicons } from '@expo/vector-icons'
 import { RouteListItem } from '@hiking/shared'
-import { useRoute } from '@react-navigation/native'
 import { Image } from 'expo-image'
 import { useRouter } from 'expo-router'
 
@@ -12,7 +11,6 @@ import { AppText } from '@/src/shared/components/AppText'
 import { colors } from '@/src/theme/colors'
 import { typography } from '@/src/theme/typography'
 
-import { BottomGradient } from './BottomGradient'
 import { DiffBadge } from './DiffBadge'
 import { MetaChip } from './MetaChip'
 import { SaveButton } from './SaveButton'

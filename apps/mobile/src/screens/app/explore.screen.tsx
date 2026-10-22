@@ -12,12 +12,12 @@ import {
 } from '@/src/features/explore/components'
 import { EXPLORE_CATEGORIES } from '@/src/features/explore/data/mock-routes'
 import { useExplore } from '@/src/features/explore/hooks/useExplore'
-import { AppSearch } from '@/src/shared/components'
+import { AppSearch, RoutesLoader } from '@/src/shared/components'
 import { useUserLocation } from '@/src/shared/hooks'
 
 export default function ExploreScreen() {
   const userLocation = useUserLocation()
-  const { routes, loadRoutes } = useExplore()
+  const { routes, isLoading, loadRoutes } = useExplore()
   const [activeCategory, setActiveCategory] = useState('Поруч')
   const [saved, setSaved] = useState<Set<string>>(new Set())
   const sheetRef = useRef<BottomSheetModal>(null)
@@ -42,7 +42,7 @@ export default function ExploreScreen() {
       {/* <ExploreHeader name='Mykyta' location='Карпати' /> */}
 
       <AppSearch
-        placeholder='Пошук маршрутів, локацій, POI'
+        placeholder='Пошук маршрутів, локацій'
         preIconName='search'
         postIconName='sliders'
         onFilterPress={handleOpenSheet}
@@ -56,21 +56,27 @@ export default function ExploreScreen() {
         />
       </View>
 
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scroll}
-      >
-        <View style={styles.section}>
-          {routes.map((route) => (
-            <AllRouteCard
-              key={route.id}
-              route={route}
-              saved={saved.has(route.id)}
-              onSave={() => toggleSave(route.id)}
-            />
-          ))}
+      {isLoading ? (
+        <View style={styles.loader}>
+          <RoutesLoader />
         </View>
-      </ScrollView>
+      ) : (
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.scroll}
+        >
+          <View style={styles.section}>
+            {routes.map((route) => (
+              <AllRouteCard
+                key={route.id}
+                route={route}
+                saved={saved.has(route.id)}
+                onSave={() => toggleSave(route.id)}
+              />
+            ))}
+          </View>
+        </ScrollView>
+      )}
 
       <FiltersBottomSheet sheetRef={sheetRef} userLocation={userLocation} />
     </SafeAreaView>
@@ -80,6 +86,7 @@ export default function ExploreScreen() {
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: '#f7f7f7' },
   scroll: { paddingBottom: 100 },
+  loader: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   categoryChips: { marginTop: 12, paddingBottom: 12 },
   section: { marginTop: 12, marginBottom: 24 },
   hScroll: { paddingHorizontal: 16, gap: 12, paddingBottom: 4 },

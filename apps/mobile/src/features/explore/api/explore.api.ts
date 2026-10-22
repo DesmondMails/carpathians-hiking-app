@@ -6,6 +6,7 @@ export const exploreApi = {
   async loadRoutes(payload: SearchRoutePayload = {}): Promise<RouteListItem[]> {
     const { data } = await apiClient.get<RouteListItem[]>('/routes', {
       params: {
+        ...payload,
         difficulty: payload.difficulty?.length
           ? payload.difficulty.join(',')
           : undefined,

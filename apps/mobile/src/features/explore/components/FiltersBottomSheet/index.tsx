@@ -49,15 +49,17 @@ export const FiltersBottomSheet: FC<FiltersBottomSheetProps> = ({
 
   const onSubmit = async (searchForm: SearchFormValues) => {
     const payload = toSearchPayload(searchForm)
-    const success = await loadRoutes(payload)
-    if (success) sheetRef.current?.close()
+
+    sheetRef.current?.close()
+    await loadRoutes(payload)
   }
 
   const onReset = async () => {
+    sheetRef.current?.close()
     const success = await loadRoutes({})
+
     if (success) {
       reset(DEFAULT_FORM_VALUES)
-      sheetRef.current?.close()
     }
   }
 

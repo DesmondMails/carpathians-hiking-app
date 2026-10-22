@@ -164,6 +164,8 @@ export class RoutesService {
   async getAllRoutes(
     searchQuery?: SearchRouteQueryDto,
   ): Promise<RouteListItem[]> {
+    this.checkDistanceOrThrowErr(searchQuery);
+
     const routes = await this.prisma.route.findMany({
       where: {
         status: 'PUBLISHED',
@@ -172,6 +174,13 @@ export class RoutesService {
               in: searchQuery?.difficulty,
             }
           : undefined,
+        distanceM: {
+          gte:
+            searchQuery?.distanceFromM !== undefined
+              ? searchQuery?.distanceFromM
+              : undefined,
+          lte: searchQuery?.distanceToM ? searchQuery?.distanceToM : undefined,
+        },
       },
       orderBy: {
         createdAt: 'desc',
@@ -491,5 +500,18 @@ export class RoutesService {
         key: storageKey,
       })
     );
+  }
+
+  private checkDistanceOrThrowErr(searchQuery?: SearchRouteQueryDto): void {
+    const from = searchQuery?.distanceFromM;
+    const to = searchQuery?.distanceToM;
+
+    if (from === undefined || to === undefined) {
+      return;
+    }
+
+    if (from > to) {
+      throw new BadRequestException('Нижня межа має бути меншою, аніж верхня');
+    }
   }
 }

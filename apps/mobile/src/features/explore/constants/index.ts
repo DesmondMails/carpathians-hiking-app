@@ -27,10 +27,12 @@ export const DURATION_OPTIONS = [
 
 export const DEFAULT_FORM_VALUES: SearchFormValues = {
   difficulty: [],
-  length: [5, 30],
+  length: [MIN_DISTANCE_KM, MAX_DISTANCE_KM],
   nearMe: false,
   radius: 50,
   minRating: null,
   maxElevationGainM: null,
   maxDurationH: null,
 }
+
+export const TO_METERS_MULTIPLIER = 1000

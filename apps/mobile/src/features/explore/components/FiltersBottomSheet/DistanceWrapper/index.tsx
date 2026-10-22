@@ -22,7 +22,7 @@ export const DistanceWrapper: FC<DistanceWrapperProps> = ({
     const leftNumberFormatted = value[0].toFixed(1).replace('.', ',')
     const rightNumberFormatted = value[1].toFixed(1).replace('.', ',')
 
-    const isPlusSign = +value[1].toFixed(0) >= MAX_DISTANCE_KM
+    const isPlusSign = +value[1] >= MAX_DISTANCE_KM
 
     return `${leftNumberFormatted}–${rightNumberFormatted} км${isPlusSign ? '+' : ''}`
   }

@@ -1,6 +1,6 @@
 import { Difficulty, DIFFICULTY_VALUES } from '@hiking/shared';
-import { Transform } from 'class-transformer';
-import { IsOptional, IsIn } from 'class-validator';
+import { Transform, Type } from 'class-transformer';
+import { IsOptional, IsIn, IsNumber, IsPositive, Min } from 'class-validator';
 
 export class SearchRouteQueryDto {
   @IsOptional()
@@ -9,4 +9,16 @@ export class SearchRouteQueryDto {
   )
   @IsIn(DIFFICULTY_VALUES, { each: true })
   difficulty?: Difficulty[];
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(0)
+  distanceFromM?: number;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @IsPositive()
+  distanceToM?: number;
 }
