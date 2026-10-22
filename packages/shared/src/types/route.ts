@@ -1,3 +1,5 @@
+import { Difficulty } from './route-difficulty'
+
 export interface Route {
   id: string
   title: string
@@ -12,4 +14,8 @@ export interface Route {
 export interface CreateRoutePayload {
   title: string
   description?: string
+}
+
+export interface SearchRoutePayload {
+  difficulty?: Difficulty[]
 }

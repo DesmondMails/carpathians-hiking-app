@@ -7,6 +7,7 @@ import {
   RoutePoisResponse,
   RouteDraftPreview,
   RoutePoiEnrichmentStatusOptions,
+  RouteListItem,
 } from '@hiking/shared';
 import {
   BadRequestException,
@@ -33,9 +34,11 @@ import {
 } from 'src/prisma/generated/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 
+import { ROUTE_LIST_SELECT } from './constants';
 import { CompleteRouteImageUploadDto } from './dto/complete-route-image-upload.dto';
 import { CreateRouteImagePresignedDto } from './dto/create-route-image-presigned.dto';
 import { CreateRouteDto } from './dto/create-route.dto';
+import { SearchRouteQueryDto } from './dto/search-route-query.dto';
 import { UpdateRouteDto } from './dto/update-route.dto';
 import { toRoutePoisResponse } from './mappers/route-view.mapper';
 import { calculateDerivedRouteValues } from './utils/calculate-derived-route-values';
@@ -115,16 +118,7 @@ export class RoutesService {
       imagesOrdered.map((image) => this.resolveImageUrl(image.storageKey)),
     );
 
-    const coverImageKey = route.images.find(
-      (image) => image.id === route.coverImageId,
-    )?.storageKey;
-
-    const coverImageUrl = coverImageKey
-      ? await this.resolveImageUrl(
-          route.images.find((image) => image.id === route.coverImageId)!
-            .storageKey,
-        )
-      : null;
+    const coverImageUrl = await this.resolveCoverImageUrl(route);
 
     return toRouteView(route, createdByUser, {
       coverImageUrl,
@@ -167,12 +161,32 @@ export class RoutesService {
     await this.poiEnrichmentService.scheduleRoutePoiEnrichment(routeId);
   }
 
-  async getAllRoutes(): Promise<Route[]> {
-    return this.prisma.route.findMany({
+  async getAllRoutes(
+    searchQuery?: SearchRouteQueryDto,
+  ): Promise<RouteListItem[]> {
+    const routes = await this.prisma.route.findMany({
+      where: {
+        status: 'PUBLISHED',
+        difficulty: searchQuery?.difficulty?.length
+          ? {
+              in: searchQuery?.difficulty,
+            }
+          : undefined,
+      },
       orderBy: {
         createdAt: 'desc',
       },
+      select: ROUTE_LIST_SELECT,
     });
+
+    return Promise.all(
+      routes.map(async (route) => ({
+        ...route,
+        coverImageUrl: await this.resolveCoverImageUrl(route),
+        createdAt: route.createdAt.toISOString(),
+        updatedAt: route.updatedAt.toISOString(),
+      })),
+    );
   }
 
   async deleteRoute(routeId: string, userId: string): Promise<void> {
@@ -453,6 +467,21 @@ export class RoutesService {
     });
 
     return lastImage ? lastImage.sortOrder + 1 : 0;
+  }
+
+  private async resolveCoverImageUrl(route: {
+    coverImageId: string | null;
+    images: RouteImage[];
+  }): Promise<string | null> {
+    if (!route.coverImageId) {
+      return null;
+    }
+
+    const coverImage = route.images.find(
+      (image) => image.id === route.coverImageId,
+    );
+
+    return coverImage ? this.resolveImageUrl(coverImage.storageKey) : null;
   }
 
   private async resolveImageUrl(storageKey: string): Promise<string> {
