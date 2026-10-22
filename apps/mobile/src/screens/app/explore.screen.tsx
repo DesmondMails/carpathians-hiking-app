@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 
 import { ScrollView, StyleSheet, View } from 'react-native'
 
@@ -10,15 +10,14 @@ import {
   CategoryChips,
   FiltersBottomSheet,
 } from '@/src/features/explore/components'
-import {
-  ALL_ROUTES,
-  EXPLORE_CATEGORIES,
-} from '@/src/features/explore/data/mock-routes'
+import { EXPLORE_CATEGORIES } from '@/src/features/explore/data/mock-routes'
+import { useExplore } from '@/src/features/explore/hooks/useExplore'
 import { AppSearch } from '@/src/shared/components'
 import { useUserLocation } from '@/src/shared/hooks'
 
 export default function ExploreScreen() {
   const userLocation = useUserLocation()
+  const { routes, loadRoutes } = useExplore()
   const [activeCategory, setActiveCategory] = useState('Поруч')
   const [saved, setSaved] = useState<Set<string>>(new Set())
   const sheetRef = useRef<BottomSheetModal>(null)
@@ -33,6 +32,10 @@ export default function ExploreScreen() {
   const handleOpenSheet = useCallback(() => {
     sheetRef.current?.present()
   }, [])
+
+  useEffect(() => {
+    void loadRoutes({})
+  }, [loadRoutes])
 
   return (
     <SafeAreaView style={styles.root} edges={['top']}>
@@ -58,7 +61,7 @@ export default function ExploreScreen() {
         contentContainerStyle={styles.scroll}
       >
         <View style={styles.section}>
-          {ALL_ROUTES.map((route) => (
+          {routes.map((route) => (
             <AllRouteCard
               key={route.id}
               route={route}

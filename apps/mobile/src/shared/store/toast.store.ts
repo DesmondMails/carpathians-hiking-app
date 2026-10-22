@@ -11,7 +11,9 @@ export interface ToastItem {
 
 interface ToastState {
   toasts: ToastItem[]
-  show: (toast: Omit<ToastItem, 'id' | 'duration'> & { duration?: number }) => string
+  show: (
+    toast: Omit<ToastItem, 'id' | 'duration'> & { duration?: number },
+  ) => string
   hide: (id: string) => void
   clear: () => void
 }
@@ -22,13 +24,16 @@ export const useToastStore = create<ToastState>((set) => ({
   toasts: [],
   show: ({ message, variant, duration = DEFAULT_DURATION }) => {
     const id = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
+
     set((state) => ({
       toasts: [...state.toasts, { id, message, variant, duration }],
     }))
+
     return id
   },
   hide: (id) =>
     set((state) => ({ toasts: state.toasts.filter((t) => t.id !== id) })),
+
   clear: () => set({ toasts: [] }),
 }))
 

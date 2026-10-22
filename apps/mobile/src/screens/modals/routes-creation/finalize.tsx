@@ -38,7 +38,7 @@ export default function RoutesCreationFinalizeScreen() {
     const route = await finalizeRoute(activeDraft.id, payload)
 
     router.replace({
-      pathname: '/(app)/routes/[id]',
+      pathname: '/routes/[id]',
       params: { id: route.id },
     })
   }

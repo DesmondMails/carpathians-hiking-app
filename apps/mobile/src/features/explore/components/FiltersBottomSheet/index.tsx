@@ -16,6 +16,9 @@ import { DistanceWrapper } from './DistanceWrapper'
 import { MoreFilters } from './MoreFilters'
 import { NearDistance } from './NearDistance'
 import { RatingFilter } from './RatingFilter'
+import { DEFAULT_FORM_VALUES } from '../../constants'
+import { useExplore } from '../../hooks/useExplore'
+import { toSearchPayload } from '../../mappers/search.payload'
 import { searchFormSchema, SearchFormValues } from '../../schemas/search.schema'
 
 type FiltersBottomSheetProps = {
@@ -34,28 +37,28 @@ export const FiltersBottomSheet: FC<FiltersBottomSheetProps> = ({
     [height, insets.top, insets.bottom],
   )
 
+  const { isLoading: isLoadingRoutes, loadRoutes } = useExplore()
+
   const { location, isLoading } = userLocation
   const locationAvailable = !!location && !isLoading
 
   const { control, reset, handleSubmit } = useForm<SearchFormValues>({
     resolver: zodResolver(searchFormSchema),
-    defaultValues: {
-      length: [5, 30],
-      nearMe: false,
-      radius: 50,
-      minRating: null,
-      maxElevationGainM: null,
-      maxDurationH: null,
-    },
+    defaultValues: DEFAULT_FORM_VALUES,
   })
 
   const onSubmit = async (searchForm: SearchFormValues) => {
-    const nearMe = searchForm.nearMe && locationAvailable
-    console.log('Form values', {
-      ...searchForm,
-      nearMe,
-      radius: nearMe ? searchForm.radius : undefined,
-    })
+    const payload = toSearchPayload(searchForm)
+    const success = await loadRoutes(payload)
+    if (success) sheetRef.current?.close()
+  }
+
+  const onReset = async () => {
+    const success = await loadRoutes({})
+    if (success) {
+      reset(DEFAULT_FORM_VALUES)
+      sheetRef.current?.close()
+    }
   }
 
   return (
@@ -66,7 +69,8 @@ export const FiltersBottomSheet: FC<FiltersBottomSheetProps> = ({
       enableContentPanningGesture={false}
       footer={
         <BottomControllers
-          onReset={() => reset()}
+          isLoadingRoutes={isLoadingRoutes}
+          onReset={() => onReset()}
           onApply={handleSubmit(onSubmit, (errors) =>
             console.log('errors', errors),
           )}

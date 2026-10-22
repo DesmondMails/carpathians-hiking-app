@@ -8,14 +8,13 @@ import { Feather } from '@expo/vector-icons'
 import { colors } from '@/src/theme/colors'
 import { typography } from '@/src/theme/typography'
 
-
-
 type FeatherIconName = ComponentProps<typeof Feather>['name']
 
 interface AppSearchProps {
   placeholder: string
   preIconName: FeatherIconName
   postIconName?: FeatherIconName
+  editable?: boolean
   onFilterPress?: () => void
   onSearchPress?: () => void
 }
@@ -24,6 +23,7 @@ export const AppSearch: FC<AppSearchProps> = ({
   placeholder,
   preIconName,
   postIconName,
+  editable = true,
   onFilterPress,
   onSearchPress,
 }) => {
@@ -34,6 +34,7 @@ export const AppSearch: FC<AppSearchProps> = ({
           <Feather name={preIconName} size={18} color={colors.gray400} />
         )}
         <TextInput
+          editable={editable}
           onPress={onSearchPress}
           style={styles.searchInput}
           placeholder={placeholder}

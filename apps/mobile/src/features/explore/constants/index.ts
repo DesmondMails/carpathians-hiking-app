@@ -1,3 +1,5 @@
+import type { SearchFormValues } from '../schemas/search.schema'
+
 export const MIN_DISTANCE_KM = 0
 export const MAX_DISTANCE_KM = 50
 export const MIN_NEAR_DISTANCE_KM = 0
@@ -22,3 +24,13 @@ export const DURATION_OPTIONS = [
   { value: 4, label: 'До 4 годин' },
   { value: 8, label: 'До 8 годин' },
 ]
+
+export const DEFAULT_FORM_VALUES: SearchFormValues = {
+  difficulty: [],
+  length: [5, 30],
+  nearMe: false,
+  radius: 50,
+  minRating: null,
+  maxElevationGainM: null,
+  maxDurationH: null,
+}
