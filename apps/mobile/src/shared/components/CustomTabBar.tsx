@@ -2,7 +2,7 @@ import { Pressable, StyleSheet, View } from 'react-native'
 
 import { Feather } from '@expo/vector-icons'
 import { BottomTabBarProps } from '@react-navigation/bottom-tabs'
-import { usePathname, useRouter } from 'expo-router'
+import { useRouter } from 'expo-router'
 import {
   useAnimatedStyle,
   useSharedValue,
@@ -29,7 +29,6 @@ export function CustomTabBar({
   navigation,
 }: BottomTabBarProps) {
   const insets = useSafeAreaInsets()
-  const pathname = usePathname()
   const pressProgress = useSharedValue(0)
   const router = useRouter()
 
@@ -39,8 +38,6 @@ export function CustomTabBar({
       { translateY: 1.5 * pressProgress.value },
     ],
   }))
-
-  if (pathname.startsWith('/routes/')) return null
 
   const handleAddRoute = () => {
     router.push('/(modals)/create-route')

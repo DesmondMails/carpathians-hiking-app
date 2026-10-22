@@ -39,11 +39,6 @@ export class UpdateRouteDto {
   })
   routeType?: RouteType;
 
-  @IsString()
-  @IsOptional()
-  @ApiPropertyOptional({ description: 'Нотатки до маршруту' })
-  notes?: string;
-
   @IsEnum(RouteStatus)
   @IsOptional()
   @ApiPropertyOptional({

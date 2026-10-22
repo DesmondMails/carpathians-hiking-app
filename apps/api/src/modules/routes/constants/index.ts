@@ -1,5 +1,7 @@
 import type { RoutePoi } from '@hiking/shared';
 
+import { Prisma } from 'src/prisma/generated/client';
+
 import type {
   FeaturedRule,
   FeaturedSupportedPoiTypes,
@@ -107,3 +109,20 @@ export const GENERIC_LABELS = new Set([
   'Spring',
   'Fountain',
 ]);
+
+export const ROUTE_LIST_SELECT = {
+  id: true,
+  title: true,
+  description: true,
+  region: true,
+  difficulty: true,
+  coverImageId: true,
+  gpxAvailable: true,
+  status: true,
+  images: true,
+  distanceM: true,
+  elevationGainM: true,
+  durationH: true,
+  createdAt: true,
+  updatedAt: true,
+} satisfies Prisma.RouteSelect;

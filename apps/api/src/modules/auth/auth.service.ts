@@ -286,11 +286,12 @@ export class AuthService {
   ): Promise<User> {
     const user = await this.usersService.findByEmail(email);
 
-    if (!user) {
+    // Google-only accounts have no password hash, so they can't log in this way
+    if (!user || !user.password || !password) {
       throw new UnauthorizedException('Неправильний email або пароль');
     }
 
-    const isPasswordValid = await bcrypt.compare(password, user.password!);
+    const isPasswordValid = await bcrypt.compare(password, user.password);
 
     if (!isPasswordValid) {
       throw new UnauthorizedException('Неправильний email або пароль');

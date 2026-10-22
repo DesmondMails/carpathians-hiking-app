@@ -47,9 +47,4 @@ export class CreateRouteDto {
     enum: RouteType,
   })
   routeType?: RouteType;
-
-  @IsString()
-  @IsOptional()
-  @ApiPropertyOptional({ description: 'Додаткові нотатки до маршруту' })
-  notes?: string;
 }

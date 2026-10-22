@@ -33,6 +33,7 @@ export default function HomepageScreen() {
         <HomapageHero />
 
         <AppSearch
+          editable={false}
           placeholder='Відкрийте для себе нову пригоду'
           preIconName='search'
           postIconName='sliders'

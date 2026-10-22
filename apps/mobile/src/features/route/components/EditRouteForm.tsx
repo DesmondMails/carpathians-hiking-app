@@ -13,9 +13,7 @@ import { EditableRoute, UpdateRoutePayload } from '@hiking/shared'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 
-import {
-  RouteMetadataFields,
-} from '@/src/features/route-creation/components'
+import { RouteMetadataFields } from '@/src/features/route-creation/components'
 import {
   RouteMetadataFormValues,
   routeMetadataSchema,
@@ -70,7 +68,6 @@ export const EditRouteForm: FC<EditRouteFormProps> = ({
       description: route.description ?? '',
       region: route.region ?? '',
       difficulty: route.difficulty ?? 'EASY',
-      notes: route.notes ?? '',
     },
   })
 
@@ -81,7 +78,6 @@ export const EditRouteForm: FC<EditRouteFormProps> = ({
         description: trimToUndefined(values.description),
         region: trimToUndefined(values.region),
         difficulty: values.difficulty,
-        notes: trimToUndefined(values.notes),
       })
     } catch (error) {
       const message =
@@ -95,7 +91,9 @@ export const EditRouteForm: FC<EditRouteFormProps> = ({
     }
   }
 
-  const hasUploadingImages = images.some((image) => image.status === 'uploading')
+  const hasUploadingImages = images.some(
+    (image) => image.status === 'uploading',
+  )
 
   return (
     <KeyboardAvoidingView

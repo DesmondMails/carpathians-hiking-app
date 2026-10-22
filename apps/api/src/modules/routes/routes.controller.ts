@@ -2,6 +2,7 @@ import {
   EditableRoute,
   PresignedUrlResponse,
   RouteDetails,
+  RouteListItem,
   RoutePoisResponse,
 } from '@hiking/shared';
 import {
@@ -14,6 +15,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
@@ -28,6 +30,7 @@ import type { Route, User } from 'src/prisma/generated/client';
 import { CompleteRouteImageUploadDto } from './dto/complete-route-image-upload.dto';
 import { CreateRouteImagePresignedDto } from './dto/create-route-image-presigned.dto';
 import { CreateRouteDto } from './dto/create-route.dto';
+import { SearchRouteQueryDto } from './dto/search-route-query.dto';
 import { SetRouteCoverDto } from './dto/set-route-cover.dto';
 import { UpdateRouteDto } from './dto/update-route.dto';
 import { RoutesService } from './routes.service';
@@ -89,8 +92,11 @@ export class RoutesController {
   @Get()
   @ApiOperation({ summary: 'Отримати всі маршрути' })
   @ApiResponse({ status: 200, description: 'Всі маршрути успішно отримані' })
-  async getAllRoutes(): Promise<Route[]> {
-    return this.routesService.getAllRoutes();
+  async getAllRoutes(
+    @Query()
+    searchQuery?: SearchRouteQueryDto,
+  ): Promise<RouteListItem[]> {
+    return this.routesService.getAllRoutes(searchQuery);
   }
 
   @Get(':id/pois')

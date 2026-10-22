@@ -1,3 +1,4 @@
+import { Difficulty } from '.'
 import { RouteDraftPreview } from './route-draft-preview'
 
 export interface RouteDraft {
@@ -13,14 +14,6 @@ export interface RouteDraft {
   updatedAt: Date
   expiresAt: Date
 }
-
-export const DIFFICULTY_VALUES = [
-  'EASY',
-  'MODERATE',
-  'HARD',
-  'EXTREME',
-] as const
-export type Difficulty = (typeof DIFFICULTY_VALUES)[number]
 
 export interface FinalizeRouteDraftPayload {
   title: string
