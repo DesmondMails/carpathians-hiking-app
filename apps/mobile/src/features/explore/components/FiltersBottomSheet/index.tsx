@@ -39,8 +39,7 @@ export const FiltersBottomSheet: FC<FiltersBottomSheetProps> = ({
 
   const { isLoading: isLoadingRoutes, loadRoutes } = useExplore()
 
-  const { location, isLoading } = userLocation
-  const locationAvailable = !!location && !isLoading
+  const { location } = userLocation
 
   const { control, reset, handleSubmit } = useForm<SearchFormValues>({
     resolver: zodResolver(searchFormSchema),
@@ -48,7 +47,7 @@ export const FiltersBottomSheet: FC<FiltersBottomSheetProps> = ({
   })
 
   const onSubmit = async (searchForm: SearchFormValues) => {
-    const payload = toSearchPayload(searchForm)
+    const payload = toSearchPayload(searchForm, location)
 
     sheetRef.current?.close()
     await loadRoutes(payload)
@@ -65,7 +64,7 @@ export const FiltersBottomSheet: FC<FiltersBottomSheetProps> = ({
 
   return (
     <BottomSheet
-      title='Фільтри'
+      title="Фільтри"
       ref={sheetRef}
       snapPoints={snapPoints}
       enableContentPanningGesture={false}
@@ -80,7 +79,7 @@ export const FiltersBottomSheet: FC<FiltersBottomSheetProps> = ({
       }
     >
       <Controller
-        name='difficulty'
+        name="difficulty"
         control={control}
         render={({ field: { onChange, value } }) => (
           <DifficultyFilter value={value} onChange={onChange} />
@@ -88,7 +87,7 @@ export const FiltersBottomSheet: FC<FiltersBottomSheetProps> = ({
       />
 
       <Controller
-        name='length'
+        name="length"
         control={control}
         render={({ field: { onChange, value } }) => (
           <DistanceWrapper value={value} onChange={onChange} />
@@ -96,11 +95,11 @@ export const FiltersBottomSheet: FC<FiltersBottomSheetProps> = ({
       />
 
       <Controller
-        name='nearMe'
+        name="nearMe"
         control={control}
         render={({ field: nearMeField }) => (
           <Controller
-            name='radius'
+            name="radius"
             control={control}
             render={({ field: { onChange, value } }) => (
               <NearDistance
@@ -108,8 +107,8 @@ export const FiltersBottomSheet: FC<FiltersBottomSheetProps> = ({
                 onChange={onChange}
                 nearMe={nearMeField.value}
                 onNearMeChange={nearMeField.onChange}
-                locationAvailable={locationAvailable}
-                isLoading={isLoading}
+                locationStatus={userLocation.status}
+                onRecoverLocation={userLocation.recoverLocation}
               />
             )}
           />
@@ -117,7 +116,7 @@ export const FiltersBottomSheet: FC<FiltersBottomSheetProps> = ({
       />
 
       <Controller
-        name='minRating'
+        name="minRating"
         control={control}
         render={({ field: { onChange, value } }) => (
           <RatingFilter value={value} onChange={onChange} />

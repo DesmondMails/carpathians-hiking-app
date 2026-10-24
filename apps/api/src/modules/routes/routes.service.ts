@@ -16,7 +16,9 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
+import * as turf from '@turf/turf';
 
+import { asStartCoordinates } from 'src/common/utils/json-guards';
 import {
   RouteWithPois,
   toEditableRoute,
@@ -46,6 +48,10 @@ import { PoiEnrichmentService } from '../poi-enrichment/poi-enrichment.service';
 import { FinalizeRouteDraftDto } from '../routes-draft/dto/finalize-route-draft.dto';
 import { StorageService } from '../storage/storage.service';
 import { selectFeaturedRoutePois } from './mappers/featured-route-pois';
+
+type RouteListRow = Prisma.RouteGetPayload<{
+  select: typeof ROUTE_LIST_SELECT;
+}>;
 
 @Injectable()
 export class RoutesService {
@@ -166,27 +172,7 @@ export class RoutesService {
   ): Promise<RouteListItem[]> {
     this.checkDistanceOrThrowErr(searchQuery);
 
-    const routes = await this.prisma.route.findMany({
-      where: {
-        status: 'PUBLISHED',
-        difficulty: searchQuery?.difficulty?.length
-          ? {
-              in: searchQuery?.difficulty,
-            }
-          : undefined,
-        distanceM: {
-          gte:
-            searchQuery?.distanceFromM !== undefined
-              ? searchQuery?.distanceFromM
-              : undefined,
-          lte: searchQuery?.distanceToM ? searchQuery?.distanceToM : undefined,
-        },
-      },
-      orderBy: {
-        createdAt: 'desc',
-      },
-      select: ROUTE_LIST_SELECT,
-    });
+    const routes = await this.selectFilteredRoutes(searchQuery);
 
     return Promise.all(
       routes.map(async (route) => ({
@@ -513,5 +499,65 @@ export class RoutesService {
     if (from > to) {
       throw new BadRequestException('Нижня межа має бути меншою, аніж верхня');
     }
+  }
+
+  private async selectFilteredRoutes(
+    searchQuery?: SearchRouteQueryDto,
+  ): Promise<RouteListRow[]> {
+    const { radiusM, longitude, latitude } = searchQuery ?? {};
+
+    const isNearMeSearch =
+      radiusM != null && longitude != null && latitude != null;
+
+    let routes = await this.prisma.route.findMany({
+      where: {
+        status: 'PUBLISHED',
+        difficulty: searchQuery?.difficulty?.length
+          ? {
+              in: searchQuery?.difficulty,
+            }
+          : undefined,
+        distanceM: {
+          gte:
+            searchQuery?.distanceFromM !== undefined
+              ? searchQuery?.distanceFromM
+              : undefined,
+          lte: searchQuery?.distanceToM ? searchQuery?.distanceToM : undefined,
+        },
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+      select: { ...ROUTE_LIST_SELECT, routeCoordinatesJson: isNearMeSearch },
+    });
+
+    if (isNearMeSearch) {
+      routes = routes.filter((route) => {
+        const startPoint = asStartCoordinates(route.routeCoordinatesJson ?? []);
+
+        if (!startPoint) return false;
+
+        return this.checkIfPointNear(
+          [longitude, latitude],
+          [startPoint.longitude, startPoint.latitude],
+          radiusM,
+        );
+      });
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    return routes.map(({ routeCoordinatesJson, ...rest }) => rest);
+  }
+
+  private checkIfPointNear(
+    userCoords: [number, number],
+    routeStartCoords: [number, number],
+    radiusM: number,
+  ): boolean {
+    const distance = turf.distance(userCoords, routeStartCoords, {
+      units: 'meters',
+    });
+
+    return distance <= radiusM;
   }
 }
