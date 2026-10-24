@@ -1,13 +1,18 @@
 import { FC } from 'react'
 
-import { Pressable, StyleSheet, View } from 'react-native'
+import { Platform, Pressable, StyleSheet, View } from 'react-native'
 
 import { Feather } from '@expo/vector-icons'
 
 import { AppText, Slider } from '@/src/shared/components'
+import type { LocationStatus } from '@/src/shared/hooks'
 import { colors } from '@/src/theme/colors'
 
-import { MIN_NEAR_DISTANCE_KM, MAX_NEAR_DISTANCE_KM } from '../../../constants'
+import {
+  MIN_NEAR_DISTANCE_KM,
+  MAX_NEAR_DISTANCE_KM,
+  locationHints,
+} from '../../../constants'
 import { filterStyles } from '../styles'
 
 type NearDistanceProps = {
@@ -15,8 +20,8 @@ type NearDistanceProps = {
   onChange: (value: number) => void
   nearMe: boolean
   onNearMeChange: (value: boolean) => void
-  locationAvailable: boolean
-  isLoading?: boolean
+  locationStatus: LocationStatus
+  onRecoverLocation: () => Promise<void>
 }
 
 export const NearDistance: FC<NearDistanceProps> = ({
@@ -24,17 +29,15 @@ export const NearDistance: FC<NearDistanceProps> = ({
   onChange,
   nearMe,
   onNearMeChange,
-  locationAvailable,
-  isLoading = false,
+  locationStatus,
+  onRecoverLocation,
 }) => {
+  const locationAvailable = locationStatus === 'available'
+  const isLoading = locationStatus === 'loading'
   const enabled = locationAvailable && nearMe
   const showWarning = !locationAvailable && !isLoading
   const hintColor = showWarning ? colors.warning : colors.textSecondary
-  const hintText = isLoading
-    ? 'Визначаємо місцезнаходження…'
-    : showWarning
-      ? 'Геолокація вимкнена або недоступна'
-      : 'Радіус по прямій, не шлях автомобілем'
+  const hint = locationHints[locationStatus]
 
   return (
     <View style={filterStyles.section}>
@@ -50,7 +53,10 @@ export const NearDistance: FC<NearDistanceProps> = ({
         <Pressable
           accessibilityRole='checkbox'
           accessibilityLabel='Шукати поруч'
-          accessibilityState={{ checked: enabled, disabled: !locationAvailable }}
+          accessibilityState={{
+            checked: enabled,
+            disabled: !locationAvailable,
+          }}
           disabled={!locationAvailable}
           onPress={() => onNearMeChange(!nearMe)}
           style={[styles.checkboxRow, !locationAvailable && styles.disabled]}
@@ -105,9 +111,24 @@ export const NearDistance: FC<NearDistanceProps> = ({
           style={styles.hint}
           accessibilityLiveRegion='polite'
         >
-          {hintText}
+          {hint.text}
         </AppText>
       </View>
+      {hint.action && (
+        <Pressable
+          accessibilityRole='button'
+          onPress={() => void onRecoverLocation()}
+          style={styles.recoveryAction}
+        >
+          <AppText
+            variant='caption'
+            color={colors.primary}
+            style={styles.actionText}
+          >
+            {hint.action}
+          </AppText>
+        </Pressable>
+      )}
     </View>
   )
 }
@@ -137,5 +158,11 @@ const styles = StyleSheet.create({
   },
   description: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   hint: { flex: 1 },
+  recoveryAction: {
+    minHeight: 44,
+    justifyContent: 'center',
+    alignSelf: 'flex-start',
+  },
+  actionText: { textDecorationLine: 'underline' },
   disabled: { opacity: 0.45 },
 })

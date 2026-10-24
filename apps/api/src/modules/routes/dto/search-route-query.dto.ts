@@ -1,6 +1,18 @@
 import { Difficulty, DIFFICULTY_VALUES } from '@hiking/shared';
 import { Transform, Type } from 'class-transformer';
-import { IsOptional, IsIn, IsNumber, IsPositive, Min } from 'class-validator';
+import {
+  IsOptional,
+  IsIn,
+  IsNumber,
+  IsPositive,
+  Min,
+  IsLatitude,
+  IsLongitude,
+  ValidateIf,
+} from 'class-validator';
+
+const hasGeoParam = (o: SearchRouteQueryDto): boolean =>
+  o.latitude != null || o.longitude != null || o.radiusM != null;
 
 export class SearchRouteQueryDto {
   @IsOptional()
@@ -21,4 +33,20 @@ export class SearchRouteQueryDto {
   @IsNumber()
   @IsPositive()
   distanceToM?: number;
+
+  @Type(() => Number)
+  @ValidateIf(hasGeoParam)
+  @IsLatitude()
+  latitude?: number;
+
+  @Type(() => Number)
+  @ValidateIf(hasGeoParam)
+  @IsLongitude()
+  longitude?: number;
+
+  @ValidateIf(hasGeoParam)
+  @Type(() => Number)
+  @IsNumber()
+  @IsPositive()
+  radiusM?: number;
 }

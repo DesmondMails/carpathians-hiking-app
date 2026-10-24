@@ -13,6 +13,11 @@ import {
 
 import type { Prisma } from 'src/prisma/generated/client';
 
+import {
+  isValidLatitude,
+  isValidLongitude,
+} from '../helpers/validate-coords.helper';
+
 export function isJsonObject(
   value: Prisma.JsonValue | null | undefined,
 ): value is Prisma.JsonObject {
@@ -72,6 +77,26 @@ export function asCoordinates(
   }
 
   return result.length ? result : undefined;
+}
+
+export function asStartCoordinates(
+  value: Prisma.JsonValue | null | undefined,
+): RouteCoordinate | undefined {
+  if (!Array.isArray(value)) return undefined;
+
+  for (const item of value) {
+    if (!isJsonObject(item)) continue;
+
+    const latitude = asNumber(item.latitude);
+    const longitude = asNumber(item.longitude);
+
+    if (!isValidLatitude(latitude) || !isValidLongitude(longitude)) continue;
+
+    return {
+      latitude,
+      longitude,
+    };
+  }
 }
 
 export function asElevationProfile(

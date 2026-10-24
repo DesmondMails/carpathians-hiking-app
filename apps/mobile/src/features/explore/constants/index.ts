@@ -1,8 +1,12 @@
+import { Platform } from 'react-native'
+
+import { LocationStatus } from '@/src/shared/hooks'
+
 import type { SearchFormValues } from '../schemas/search.schema'
 
 export const MIN_DISTANCE_KM = 0
 export const MAX_DISTANCE_KM = 50
-export const MIN_NEAR_DISTANCE_KM = 0
+export const MIN_NEAR_DISTANCE_KM = 1
 export const MAX_NEAR_DISTANCE_KM = 200
 
 export const RATING_OPTIONS = [
@@ -36,3 +40,35 @@ export const DEFAULT_FORM_VALUES: SearchFormValues = {
 }
 
 export const TO_METERS_MULTIPLIER = 1000
+
+export const locationHints: Record<
+  LocationStatus,
+  { text: string; action?: string }
+> = {
+  loading: { text: 'Визначаємо місцезнаходження…' },
+  available: { text: 'Радіус по прямій, не шлях автомобілем' },
+  'permission-required': {
+    text: 'Дозвольте доступ до геолокації, щоб знайти маршрути поруч.',
+    action: 'Дозволити геолокацію',
+  },
+  'permission-blocked': {
+    text:
+      Platform.OS === 'web'
+        ? 'Дозвольте геолокацію в налаштуваннях сайту у браузері.'
+        : 'Дозвольте доступ до геолокації в налаштуваннях застосунку.',
+    action:
+      Platform.OS === 'web' ? 'Перевірити знову' : 'Відкрити налаштування',
+  },
+  'services-disabled': {
+    text:
+      Platform.OS === 'ios'
+        ? 'Увімкніть Служби локації: Налаштування → Приватність і безпека → Служби локації.'
+        : 'Увімкніть геолокацію в налаштуваннях пристрою.',
+    action:
+      Platform.OS === 'android' ? 'Відкрити налаштування' : 'Перевірити знову',
+  },
+  error: {
+    text: 'Не вдалося визначити місцезнаходження.',
+    action: 'Спробувати ще раз',
+  },
+}

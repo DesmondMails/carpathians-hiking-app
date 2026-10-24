@@ -1,8 +1,18 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 
-import { AppState } from 'react-native'
+import { AppState, Linking, Platform } from 'react-native'
 
 import * as Location from 'expo-location'
+
+import { toast } from '@/src/shared/store/toast.store'
+
+export type LocationStatus =
+  | 'loading'
+  | 'available'
+  | 'permission-required'
+  | 'permission-blocked'
+  | 'services-disabled'
+  | 'error'
 
 export const useUserLocation = () => {
   const [location, setLocation] = useState<Location.LocationObject>()
@@ -11,14 +21,14 @@ export const useUserLocation = () => {
   const [allowLocationError, setAllowLocationError] = useState<Error | null>(
     null,
   )
-  const [isLoading, setIsLoading] = useState(true)
+  const [status, setStatus] = useState<LocationStatus>('loading')
   const requestInFlight = useRef(false)
 
   const refreshLocation = useCallback(async (requestPermission = true) => {
     if (requestInFlight.current) return
 
     requestInFlight.current = true
-    setIsLoading(true)
+    setStatus('loading')
     setAllowLocationError(null)
     setLocation(undefined)
 
@@ -35,19 +45,27 @@ export const useUserLocation = () => {
       }
 
       setPermission(currentPermission)
-      if (!currentPermission.granted) return
+      if (!currentPermission.granted) {
+        setStatus(
+          currentPermission.canAskAgain
+            ? 'permission-required'
+            : 'permission-blocked',
+        )
+        return
+      }
 
       if (!(await Location.hasServicesEnabledAsync())) {
-        throw new Error(
-          'Служби геолокації вимкнені. Увімкніть їх у налаштуваннях пристрою.',
-        )
+        setStatus('services-disabled')
+        return
       }
 
       const position = await Location.getCurrentPositionAsync({
         accuracy: Location.Accuracy.Balanced,
       })
       setLocation(position)
+      setStatus('available')
     } catch (error) {
+      setStatus('error')
       setAllowLocationError(
         error instanceof Error
           ? error
@@ -57,9 +75,24 @@ export const useUserLocation = () => {
       )
     } finally {
       requestInFlight.current = false
-      setIsLoading(false)
     }
   }, [])
+
+  const recoverLocation = useCallback(async () => {
+    if (requestInFlight.current) return
+
+    try {
+      if (status === 'permission-blocked' && Platform.OS !== 'web') {
+        await Linking.openSettings()
+      } else if (status === 'services-disabled' && Platform.OS === 'android') {
+        await Linking.sendIntent('android.settings.LOCATION_SOURCE_SETTINGS')
+      } else {
+        await refreshLocation()
+      }
+    } catch {
+      toast.error('Не вдалося відкрити налаштування. Відкрийте їх вручну.')
+    }
+  }, [status, refreshLocation])
 
   useEffect(() => {
     void refreshLocation()
@@ -67,7 +100,7 @@ export const useUserLocation = () => {
     let previousState = AppState.currentState
     const subscription = AppState.addEventListener('change', (nextState) => {
       // Returning from Settings should recheck permission without another prompt.
-      if (previousState === 'background' && nextState === 'active') {
+      if (previousState !== 'active' && nextState === 'active') {
         void refreshLocation(false)
       }
       previousState = nextState
@@ -80,10 +113,12 @@ export const useUserLocation = () => {
 
   return {
     location,
+    status,
+    recoverLocation,
     allowedLocationStatus: permission?.status,
     canAskAgain: permission?.canAskAgain,
     allowLocationError,
-    isLoading,
+    isLoading: status === 'loading',
     refreshLocation,
   }
 }
