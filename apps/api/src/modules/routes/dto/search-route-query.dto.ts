@@ -9,12 +9,29 @@ import {
   IsLatitude,
   IsLongitude,
   ValidateIf,
+  Max,
+  IsInt,
 } from 'class-validator';
 
 const hasGeoParam = (o: SearchRouteQueryDto): boolean =>
   o.latitude != null || o.longitude != null || o.radiusM != null;
 
 export class SearchRouteQueryDto {
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(1)
+  @Max(50)
+  @IsInt()
+  limit?: number;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(0)
+  @IsInt()
+  offset?: number;
+
   @IsOptional()
   @Transform(({ value }: { value: unknown }): string[] =>
     Array.isArray(value) ? (value as string[]) : String(value).split(','),

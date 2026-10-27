@@ -22,6 +22,7 @@ type BottomSheetProps = {
   footer?: ReactNode
   snapPoints?: (number | string)[]
   enableContentPanningGesture?: boolean
+  onAnimate?: (fromIndex: number, toIndex: number) => void
 }
 
 const DEFAULT_SNAP_POINTS = ['90%']
@@ -33,11 +34,16 @@ export const BottomSheet: FC<BottomSheetProps> = ({
   footer,
   snapPoints = DEFAULT_SNAP_POINTS,
   enableContentPanningGesture = true,
+  onAnimate,
 }) => {
   const insets = useSafeAreaInsets()
   const renderBackdrop = useCallback(
     (props: BottomSheetBackdropProps) => (
-      <BottomSheetBackdrop {...props} appearsOnIndex={0} disappearsOnIndex={-1} />
+      <BottomSheetBackdrop
+        {...props}
+        appearsOnIndex={0}
+        disappearsOnIndex={-1}
+      />
     ),
     [],
   )
@@ -45,6 +51,7 @@ export const BottomSheet: FC<BottomSheetProps> = ({
   return (
     <BottomSheetModal
       ref={ref}
+      onAnimate={onAnimate}
       index={0}
       snapPoints={snapPoints}
       enableDynamicSizing={false}
@@ -57,21 +64,24 @@ export const BottomSheet: FC<BottomSheetProps> = ({
     >
       <View style={styles.container}>
         <View style={styles.header}>
-          <AppText variant='h2'>{title}</AppText>
+          <AppText variant="h2">{title}</AppText>
           <Pressable
-            accessibilityRole='button'
-            accessibilityLabel='Закрити фільтри'
+            accessibilityRole="button"
+            accessibilityLabel="Закрити фільтри"
             onPress={() => ref.current?.dismiss()}
-            style={({ pressed }) => [styles.closeButton, pressed && styles.pressed]}
+            style={({ pressed }) => [
+              styles.closeButton,
+              pressed && styles.pressed,
+            ]}
           >
-            <Feather name='x' size={22} color={colors.textPrimary} />
+            <Feather name="x" size={22} color={colors.textPrimary} />
           </Pressable>
         </View>
         <BottomSheetScrollView
           style={styles.scroll}
           contentContainerStyle={styles.content}
           showsVerticalScrollIndicator={false}
-          keyboardShouldPersistTaps='handled'
+          keyboardShouldPersistTaps="handled"
         >
           {children}
         </BottomSheetScrollView>
