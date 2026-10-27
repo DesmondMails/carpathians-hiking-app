@@ -1,4 +1,4 @@
-import { FC, RefObject, useMemo } from 'react'
+import { FC, RefObject, useCallback, useMemo } from 'react'
 
 import { useWindowDimensions } from 'react-native'
 
@@ -17,69 +17,68 @@ import { MoreFilters } from './MoreFilters'
 import { NearDistance } from './NearDistance'
 import { RatingFilter } from './RatingFilter'
 import { DEFAULT_FORM_VALUES } from '../../constants'
-import { useExplore } from '../../hooks/useExplore'
-import { toSearchPayload } from '../../mappers/search.payload'
 import { searchFormSchema, SearchFormValues } from '../../schemas/search.schema'
 
 type FiltersBottomSheetProps = {
   sheetRef: RefObject<BottomSheetModal | null>
   userLocation: ReturnType<typeof useUserLocation>
+  appliedFilters: SearchFormValues
+  onApply: (filters: SearchFormValues) => void
 }
 
 export const FiltersBottomSheet: FC<FiltersBottomSheetProps> = ({
   sheetRef,
   userLocation,
+  appliedFilters,
+  onApply,
 }) => {
   const { height } = useWindowDimensions()
   const insets = useSafeAreaInsets()
   const snapPoints = useMemo(
     () => [Math.min(760 + insets.bottom, (height - insets.top) * 0.92)],
-    [height, insets.top, insets.bottom],
+    [height, insets.top, insets.bottom]
   )
-
-  const { isLoading: isLoadingRoutes, loadRoutes } = useExplore()
-
-  const { location } = userLocation
 
   const { control, reset, handleSubmit } = useForm<SearchFormValues>({
     resolver: zodResolver(searchFormSchema),
-    defaultValues: DEFAULT_FORM_VALUES,
+    defaultValues: appliedFilters,
   })
 
-  const onSubmit = async (searchForm: SearchFormValues) => {
-    const payload = toSearchPayload(searchForm, location)
+  // Sync on open, not on dismiss: the sheet captures its close callbacks when
+  // the close animation starts, so a dismiss handler sees pre-apply props.
+  const handleAnimate = useCallback(
+    (fromIndex: number, toIndex: number) => {
+      if (fromIndex === -1 && toIndex >= 0) reset(appliedFilters)
+    },
+    [appliedFilters, reset]
+  )
 
-    sheetRef.current?.close()
-    await loadRoutes(payload)
+  const onSubmit = (searchForm: SearchFormValues) => {
+    onApply(searchForm)
+
+    sheetRef.current?.dismiss()
   }
 
-  const onReset = async () => {
-    sheetRef.current?.close()
-    const success = await loadRoutes({})
-
-    if (success) {
-      reset(DEFAULT_FORM_VALUES)
-    }
-  }
+  const onReset = () => onSubmit(DEFAULT_FORM_VALUES)
 
   return (
     <BottomSheet
-      title="Фільтри"
+      title='Фільтри'
       ref={sheetRef}
       snapPoints={snapPoints}
       enableContentPanningGesture={false}
+      onAnimate={handleAnimate}
       footer={
         <BottomControllers
-          isLoadingRoutes={isLoadingRoutes}
           onReset={() => onReset()}
           onApply={handleSubmit(onSubmit, (errors) =>
-            console.log('errors', errors),
+            console.log('errors', errors)
           )}
         />
       }
     >
       <Controller
-        name="difficulty"
+        name='difficulty'
         control={control}
         render={({ field: { onChange, value } }) => (
           <DifficultyFilter value={value} onChange={onChange} />
@@ -87,7 +86,7 @@ export const FiltersBottomSheet: FC<FiltersBottomSheetProps> = ({
       />
 
       <Controller
-        name="length"
+        name='length'
         control={control}
         render={({ field: { onChange, value } }) => (
           <DistanceWrapper value={value} onChange={onChange} />
@@ -95,11 +94,11 @@ export const FiltersBottomSheet: FC<FiltersBottomSheetProps> = ({
       />
 
       <Controller
-        name="nearMe"
+        name='nearMe'
         control={control}
         render={({ field: nearMeField }) => (
           <Controller
-            name="radius"
+            name='radius'
             control={control}
             render={({ field: { onChange, value } }) => (
               <NearDistance
@@ -116,7 +115,7 @@ export const FiltersBottomSheet: FC<FiltersBottomSheetProps> = ({
       />
 
       <Controller
-        name="minRating"
+        name='minRating'
         control={control}
         render={({ field: { onChange, value } }) => (
           <RatingFilter value={value} onChange={onChange} />

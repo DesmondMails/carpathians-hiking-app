@@ -8,6 +8,8 @@ import {
   RouteDraftPreview,
   RoutePoiEnrichmentStatusOptions,
   RouteListItem,
+  DEFAULT_LIMIT,
+  DEFAULT_OFFSET,
 } from '@hiking/shared';
 import {
   BadRequestException,
@@ -506,6 +508,9 @@ export class RoutesService {
   ): Promise<RouteListRow[]> {
     const { radiusM, longitude, latitude } = searchQuery ?? {};
 
+    const { limit = DEFAULT_LIMIT, offset = DEFAULT_OFFSET } =
+      searchQuery ?? {};
+
     const isNearMeSearch =
       radiusM != null && longitude != null && latitude != null;
 
@@ -525,9 +530,8 @@ export class RoutesService {
           lte: searchQuery?.distanceToM ? searchQuery?.distanceToM : undefined,
         },
       },
-      orderBy: {
-        createdAt: 'desc',
-      },
+      orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+      ...(isNearMeSearch ? {} : { take: limit, skip: offset }),
       select: { ...ROUTE_LIST_SELECT, routeCoordinatesJson: isNearMeSearch },
     });
 
@@ -543,6 +547,8 @@ export class RoutesService {
           radiusM,
         );
       });
+
+      routes = routes.slice(offset, offset + limit);
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars

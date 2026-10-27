@@ -23,4 +23,6 @@ export interface SearchRoutePayload {
   latitude?: number
   longitude?: number
   radiusM?: number
+  offset?: number
+  limit?: number
 }

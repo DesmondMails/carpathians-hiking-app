@@ -1,5 +1,5 @@
 // Node loads this file when the API require()s @hiking/shared.
-// Keep every public runtime value in sync with its declaration in src/types.
+// Keep every public runtime value in sync with its declaration in src/types or src/constants.
 const DIFFICULTY_VALUES = ['EASY', 'MODERATE', 'HARD', 'EXTREME']
 
 const DIFFICULTY_LABELS = {
@@ -8,6 +8,9 @@ const DIFFICULTY_LABELS = {
   HARD: 'Складний',
   EXTREME: 'Екстремальний',
 }
+
+const DEFAULT_LIMIT = 15
+const DEFAULT_OFFSET = 0
 
 const RoutePoiEnrichmentStatusOptions = {
   PENDING: 'PENDING',
@@ -19,4 +22,6 @@ module.exports = {
   DIFFICULTY_VALUES,
   DIFFICULTY_LABELS,
   RoutePoiEnrichmentStatusOptions,
+  DEFAULT_LIMIT,
+  DEFAULT_OFFSET,
 }
