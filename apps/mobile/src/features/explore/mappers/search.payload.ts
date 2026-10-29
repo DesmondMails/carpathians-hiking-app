@@ -32,10 +32,15 @@ export const toSearchPayload = (
         }
       : undefined
 
+  const maxDurationH = values?.maxDurationH ?? undefined
+  const maxElevationGainM = values?.maxElevationGainM ?? undefined
+
   return {
     ...radiusData,
     difficulty: values.difficulty?.length ? values.difficulty : undefined,
     distanceFromM,
     distanceToM,
+    maxDurationH,
+    maxElevationGainM,
   }
 }

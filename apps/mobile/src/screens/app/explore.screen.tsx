@@ -18,7 +18,7 @@ import { useExplore } from '@/src/features/explore/hooks/useExplore'
 import { toSearchPayload } from '@/src/features/explore/mappers/search.payload'
 import type { SearchFormValues } from '@/src/features/explore/schemas/search.schema'
 import { AppSearch, RoutesLoader } from '@/src/shared/components'
-import { useUserLocation } from '@/src/shared/hooks'
+import { useDebounce, useUserLocation } from '@/src/shared/hooks'
 
 export default function ExploreScreen() {
   const userLocation = useUserLocation()
@@ -28,13 +28,20 @@ export default function ExploreScreen() {
     isLoadingMore,
     error,
     appliedFilters,
+    appliedSearchPayload,
     applyFilters,
     loadRoutes,
     loadMore,
+    applySearchText,
   } = useExplore()
+  const [searchText, setSearchText] = useState(
+    appliedSearchPayload?.searchText ?? ''
+  )
   const [activeCategory, setActiveCategory] = useState('Поруч')
   const [saved, setSaved] = useState<Set<string>>(new Set())
   const sheetRef = useRef<BottomSheetModal>(null)
+
+  const debouncedSearchText = useDebounce<string>(searchText, 500)
 
   const toggleSave = (id: string) =>
     setSaved((prev) => {
@@ -48,9 +55,17 @@ export default function ExploreScreen() {
     sheetRef.current?.present()
   }, [])
 
+  const handleSearchText = (newText: string) => {
+    setSearchText(newText)
+  }
+
   const handleApplyFilters = (filters: SearchFormValues) => {
     void applyFilters(filters, toSearchPayload(filters, userLocation.location))
   }
+
+  useEffect(() => {
+    void applySearchText(debouncedSearchText)
+  }, [debouncedSearchText, applySearchText])
 
   useEffect(() => {
     void loadRoutes()
@@ -61,10 +76,12 @@ export default function ExploreScreen() {
       {/* <ExploreHeader name='Mykyta' location='Карпати' /> */}
 
       <AppSearch
+        text={searchText}
         placeholder='Пошук маршрутів, локацій'
         preIconName='search'
         postIconName='sliders'
         onFilterPress={handleOpenSheet}
+        onTextChange={handleSearchText}
       />
 
       <View style={styles.categoryChips}>

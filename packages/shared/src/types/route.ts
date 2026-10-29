@@ -25,4 +25,7 @@ export interface SearchRoutePayload {
   radiusM?: number
   offset?: number
   limit?: number
+  maxElevationGainM?: number
+  maxDurationH?: number
+  searchText?: string
 }

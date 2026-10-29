@@ -92,6 +92,10 @@ export class RoutesController {
   @Get()
   @ApiOperation({ summary: 'Отримати всі маршрути' })
   @ApiResponse({ status: 200, description: 'Всі маршрути успішно отримані' })
+  @ApiResponse({
+    status: 400,
+    description: 'Некоректні параметри пошуку або пагінації',
+  })
   async getAllRoutes(
     @Query()
     searchQuery?: SearchRouteQueryDto,

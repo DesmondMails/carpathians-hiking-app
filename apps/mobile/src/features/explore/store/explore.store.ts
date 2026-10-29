@@ -13,7 +13,6 @@ import { DEFAULT_FORM_VALUES } from '../constants'
 import type { SearchFormValues } from '../schemas/search.schema'
 
 type AppliedSearchPayload = Omit<SearchRoutePayload, 'limit' | 'offset'>
-
 interface ExploreState {
   isLoading: boolean
   isLoadingMore: boolean
@@ -28,6 +27,7 @@ interface ExploreState {
     filters: SearchFormValues,
     payload: AppliedSearchPayload
   ) => Promise<boolean>
+  applySearchText: (searchText: string) => Promise<boolean>
   loadRoutes: () => Promise<boolean>
   loadMore: () => Promise<boolean>
 }
@@ -123,7 +123,28 @@ export const useExploreStore = create<ExploreState>((set, get) => {
     appliedSearchPayload: {},
 
     applyFilters: (filters, payload) => {
-      set({ appliedFilters: filters, appliedSearchPayload: payload })
+      set({
+        appliedFilters: filters,
+        appliedSearchPayload: {
+          ...payload,
+          searchText: get().appliedSearchPayload.searchText,
+        },
+      })
+
+      return loadPage(false)
+    },
+    applySearchText: (searchText: string) => {
+      const normalizedText = searchText.trim() || undefined
+
+      if (normalizedText === get().appliedSearchPayload.searchText) {
+        return Promise.resolve(false)
+      }
+      set({
+        appliedSearchPayload: {
+          ...get().appliedSearchPayload,
+          searchText: normalizedText,
+        },
+      })
 
       return loadPage(false)
     },

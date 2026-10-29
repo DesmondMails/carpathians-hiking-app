@@ -18,15 +18,15 @@ export const RATING_OPTIONS = [
 export const ELEVATION_OPTIONS = [
   { value: null, label: 'Без обмежень' },
   { value: 300, label: 'До 300 м' },
-  { value: 600, label: 'До 600 м' },
-  { value: 1000, label: 'До 1 000 м' },
+  { value: 900, label: 'До 900 м' },
   { value: 1500, label: 'До 1 500 м' },
+  { value: 2300, label: 'До 2 300 м' },
 ]
 export const DURATION_OPTIONS = [
   { value: null, label: 'Без обмежень' },
-  { value: 2, label: 'До 2 годин' },
-  { value: 4, label: 'До 4 годин' },
+  { value: 3, label: 'До 3 годин' },
   { value: 8, label: 'До 8 годин' },
+  { value: 12, label: 'До 12 годин' },
 ]
 
 export const DEFAULT_FORM_VALUES: SearchFormValues = {
