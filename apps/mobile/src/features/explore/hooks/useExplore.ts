@@ -6,9 +6,13 @@ export const useExplore = () => {
   const isLoadingMore = useExploreStore((state) => state.isLoadingMore)
   const error = useExploreStore((state) => state.error)
   const appliedFilters = useExploreStore((state) => state.appliedFilters)
+  const appliedSearchPayload = useExploreStore(
+    (state) => state.appliedSearchPayload
+  )
   const applyFilters = useExploreStore((state) => state.applyFilters)
   const loadRoutes = useExploreStore((state) => state.loadRoutes)
   const loadMore = useExploreStore((state) => state.loadMore)
+  const applySearchText = useExploreStore((state) => state.applySearchText)
 
   return {
     routes,
@@ -16,8 +20,10 @@ export const useExplore = () => {
     isLoadingMore,
     error,
     appliedFilters,
+    appliedSearchPayload,
     applyFilters,
     loadRoutes,
     loadMore,
+    applySearchText,
   }
 }

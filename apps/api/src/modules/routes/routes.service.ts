@@ -514,6 +514,8 @@ export class RoutesService {
     const isNearMeSearch =
       radiusM != null && longitude != null && latitude != null;
 
+    const searchText = searchQuery?.searchText?.trim();
+
     let routes = await this.prisma.route.findMany({
       where: {
         status: 'PUBLISHED',
@@ -529,6 +531,18 @@ export class RoutesService {
               : undefined,
           lte: searchQuery?.distanceToM ? searchQuery?.distanceToM : undefined,
         },
+        elevationGainM: {
+          lte: searchQuery?.maxElevationGainM,
+        },
+        durationH: {
+          lte: searchQuery?.maxDurationH,
+        },
+        OR: searchText
+          ? [
+              { title: { contains: searchText, mode: 'insensitive' } },
+              { region: { contains: searchText, mode: 'insensitive' } },
+            ]
+          : undefined,
       },
       orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
       ...(isNearMeSearch ? {} : { take: limit, skip: offset }),

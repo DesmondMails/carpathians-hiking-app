@@ -13,19 +13,23 @@ type FeatherIconName = ComponentProps<typeof Feather>['name']
 interface AppSearchProps {
   placeholder: string
   preIconName: FeatherIconName
+  text?: string
   postIconName?: FeatherIconName
   editable?: boolean
   onFilterPress?: () => void
   onSearchPress?: () => void
+  onTextChange?: (newText: string) => void
 }
 
 export const AppSearch: FC<AppSearchProps> = ({
   placeholder,
   preIconName,
   postIconName,
+  text,
   editable = true,
   onFilterPress,
   onSearchPress,
+  onTextChange,
 }) => {
   return (
     <View style={styles.searchWrapper}>
@@ -34,8 +38,10 @@ export const AppSearch: FC<AppSearchProps> = ({
           <Feather name={preIconName} size={18} color={colors.gray400} />
         )}
         <TextInput
+          value={text}
           editable={editable}
           onPress={onSearchPress}
+          onChangeText={onTextChange}
           style={styles.searchInput}
           placeholder={placeholder}
           placeholderTextColor={colors.gray400}

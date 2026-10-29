@@ -18,7 +18,7 @@ const lengthTuple = z
       message:
         'Максимальна довжина має перевищувати мінімальну хоча б на 0,1 км',
       path: [1],
-    },
+    }
   )
 
 export const searchFormSchema = z.object({
