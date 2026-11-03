@@ -7,14 +7,6 @@ const IMG_2 =
 const IMG_3 =
   'https://www.figma.com/api/mcp/asset/ba4d91a7-0cb1-4846-841e-07fd8844fb27'
 
-export const EXPLORE_CATEGORIES: Category[] = [
-  { label: 'Поруч', icon: 'map-pin' },
-  { label: 'Легкі', icon: 'sun' },
-  { label: 'З водою', icon: 'droplet' },
-  { label: 'Види', icon: 'eye' },
-  { label: 'Складні', icon: 'zap' },
-]
-
 export const NEARBY_ROUTES: Route[] = [
   {
     id: 'n1',
@@ -156,4 +148,7 @@ export const POPULAR_ROUTES: Route[] = [
   },
 ]
 
-export const ALL_ROUTES: Route[] = [...NEARBY_ROUTES, ...POPULAR_ROUTES.slice(0, 3)]
+export const ALL_ROUTES: Route[] = [
+  ...NEARBY_ROUTES,
+  ...POPULAR_ROUTES.slice(0, 3),
+]

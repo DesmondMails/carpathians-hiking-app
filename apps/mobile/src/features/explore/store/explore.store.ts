@@ -21,6 +21,8 @@ interface ExploreState {
   isLoadingMore: boolean
   // A first page has loaded at least once, so `routes` is a real result
   hasLoaded: boolean
+  // Bumped when a first page replaces the list, so the screen can scroll to top
+  resultsVersion: number
   hasMore: boolean
   refreshError: string | null
   loadMoreError: string | null
@@ -103,6 +105,9 @@ export const useExploreStore = create<ExploreState>((set, get) => {
           offset: offset + page.length,
           hasMore: page.length === DEFAULT_LIMIT,
           hasLoaded: true,
+          resultsVersion: isNextPage
+            ? current.resultsVersion
+            : current.resultsVersion + 1,
         }
       })
       return true
@@ -127,6 +132,7 @@ export const useExploreStore = create<ExploreState>((set, get) => {
     isRefreshing: false,
     isLoadingMore: false,
     hasLoaded: false,
+    resultsVersion: 0,
     hasMore: true,
     refreshError: null,
     loadMoreError: null,

@@ -9,13 +9,12 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 
 import {
   AllRouteCard,
-  CategoryChips,
+  CategoryChipsQuickSelect,
   FiltersBottomSheet,
   RoutesEmptyState,
   RoutesListFooter,
   RoutesRefreshStatus,
 } from '@/src/features/explore/components'
-import { EXPLORE_CATEGORIES } from '@/src/features/explore/data/mock-routes'
 import { useExplore } from '@/src/features/explore/hooks/useExplore'
 import { toSearchPayload } from '@/src/features/explore/mappers/search.payload'
 import type { SearchFormValues } from '@/src/features/explore/schemas/search.schema'
@@ -29,6 +28,7 @@ export default function ExploreScreen() {
     isRefreshing,
     isLoadingMore,
     hasLoaded,
+    resultsVersion,
     refreshError,
     loadMoreError,
     appliedFilters,
@@ -43,7 +43,7 @@ export default function ExploreScreen() {
   const [searchText, setSearchText] = useState(
     appliedSearchPayload?.searchText ?? ''
   )
-  const [activeCategory, setActiveCategory] = useState('Поруч')
+
   const [saved, setSaved] = useState<Set<string>>(new Set())
   const sheetRef = useRef<BottomSheetModal>(null)
   const listRef = useRef<FlashListRef<RouteListItem>>(null)
@@ -66,37 +66,32 @@ export default function ExploreScreen() {
     setSearchText(newText)
   }
 
-  const showFirstPageWhenLoaded = useCallback(
-    async (request: Promise<boolean>) => {
-      if (await request) {
-        listRef.current?.scrollToOffset({ offset: 0, animated: false })
-      }
+  const handleApplyFilters = useCallback(
+    (filters: SearchFormValues) => {
+      applyFilters(filters, toSearchPayload(filters, userLocation.location))
     },
-    []
+    [applyFilters, userLocation.location]
   )
 
-  const handleApplyFilters = (filters: SearchFormValues) => {
-    void showFirstPageWhenLoaded(
-      applyFilters(filters, toSearchPayload(filters, userLocation.location))
-    )
-  }
-
   const handleRetryRefresh = () => {
-    void showFirstPageWhenLoaded(retryRefresh())
+    retryRefresh()
   }
 
   useEffect(() => {
-    void showFirstPageWhenLoaded(applySearchText(debouncedSearchText))
-  }, [debouncedSearchText, applySearchText, showFirstPageWhenLoaded])
+    applySearchText(debouncedSearchText)
+  }, [debouncedSearchText, applySearchText])
 
   useEffect(() => {
     void loadRoutes()
   }, [loadRoutes])
 
+  // Runs after the new first page has rendered, so FlashList measures it first
+  useEffect(() => {
+    listRef.current?.scrollToOffset({ offset: 0, animated: false })
+  }, [resultsVersion])
+
   return (
     <SafeAreaView style={styles.root} edges={['top']}>
-      {/* <ExploreHeader name='Mykyta' location='Карпати' /> */}
-
       <AppSearch
         text={searchText}
         placeholder='Пошук маршрутів, локацій'
@@ -107,10 +102,9 @@ export default function ExploreScreen() {
       />
 
       <View style={styles.categoryChips}>
-        <CategoryChips
-          categories={EXPLORE_CATEGORIES}
-          active={activeCategory}
-          onPress={setActiveCategory}
+        <CategoryChipsQuickSelect
+          appliedFilters={appliedFilters}
+          handleApplyFilters={handleApplyFilters}
         />
       </View>
 
