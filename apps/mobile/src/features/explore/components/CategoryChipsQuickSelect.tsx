@@ -5,36 +5,54 @@ import { Pressable, ScrollView, StyleSheet } from 'react-native'
 import { Feather } from '@expo/vector-icons'
 
 import { AppText } from '@/src/shared/components/AppText'
+import { isSameValue } from '@/src/shared/utils/isSameValue'
 import { colors } from '@/src/theme/colors'
 import { typography } from '@/src/theme/typography'
 
-import { Category } from '../types'
+import { DEFAULT_FORM_VALUES, EXPLORE_CATEGORIES } from '../constants'
+import { SearchFormValues } from '../schemas/search.schema'
 
-
-interface CategoryChipsProps {
-  categories: Category[]
-  active: string
-  onPress: (label: string) => void
+interface CategoryChipsQuickSelectProps {
+  appliedFilters: SearchFormValues
+  handleApplyFilters: (filters: SearchFormValues) => void
 }
 
-export const CategoryChips: FC<CategoryChipsProps> = ({
-  categories,
-  active,
-  onPress,
+const isCategoryActive = (
+  filter: Partial<SearchFormValues>,
+  applied: SearchFormValues
+) =>
+  (Object.keys(filter) as (keyof SearchFormValues)[]).every((key) =>
+    isSameValue(filter[key], applied[key])
+  )
+
+export const CategoryChipsQuickSelect: FC<CategoryChipsQuickSelectProps> = ({
+  appliedFilters,
+  handleApplyFilters,
 }) => {
+  const handleQuickFilterSelected = (filter: Partial<SearchFormValues>) => {
+    const isActiveFilterClicked = isCategoryActive(filter, appliedFilters)
+
+    const filterToApply = isActiveFilterClicked
+      ? DEFAULT_FORM_VALUES
+      : { ...DEFAULT_FORM_VALUES, ...filter }
+
+    handleApplyFilters(filterToApply)
+  }
+
   return (
     <ScrollView
       horizontal
       showsHorizontalScrollIndicator={false}
       contentContainerStyle={cc.row}
     >
-      {categories.map((cat) => {
-        const isActive = cat.label === active
+      {EXPLORE_CATEGORIES.map((cat) => {
+        const isActive = isCategoryActive(cat.value, appliedFilters)
+
         return (
           <Pressable
             key={cat.label}
             style={[cc.chip, isActive && cc.chipActive]}
-            onPress={() => onPress(cat.label)}
+            onPress={() => handleQuickFilterSelected(cat.value)}
           >
             <Feather
               name={cat.icon as any}

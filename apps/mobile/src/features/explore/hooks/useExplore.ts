@@ -6,6 +6,7 @@ export const useExplore = () => {
   const isRefreshing = useExploreStore((state) => state.isRefreshing)
   const isLoadingMore = useExploreStore((state) => state.isLoadingMore)
   const hasLoaded = useExploreStore((state) => state.hasLoaded)
+  const resultsVersion = useExploreStore((state) => state.resultsVersion)
   const refreshError = useExploreStore((state) => state.refreshError)
   const loadMoreError = useExploreStore((state) => state.loadMoreError)
   const appliedFilters = useExploreStore((state) => state.appliedFilters)
@@ -25,6 +26,7 @@ export const useExplore = () => {
     isRefreshing,
     isLoadingMore,
     hasLoaded,
+    resultsVersion,
     refreshError,
     loadMoreError,
     appliedFilters,

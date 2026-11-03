@@ -3,6 +3,7 @@ import { Platform } from 'react-native'
 import { LocationStatus } from '@/src/shared/hooks'
 
 import type { SearchFormValues } from '../schemas/search.schema'
+import { Category } from '../types'
 
 export const MIN_DISTANCE_KM = 0
 export const MAX_DISTANCE_KM = 50
@@ -79,3 +80,26 @@ export const PAGE_REQUEST = {
 } as const
 
 export type PageRequest = (typeof PAGE_REQUEST)[keyof typeof PAGE_REQUEST]
+
+export const EXPLORE_CATEGORIES: Category[] = [
+  {
+    label: 'Легкі',
+    icon: 'sun',
+    value: { difficulty: ['EASY'] },
+  },
+  {
+    label: 'До 10км',
+    icon: 'compass',
+    value: { length: [0, 10] },
+  },
+  {
+    label: 'Помірні',
+    icon: 'crop',
+    value: { difficulty: ['MODERATE'] },
+  },
+  {
+    label: 'Складні',
+    icon: 'zap',
+    value: { difficulty: ['HARD'] },
+  },
+]

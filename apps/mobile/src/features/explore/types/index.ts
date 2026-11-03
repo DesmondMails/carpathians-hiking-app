@@ -1,6 +1,12 @@
+import { SearchFormValues } from '../schemas/search.schema'
+
 export type Difficulty = 'Легкий' | 'Помірний' | 'Складний' | 'Екстрем'
 
-export type Category = { label: string; icon: string }
+export type Category = {
+  label: string
+  icon: string
+  value: Partial<SearchFormValues>
+}
 
 export type Route = {
   id: string
