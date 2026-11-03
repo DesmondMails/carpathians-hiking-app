@@ -3,7 +3,8 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { StyleSheet, View } from 'react-native'
 
 import { BottomSheetModal } from '@gorhom/bottom-sheet'
-import { FlashList } from '@shopify/flash-list'
+import type { RouteListItem } from '@hiking/shared'
+import { FlashList, FlashListRef } from '@shopify/flash-list'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
 import {
@@ -12,6 +13,7 @@ import {
   FiltersBottomSheet,
   RoutesEmptyState,
   RoutesListFooter,
+  RoutesRefreshStatus,
 } from '@/src/features/explore/components'
 import { EXPLORE_CATEGORIES } from '@/src/features/explore/data/mock-routes'
 import { useExplore } from '@/src/features/explore/hooks/useExplore'
@@ -24,15 +26,19 @@ export default function ExploreScreen() {
   const userLocation = useUserLocation()
   const {
     routes,
-    isLoading,
+    isRefreshing,
     isLoadingMore,
-    error,
+    hasLoaded,
+    refreshError,
+    loadMoreError,
     appliedFilters,
     appliedSearchPayload,
     applyFilters,
     loadRoutes,
     loadMore,
     applySearchText,
+    retryRefresh,
+    retryLoadMore,
   } = useExplore()
   const [searchText, setSearchText] = useState(
     appliedSearchPayload?.searchText ?? ''
@@ -40,6 +46,7 @@ export default function ExploreScreen() {
   const [activeCategory, setActiveCategory] = useState('Поруч')
   const [saved, setSaved] = useState<Set<string>>(new Set())
   const sheetRef = useRef<BottomSheetModal>(null)
+  const listRef = useRef<FlashListRef<RouteListItem>>(null)
 
   const debouncedSearchText = useDebounce<string>(searchText, 500)
 
@@ -59,13 +66,28 @@ export default function ExploreScreen() {
     setSearchText(newText)
   }
 
+  const showFirstPageWhenLoaded = useCallback(
+    async (request: Promise<boolean>) => {
+      if (await request) {
+        listRef.current?.scrollToOffset({ offset: 0, animated: false })
+      }
+    },
+    []
+  )
+
   const handleApplyFilters = (filters: SearchFormValues) => {
-    void applyFilters(filters, toSearchPayload(filters, userLocation.location))
+    void showFirstPageWhenLoaded(
+      applyFilters(filters, toSearchPayload(filters, userLocation.location))
+    )
+  }
+
+  const handleRetryRefresh = () => {
+    void showFirstPageWhenLoaded(retryRefresh())
   }
 
   useEffect(() => {
-    void applySearchText(debouncedSearchText)
-  }, [debouncedSearchText, applySearchText])
+    void showFirstPageWhenLoaded(applySearchText(debouncedSearchText))
+  }, [debouncedSearchText, applySearchText, showFirstPageWhenLoaded])
 
   useEffect(() => {
     void loadRoutes()
@@ -92,38 +114,55 @@ export default function ExploreScreen() {
         />
       </View>
 
-      {isLoading ? (
+      {!hasLoaded ? (
         <View style={styles.loader}>
-          <RoutesLoader />
+          {refreshError ? (
+            <RoutesListFooter
+              isLoading={false}
+              error={refreshError}
+              onRetry={handleRetryRefresh}
+            />
+          ) : (
+            <RoutesLoader />
+          )}
         </View>
       ) : (
-        <FlashList
-          data={routes}
-          extraData={saved}
-          ListEmptyComponent={!error ? <RoutesEmptyState /> : null}
-          ListFooterComponent={
-            <RoutesListFooter
-              isLoading={isLoadingMore}
-              error={error}
-              onRetry={() => {
-                void (routes.length ? loadMore() : loadRoutes())
-              }}
-            />
-          }
-          keyExtractor={(item) => item.id}
-          contentContainerStyle={styles.list}
-          onEndReached={() => {
-            if (!error) void loadMore()
-          }}
-          onEndReachedThreshold={0.5}
-          renderItem={({ item }) => (
-            <AllRouteCard
-              route={item}
-              saved={saved.has(item.id)}
-              onSave={() => toggleSave(item.id)}
-            />
-          )}
-        />
+        <>
+          <RoutesRefreshStatus
+            isRefreshing={isRefreshing}
+            hasError={refreshError != null}
+            onRetry={handleRetryRefresh}
+          />
+          <FlashList
+            ref={listRef}
+            data={routes}
+            extraData={saved}
+            maintainVisibleContentPosition={{ disabled: true }}
+            ListEmptyComponent={<RoutesEmptyState />}
+            ListFooterComponent={
+              <RoutesListFooter
+                isLoading={isLoadingMore}
+                error={loadMoreError}
+                onRetry={() => {
+                  void retryLoadMore()
+                }}
+              />
+            }
+            keyExtractor={(item) => item.id}
+            contentContainerStyle={styles.list}
+            onEndReached={() => {
+              void loadMore()
+            }}
+            onEndReachedThreshold={0.5}
+            renderItem={({ item }) => (
+              <AllRouteCard
+                route={item}
+                saved={saved.has(item.id)}
+                onSave={() => toggleSave(item.id)}
+              />
+            )}
+          />
+        </>
       )}
 
       <FiltersBottomSheet

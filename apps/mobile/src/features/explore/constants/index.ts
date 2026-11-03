@@ -72,3 +72,10 @@ export const locationHints: Record<
     action: 'Спробувати ще раз',
   },
 }
+
+export const PAGE_REQUEST = {
+  FIRST: 'first',
+  NEXT: 'next',
+} as const
+
+export type PageRequest = (typeof PAGE_REQUEST)[keyof typeof PAGE_REQUEST]
