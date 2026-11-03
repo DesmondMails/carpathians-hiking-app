@@ -18,6 +18,7 @@ import {
 import { useExplore } from '@/src/features/explore/hooks/useExplore'
 import { toSearchPayload } from '@/src/features/explore/mappers/search.payload'
 import type { SearchFormValues } from '@/src/features/explore/schemas/search.schema'
+import { hasActiveFilters } from '@/src/features/explore/utills/has-active-filters'
 import { AppSearch, RoutesLoader } from '@/src/shared/components'
 import { useDebounce, useUserLocation } from '@/src/shared/hooks'
 
@@ -97,6 +98,8 @@ export default function ExploreScreen() {
         placeholder='Пошук маршрутів, локацій'
         preIconName='search'
         postIconName='sliders'
+        isLoading={isRefreshing}
+        isFilterActive={hasActiveFilters(appliedFilters)}
         onFilterPress={handleOpenSheet}
         onTextChange={handleSearchText}
       />
@@ -123,7 +126,6 @@ export default function ExploreScreen() {
       ) : (
         <>
           <RoutesRefreshStatus
-            isRefreshing={isRefreshing}
             hasError={refreshError != null}
             onRetry={handleRetryRefresh}
           />

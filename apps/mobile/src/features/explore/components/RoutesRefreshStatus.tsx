@@ -1,4 +1,4 @@
-import { ActivityIndicator, StyleSheet, View } from 'react-native'
+import { StyleSheet, View } from 'react-native'
 
 import { Feather } from '@expo/vector-icons'
 
@@ -6,28 +6,16 @@ import { AppButton } from '@/src/shared/components/AppButton'
 import { AppText } from '@/src/shared/components/AppText'
 import { colors } from '@/src/theme/colors'
 
+// The in-progress state is shown by the spinner in AppSearch
 type RoutesRefreshStatusProps = {
-  isRefreshing: boolean
   hasError: boolean
   onRetry: () => void
 }
 
 export function RoutesRefreshStatus({
-  isRefreshing,
   hasError,
   onRetry,
 }: RoutesRefreshStatusProps) {
-  if (isRefreshing) {
-    return (
-      <View style={styles.row} accessibilityLiveRegion="polite">
-        <ActivityIndicator size="small" color={colors.primary} />
-        <AppText variant="caption" color={colors.textSecondary}>
-          Оновлюємо маршрути…
-        </AppText>
-      </View>
-    )
-  }
-
   if (!hasError) return null
 
   return (
