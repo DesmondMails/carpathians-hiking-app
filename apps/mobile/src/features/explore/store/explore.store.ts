@@ -5,20 +5,25 @@ import {
 } from '@hiking/shared'
 import { create } from 'zustand'
 
-import { toast } from '@/src/shared/store/toast.store'
 import { getErrorMessage } from '@/src/shared/utils/getErrorMessage'
 
 import { exploreApi } from '../api/explore.api'
-import { DEFAULT_FORM_VALUES } from '../constants'
+import { DEFAULT_FORM_VALUES, PAGE_REQUEST, PageRequest } from '../constants'
 import type { SearchFormValues } from '../schemas/search.schema'
 
 type AppliedSearchPayload = Omit<SearchRoutePayload, 'limit' | 'offset'>
+
 interface ExploreState {
+  // First page while nothing has been shown yet
   isLoading: boolean
+  // First page of a new search while previous results stay visible
+  isRefreshing: boolean
   isLoadingMore: boolean
+  // A first page has loaded at least once, so `routes` is a real result
   hasLoaded: boolean
   hasMore: boolean
-  error: string | null
+  refreshError: string | null
+  loadMoreError: string | null
   routes: RouteListItem[]
   offset: number
   appliedFilters: SearchFormValues
@@ -30,40 +35,48 @@ interface ExploreState {
   applySearchText: (searchText: string) => Promise<boolean>
   loadRoutes: () => Promise<boolean>
   loadMore: () => Promise<boolean>
+  retryRefresh: () => Promise<boolean>
+  retryLoadMore: () => Promise<boolean>
 }
+
+// Next pages only extend results of the current, successfully loaded search
+const canLoadNextPage = (state: ExploreState): boolean =>
+  state.hasLoaded &&
+  state.hasMore &&
+  !state.isLoading &&
+  !state.isRefreshing &&
+  !state.isLoadingMore &&
+  !state.refreshError
 
 export const useExploreStore = create<ExploreState>((set, get) => {
   let searchVersion = 0
 
-  const loadPage = async (append: boolean): Promise<boolean> => {
+  const loadPage = async (request: PageRequest): Promise<boolean> => {
     const state = get()
+    const isNextPage = request === PAGE_REQUEST.NEXT
 
-    const shouldNotLoad =
-      append &&
-      (state.isLoading ||
-        state.isLoadingMore ||
-        !state.hasMore ||
-        !state.hasLoaded)
-
-    if (shouldNotLoad) {
+    if (isNextPage && !canLoadNextPage(state)) {
       return false
     }
 
-    const version = append ? searchVersion : ++searchVersion
-    const offset = append ? state.offset : 0
+    const version = isNextPage ? searchVersion : ++searchVersion
+    const offset = isNextPage ? state.offset : 0
     const payload = state.appliedSearchPayload
+    const loadingFlag = isNextPage
+      ? 'isLoadingMore'
+      : state.hasLoaded
+        ? 'isRefreshing'
+        : 'isLoading'
 
     set(
-      append
-        ? { isLoadingMore: true, error: null }
+      isNextPage
+        ? { isLoadingMore: true, loadMoreError: null }
         : {
-            isLoading: true,
+            isLoading: !state.hasLoaded,
+            isRefreshing: state.hasLoaded,
             isLoadingMore: false,
-            error: null,
-            routes: [],
-            offset: 0,
-            hasMore: true,
-            hasLoaded: false,
+            refreshError: null,
+            loadMoreError: null,
           }
     )
 
@@ -78,7 +91,7 @@ export const useExploreStore = create<ExploreState>((set, get) => {
 
       set((current) => {
         const existingIds = new Set(current.routes.map((route) => route.id))
-        const routes = append
+        const routes = isNextPage
           ? [
               ...current.routes,
               ...page.filter((route) => !existingIds.has(route.id)),
@@ -100,23 +113,23 @@ export const useExploreStore = create<ExploreState>((set, get) => {
         error,
         'Не вдалося завантажити маршрути. Спробуйте ще раз.'
       )
-      set({ error: message })
-
-      toast.error(message)
+      set(isNextPage ? { loadMoreError: message } : { refreshError: message })
       return false
     } finally {
       if (version === searchVersion) {
-        set({ isLoading: false, isLoadingMore: false })
+        set({ [loadingFlag]: false })
       }
     }
   }
 
   return {
     isLoading: false,
+    isRefreshing: false,
     isLoadingMore: false,
     hasLoaded: false,
     hasMore: true,
-    error: null,
+    refreshError: null,
+    loadMoreError: null,
     routes: [],
     offset: 0,
     appliedFilters: DEFAULT_FORM_VALUES,
@@ -131,7 +144,7 @@ export const useExploreStore = create<ExploreState>((set, get) => {
         },
       })
 
-      return loadPage(false)
+      return loadPage(PAGE_REQUEST.FIRST)
     },
     applySearchText: (searchText: string) => {
       const normalizedText = searchText.trim() || undefined
@@ -146,13 +159,31 @@ export const useExploreStore = create<ExploreState>((set, get) => {
         },
       })
 
-      return loadPage(false)
+      return loadPage(PAGE_REQUEST.FIRST)
     },
     loadRoutes: () => {
-      if (get().isLoading || get().hasLoaded) return Promise.resolve(false)
+      const { isLoading, isRefreshing, hasLoaded } = get()
 
-      return loadPage(false)
+      if (isLoading || isRefreshing || hasLoaded) return Promise.resolve(false)
+
+      return loadPage(PAGE_REQUEST.FIRST)
     },
-    loadMore: () => loadPage(true),
+    loadMore: () => {
+      if (get().loadMoreError) return Promise.resolve(false)
+
+      return loadPage(PAGE_REQUEST.NEXT)
+    },
+    // The failed first page used the payload that is still applied
+    retryRefresh: () => {
+      if (!get().refreshError) return Promise.resolve(false)
+
+      return loadPage(PAGE_REQUEST.FIRST)
+    },
+    // `offset` only advances on success, so this re-requests the failed page
+    retryLoadMore: () => {
+      if (!get().loadMoreError) return Promise.resolve(false)
+
+      return loadPage(PAGE_REQUEST.NEXT)
+    },
   }
 })

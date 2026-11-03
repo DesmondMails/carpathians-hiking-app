@@ -3,8 +3,11 @@ import { useExploreStore } from '../store/explore.store'
 export const useExplore = () => {
   const routes = useExploreStore((state) => state.routes)
   const isLoading = useExploreStore((state) => state.isLoading)
+  const isRefreshing = useExploreStore((state) => state.isRefreshing)
   const isLoadingMore = useExploreStore((state) => state.isLoadingMore)
-  const error = useExploreStore((state) => state.error)
+  const hasLoaded = useExploreStore((state) => state.hasLoaded)
+  const refreshError = useExploreStore((state) => state.refreshError)
+  const loadMoreError = useExploreStore((state) => state.loadMoreError)
   const appliedFilters = useExploreStore((state) => state.appliedFilters)
   const appliedSearchPayload = useExploreStore(
     (state) => state.appliedSearchPayload
@@ -13,17 +16,24 @@ export const useExplore = () => {
   const loadRoutes = useExploreStore((state) => state.loadRoutes)
   const loadMore = useExploreStore((state) => state.loadMore)
   const applySearchText = useExploreStore((state) => state.applySearchText)
+  const retryRefresh = useExploreStore((state) => state.retryRefresh)
+  const retryLoadMore = useExploreStore((state) => state.retryLoadMore)
 
   return {
     routes,
     isLoading,
+    isRefreshing,
     isLoadingMore,
-    error,
+    hasLoaded,
+    refreshError,
+    loadMoreError,
     appliedFilters,
     appliedSearchPayload,
     applyFilters,
     loadRoutes,
     loadMore,
     applySearchText,
+    retryRefresh,
+    retryLoadMore,
   }
 }
