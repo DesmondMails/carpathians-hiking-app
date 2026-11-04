@@ -33,6 +33,8 @@ export type RouteDraftPreview = {
   routeType?: RouteDraftPreviewRouteType
   distanceM?: number
   elevationGainM?: number
+  // Walking time without the difficulty multiplier, the client applies it
+  baseDurationH?: number
   coordinates?: RouteDraftPreviewCoordinate[]
   elevationProfile?: RouteDraftPreviewElevationPoint[]
 }

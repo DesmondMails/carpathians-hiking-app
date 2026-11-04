@@ -11,6 +11,7 @@ import {
   Patch,
   Post,
   UploadedFile,
+  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -22,6 +23,7 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
+import { Throttle, ThrottlerGuard } from '@nestjs/throttler';
 
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import { FileExtensionValidator } from 'src/common/validators/file-extension.validator';
@@ -57,6 +59,8 @@ export class RoutesDraftController {
 
   @Post('/import-gpx')
   @HttpCode(HttpStatus.CREATED)
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
+  @UseGuards(ThrottlerGuard)
   @UseInterceptors(FileInterceptor('file'))
   @ApiOperation({ summary: 'Імпортувати GPX-файл' })
   @ApiConsumes('multipart/form-data')

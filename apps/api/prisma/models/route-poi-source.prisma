@@ -1,5 +1,5 @@
 model RoutePoiSource {
-  id                    String     @id @default(uuid())
+  id                    String           @id @default(uuid())
   provider              RoutePoiProvider
   osmType               RoutePoiOsmType
   osmId                 String

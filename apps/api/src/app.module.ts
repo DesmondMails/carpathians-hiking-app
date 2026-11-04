@@ -2,6 +2,7 @@ import { BullModule } from '@nestjs/bullmq';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
+import { ThrottlerModule } from '@nestjs/throttler';
 
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { AuthModule } from './modules/auth/auth.module';
@@ -30,6 +31,15 @@ import { PrismaModule } from './prisma/prisma.module';
         removeOnComplete: 1000,
         removeOnFail: 3000,
       },
+    }),
+    ThrottlerModule.forRoot({
+      throttlers: [
+        {
+          ttl: 60000, // 60 секунд (1 хвилина)
+          limit: 10, // максимум 10 запитів за цей час
+        },
+      ],
+      errorMessage: 'Занадто багато запитів, спробуйте пізніше!',
     }),
   ],
   controllers: [],

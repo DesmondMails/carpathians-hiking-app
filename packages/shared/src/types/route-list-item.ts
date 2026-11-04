@@ -7,6 +7,8 @@ export interface RouteListItem {
   region?: string | null
   difficulty: RouteDifficulty | null
   coverImageUrl?: string | null
+  coverImageThumbhash?: string | null
+  coverImageId?: string | null
   gpxAvailable: boolean
   distanceM: number | null
   elevationGainM: number | null

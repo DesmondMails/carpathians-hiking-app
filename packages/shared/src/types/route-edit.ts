@@ -36,4 +36,5 @@ export interface CompleteRouteImageUploadPayload {
   imageId: string
   storageKey: string
   sortOrder?: number
+  thumbhash?: string
 }

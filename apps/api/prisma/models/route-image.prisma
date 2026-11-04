@@ -4,6 +4,8 @@ model RouteImage {
   uploadedByUserId String
   uploadedByUser   User             @relation(fields: [uploadedByUserId], references: [id])
   storageKey       String
+  // Tiny blurred preview shown while the image loads, generated on the client
+  thumbhash        String?
   status           RouteImageStatus @default(PENDING)
   sortOrder        Int              @default(0)
   createdAt        DateTime         @default(now())
