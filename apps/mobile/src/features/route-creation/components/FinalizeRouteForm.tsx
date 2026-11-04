@@ -11,7 +11,7 @@ import {
 
 import { FinalizeRouteDraftPayload, RouteDraft } from '@hiking/shared'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useForm } from 'react-hook-form'
+import { useForm, useWatch } from 'react-hook-form'
 
 import { AppButton, AppText } from '@/src/shared/components'
 import { colors } from '@/src/theme/colors'
@@ -56,6 +56,8 @@ export const FinalizeRouteForm: FC<FinalizeRouteFormProps> = ({
       difficulty: 'EASY',
     },
   })
+
+  const difficulty = useWatch({ control, name: 'difficulty' })
 
   const [draftImages, setDraftImages] = useState<DraftImageItem[]>([])
 
@@ -112,7 +114,7 @@ export const FinalizeRouteForm: FC<FinalizeRouteFormProps> = ({
           </AppText>
         </View>
 
-        <RouteDraftSummary routeDraft={routeDraft} />
+        <RouteDraftSummary routeDraft={routeDraft} difficulty={difficulty} />
 
         <DraftImagesField
           routeDraftId={routeDraft.id}

@@ -6,12 +6,11 @@ import { Feather, Ionicons } from '@expo/vector-icons'
 import type { RouteDetails } from '@hiking/shared'
 
 import { AppText } from '@/src/shared/components/AppText'
+import { formatDuration } from '@/src/shared/utils/formatDuration'
 import { toFixedNumber } from '@/src/shared/utils/toFixedNumber'
 import { colors } from '@/src/theme/colors'
 import { spacing } from '@/src/theme/spacing'
 import { typography } from '@/src/theme/typography'
-
-import { formatDuration } from '../utils/formatDuration'
 
 interface StatItemProps {
   icon: React.ReactNode

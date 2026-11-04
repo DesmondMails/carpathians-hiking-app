@@ -26,6 +26,7 @@ export function parsePreview(
     version: 1,
     distanceM: asNumber(previewJson.distanceM),
     elevationGainM: asNumber(previewJson.elevationGainM),
+    baseDurationH: asNumber(previewJson.baseDurationH),
     region: asString(previewJson.region),
     coordinates: asCoordinates(previewJson.coordinates),
     elevationProfile: asElevationProfile(previewJson.elevationProfile),

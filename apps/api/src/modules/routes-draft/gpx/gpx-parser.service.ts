@@ -14,19 +14,30 @@ import {
   GpxTrackSegment,
   ParsedGpx,
 } from '../interfaces';
+import { OpenMeteoElevationService } from './open-meteo-elevation.service';
 
 const MIN_COORDINATES_COUNT = 2;
+// DEM resolution is 90 m, denser sampling costs quota but adds no data
+const MIN_ELEVATION_SAMPLE_STEP_M = 100;
+// Open-Meteo bills every coordinate as one API call (600/min, 10k/day)
+const MAX_ELEVATION_SAMPLES = 200;
+// DEM heights jump around on steep valley sides, which inflates the gain;
+// averaging over 600 m of trail matched reference gain within ~3%
+const DEM_SMOOTHING_WINDOW_M = 600;
 
 @Injectable()
 export class GpxParserService {
   private readonly logger = new Logger(GpxParserService.name);
   private readonly xmlParser = new XMLParser(GPX_PARSER_OPTIONS);
 
+  constructor(
+    private readonly openMeteoElevationService: OpenMeteoElevationService,
+  ) {}
+
   async parseGpx(file: Express.Multer.File): Promise<ParsedGpx> {
     const gpx = this.toGpxDocument(file);
 
     const coordinates = this.extractCoordinates(gpx);
-    const elevationSamples = this.buildElevationSamples(coordinates);
 
     if (coordinates.length < MIN_COORDINATES_COUNT) {
       throw new BadRequestException(
@@ -34,10 +45,13 @@ export class GpxParserService {
       );
     }
 
-    const region = await reverseGeocodeRegionGeoapify(coordinates[0], {
-      apiKey: process.env.GEOAPIFY_API_KEY,
-      warn: (message) => this.logger.warn(message),
-    });
+    const [region, elevationSamples] = await Promise.all([
+      reverseGeocodeRegionGeoapify(coordinates[0], {
+        apiKey: process.env.GEOAPIFY_API_KEY,
+        warn: (message) => this.logger.warn(message),
+      }),
+      this.getElevationSamples(coordinates),
+    ]);
 
     const distanceM = this.calculateDistanceM(coordinates);
     const elevation = this.calculateElevationStats(elevationSamples);
@@ -187,6 +201,113 @@ export class GpxParserService {
     const TARGET_SAMPLES = 200;
 
     return Math.max(1, Math.floor(coordsCount / TARGET_SAMPLES));
+  }
+
+  private async getElevationSamples(
+    coordinates: Coordinate[],
+  ): Promise<RouteElevationPoint[]> {
+    const gpxSamples = this.buildElevationSamples(coordinates);
+
+    if (gpxSamples.length >= MIN_COORDINATES_COUNT) return gpxSamples;
+
+    const points = this.sampleAlongRoute(coordinates);
+    const elevations = await this.openMeteoElevationService.getElevations(
+      points.map((point) => point.coordinate),
+    );
+
+    if (!elevations) return [];
+
+    this.logger.log(
+      `GPX has no elevation, fetched ${elevations.length} samples from Open-Meteo`,
+    );
+
+    const stepM = points.length > 1 ? points[1].distanceM : 0;
+    const smoothed = this.smoothElevations(elevations, stepM);
+
+    return points.map((point, i) => ({
+      distanceM: parseFloat(point.distanceM.toFixed(1)),
+      elevationM: parseFloat(smoothed[i].toFixed(1)),
+    }));
+  }
+
+  /**
+   * Moving average over evenly spaced samples. The window narrows towards
+   * the ends so start and end heights stay exact and the climb isn't cut off.
+   */
+  private smoothElevations(elevations: number[], stepM: number): number[] {
+    if (stepM <= 0) return elevations;
+
+    const halfWindow = Math.floor(DEM_SMOOTHING_WINDOW_M / 2 / stepM);
+    const lastIndex = elevations.length - 1;
+
+    return elevations.map((_, i) => {
+      const half = Math.min(halfWindow, i, lastIndex - i);
+      let sum = 0;
+
+      for (let j = i - half; j <= i + half; j++) {
+        sum += elevations[j];
+      }
+
+      return sum / (half * 2 + 1);
+    });
+  }
+
+  /**
+   * Evenly spaced points along the route, interpolated between GPX points,
+   * so dense tracks don't waste requests and sparse ones still get coverage.
+   */
+  private sampleAlongRoute(
+    coordinates: Coordinate[],
+  ): { coordinate: Coordinate; distanceM: number }[] {
+    const cumulativeM = [0];
+
+    for (let i = 1; i < coordinates.length; i++) {
+      const segmentM = turf.distance(
+        [coordinates[i - 1].longitude, coordinates[i - 1].latitude],
+        [coordinates[i].longitude, coordinates[i].latitude],
+        { units: 'meters' },
+      );
+      cumulativeM.push(cumulativeM[i - 1] + segmentM);
+    }
+
+    const totalM = cumulativeM[cumulativeM.length - 1];
+    const sampleCount = Math.min(
+      Math.max(
+        Math.floor(totalM / MIN_ELEVATION_SAMPLE_STEP_M) + 1,
+        MIN_COORDINATES_COUNT,
+      ),
+      MAX_ELEVATION_SAMPLES,
+    );
+    const stepM = totalM / (sampleCount - 1);
+
+    const samples: { coordinate: Coordinate; distanceM: number }[] = [];
+    let segment = 0;
+
+    for (let k = 0; k < sampleCount; k++) {
+      const targetM = k === sampleCount - 1 ? totalM : k * stepM;
+
+      while (
+        segment < coordinates.length - 2 &&
+        cumulativeM[segment + 1] < targetM
+      ) {
+        segment++;
+      }
+
+      const from = coordinates[segment];
+      const to = coordinates[segment + 1];
+      const segmentM = cumulativeM[segment + 1] - cumulativeM[segment];
+      const t = segmentM > 0 ? (targetM - cumulativeM[segment]) / segmentM : 0;
+
+      samples.push({
+        coordinate: {
+          latitude: from.latitude + (to.latitude - from.latitude) * t,
+          longitude: from.longitude + (to.longitude - from.longitude) * t,
+        },
+        distanceM: targetM,
+      });
+    }
+
+    return samples;
   }
 
   private buildElevationSamples(

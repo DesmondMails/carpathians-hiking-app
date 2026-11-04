@@ -3,24 +3,40 @@ import { FC } from 'react'
 import { StyleSheet, View } from 'react-native'
 
 import { Feather } from '@expo/vector-icons'
-import { RouteDraft } from '@hiking/shared'
+import {
+  Difficulty,
+  DIFFICULTY_DURATION_MULTIPLIER,
+  RouteDraft,
+} from '@hiking/shared'
 
 import { AppText } from '@/src/shared/components'
+import { formatDuration } from '@/src/shared/utils/formatDuration'
 import { colors } from '@/src/theme/colors'
 import { spacing } from '@/src/theme/spacing'
 
 interface RouteDraftSummaryProps {
   routeDraft: RouteDraft
+  difficulty?: Difficulty
 }
 
 export const RouteDraftSummary: FC<RouteDraftSummaryProps> = ({
   routeDraft,
+  difficulty = 'MODERATE',
 }) => {
   const preview = routeDraft.previewJson
 
   const distanceKm =
     preview?.distanceM != null ? preview.distanceM / 1000 : undefined
   const elevationGainM = preview?.elevationGainM
+  // Same rounding as the API on finalize, so the saved route shows this value
+  const durationH =
+    preview?.baseDurationH != null
+      ? Number(
+          (
+            preview.baseDurationH * DIFFICULTY_DURATION_MULTIPLIER[difficulty]
+          ).toFixed(1),
+        )
+      : undefined
 
   const stats: { icon: keyof typeof Feather.glyphMap; label: string }[] = []
 
@@ -35,6 +51,13 @@ export const RouteDraftSummary: FC<RouteDraftSummaryProps> = ({
     stats.push({
       icon: 'trending-up',
       label: `${Math.round(elevationGainM)} м`,
+    })
+  }
+
+  if (durationH != null) {
+    stats.push({
+      icon: 'clock',
+      label: formatDuration(durationH),
     })
   }
 

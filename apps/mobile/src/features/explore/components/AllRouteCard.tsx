@@ -8,6 +8,8 @@ import { Image } from 'expo-image'
 import { useRouter } from 'expo-router'
 
 import { AppText } from '@/src/shared/components/AppText'
+import { formatDuration } from '@/src/shared/utils/formatDuration'
+import { formatElevation } from '@/src/shared/utils/formatElevation'
 import { colors } from '@/src/theme/colors'
 import { typography } from '@/src/theme/typography'
 
@@ -46,11 +48,15 @@ export const AllRouteCard: FC<AllRouteCardProps> = ({
       <View style={styles.thumb}>
         {showCover ? (
           <Image
-            source={{ uri: route.coverImageUrl! }}
+            source={{
+              uri: route.coverImageUrl!,
+              cacheKey: route?.coverImageId ?? route.id,
+            }}
             recyclingKey={route.id}
             style={StyleSheet.absoluteFill}
             contentFit='cover'
             onError={() => setFailedCoverKey(coverKey)}
+            cachePolicy='disk'
           />
         ) : (
           <RouteCoverPlaceholder />
@@ -80,10 +86,19 @@ export const AllRouteCard: FC<AllRouteCardProps> = ({
           <View style={styles.dot} />
           <MetaChip
             icon='trending-up'
-            label={route?.elevationGainM ? `${route?.elevationGainM} m` : ''}
+            label={
+              route?.elevationGainM
+                ? formatElevation(route.elevationGainM)
+                : 'н/д'
+            }
           />
           <View style={styles.dot} />
-          <MetaChip icon='clock' label={`${route?.durationH ?? '-'}h`} />
+          <MetaChip
+            icon='clock'
+            label={
+              route?.durationH != null ? formatDuration(route.durationH) : '-'
+            }
+          />
         </View>
         <View style={styles.bottomRow}>
           {route.difficulty ? (

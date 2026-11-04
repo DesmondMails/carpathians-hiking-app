@@ -7,6 +7,7 @@ import * as DocumentPicker from 'expo-document-picker'
 import { useRouter } from 'expo-router'
 
 import { AppButton, AppText } from '@/src/shared/components'
+import { getErrorMessage } from '@/src/shared/utils/getErrorMessage'
 import { colors } from '@/src/theme/colors'
 import { spacing } from '@/src/theme/spacing'
 
@@ -48,7 +49,7 @@ export const UploadGpx = () => {
       if (!isGpx) {
         Alert.alert(
           'Невірний формат файлу',
-          'Будь ласка, оберіть файл у форматі GPX.',
+          'Будь ласка, оберіть файл у форматі GPX.'
         )
         return
       }
@@ -64,11 +65,12 @@ export const UploadGpx = () => {
         params: { draftId: draft.id },
       })
     } catch (error) {
-      Alert.alert(
-        'Помилка завантаження',
-        'Не вдалося завантажити файл. Спробуйте ще раз.',
+      const message = getErrorMessage(
+        error,
+        'Не вдалося завантажити файл. Спробуйте ще раз.'
       )
-      console.error('Upload GPX error', error)
+
+      Alert.alert('Помилка завантаження', message)
     } finally {
       setPickingFile(false)
     }
