@@ -7,8 +7,10 @@ generator client {
   provider     = "prisma-client"
   output       = "../src/prisma/generated"
   moduleFormat = "cjs"
+  previewFeatures = ["postgresqlExtensions"] 
 }
 
 datasource db {
   provider = "postgresql"
+  extensions = [postgis]
 }

@@ -8,7 +8,7 @@ import { Category } from '../types'
 export const MIN_DISTANCE_KM = 0
 export const MAX_DISTANCE_KM = 50
 export const MIN_NEAR_DISTANCE_KM = 1
-export const MAX_NEAR_DISTANCE_KM = 200
+export const MAX_NEAR_DISTANCE_KM = 40
 
 export const RATING_OPTIONS = [
   { value: null, label: 'Будь-який' },
@@ -34,7 +34,7 @@ export const DEFAULT_FORM_VALUES: SearchFormValues = {
   difficulty: [],
   length: [MIN_DISTANCE_KM, MAX_DISTANCE_KM],
   nearMe: false,
-  radius: 50,
+  radius: 40,
   minRating: null,
   maxElevationGainM: null,
   maxDurationH: null,
