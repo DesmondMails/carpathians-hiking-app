@@ -6,6 +6,7 @@ import { routeEditApi } from '@/src/features/route/api/route-edit.api'
 import { AddImages } from '@/src/features/route-creation/components'
 import { DraftImageItem } from '@/src/features/route-creation/types'
 import { toast } from '@/src/shared/store/toast.store'
+import { generateThumbhash } from '@/src/shared/utils/generateThumbhash'
 import { uploadAssetToPresignedUrl } from '@/src/shared/utils/uploadToPresignedUrl'
 
 interface RouteImagesFieldProps {
@@ -46,15 +47,20 @@ export const RouteImagesField: FC<RouteImagesFieldProps> = ({
           contentType: optimisticItem.mimeType,
         })
 
-        await uploadAssetToPresignedUrl(presignedUrlData.uploadUrl, {
-          uri: optimisticItem.localUri,
-          mimeType: optimisticItem.mimeType,
-        })
+        // Hash the local file while it uploads, so it adds no extra wait
+        const [, thumbhash] = await Promise.all([
+          uploadAssetToPresignedUrl(presignedUrlData.uploadUrl, {
+            uri: optimisticItem.localUri,
+            mimeType: optimisticItem.mimeType,
+          }),
+          generateThumbhash(optimisticItem.localUri),
+        ])
 
         await routeEditApi.completeImageUpload(routeId, {
           imageId: presignedUrlData.imageId,
           storageKey: presignedUrlData.storageKey,
           sortOrder: optimisticItem.sortOrder,
+          thumbhash,
         })
 
         let shouldSetAsCover = false

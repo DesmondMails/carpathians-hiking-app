@@ -9,6 +9,13 @@ const DIFFICULTY_LABELS = {
   EXTREME: 'Екстремальний',
 }
 
+const DIFFICULTY_DURATION_MULTIPLIER = {
+  EASY: 1,
+  MODERATE: 1.1,
+  HARD: 1.25,
+  EXTREME: 1.45,
+}
+
 const DEFAULT_LIMIT = 15
 const DEFAULT_OFFSET = 0
 
@@ -21,6 +28,7 @@ const RoutePoiEnrichmentStatusOptions = {
 module.exports = {
   DIFFICULTY_VALUES,
   DIFFICULTY_LABELS,
+  DIFFICULTY_DURATION_MULTIPLIER,
   RoutePoiEnrichmentStatusOptions,
   DEFAULT_LIMIT,
   DEFAULT_OFFSET,

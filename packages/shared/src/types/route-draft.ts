@@ -39,4 +39,5 @@ export interface CompleteUploadPayload {
   imageId: string
   storageKey: string
   sortOrder?: number
+  thumbhash?: string
 }

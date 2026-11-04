@@ -179,6 +179,7 @@ export class RoutesService {
       routes.map(async (route) => ({
         ...route,
         coverImageUrl: await this.resolveCoverImageUrl(route),
+        coverImageThumbhash: this.findCoverImage(route)?.thumbhash ?? null,
         createdAt: route.createdAt.toISOString(),
         updatedAt: route.updatedAt.toISOString(),
       })),
@@ -227,7 +228,7 @@ export class RoutesService {
   ): Promise<void> {
     await this.findOwnedRouteById(routeId, userId);
 
-    const { imageId, storageKey } = completeRouteImageUploadDto;
+    const { imageId, storageKey, thumbhash } = completeRouteImageUploadDto;
     const isValidKey = storageKey.startsWith(`routes/${routeId}/images/`);
 
     if (!isValidKey) {
@@ -242,6 +243,7 @@ export class RoutesService {
       id: imageId,
       routeId,
       storageKey,
+      thumbhash,
       sortOrder,
       status: RouteImageStatus.APPROVED,
       uploadedByUserId: userId,
@@ -469,17 +471,22 @@ export class RoutesService {
     return lastImage ? lastImage.sortOrder + 1 : 0;
   }
 
+  private findCoverImage(route: {
+    coverImageId: string | null;
+    images: RouteImage[];
+  }): RouteImage | undefined {
+    if (!route.coverImageId) {
+      return undefined;
+    }
+
+    return route.images.find((image) => image.id === route.coverImageId);
+  }
+
   private async resolveCoverImageUrl(route: {
     coverImageId: string | null;
     images: RouteImage[];
   }): Promise<string | null> {
-    if (!route.coverImageId) {
-      return null;
-    }
-
-    const coverImage = route.images.find(
-      (image) => image.id === route.coverImageId,
-    );
+    const coverImage = this.findCoverImage(route);
 
     return coverImage ? this.resolveImageUrl(coverImage.storageKey) : null;
   }

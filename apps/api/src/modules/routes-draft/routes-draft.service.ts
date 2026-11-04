@@ -147,6 +147,7 @@ export class RoutesDraftService {
             id: image.id,
             routeId: createdRoute.id,
             storageKey: image.storageKey,
+            thumbhash: image.thumbhash,
             status: RouteImageStatus.APPROVED,
             sortOrder: index,
             uploadedByUserId: userId,
@@ -245,7 +246,8 @@ export class RoutesDraftService {
   ): Promise<void> {
     await this.findOwnedRouteDraftById(routeDraftId, userId);
 
-    const { imageId, storageKey, sortOrder } = completeDraftImageUploadDto;
+    const { imageId, storageKey, sortOrder, thumbhash } =
+      completeDraftImageUploadDto;
 
     const isValidKey = storageKey.startsWith(`drafts/${routeDraftId}/images/`);
 
@@ -258,6 +260,7 @@ export class RoutesDraftService {
       draftId: routeDraftId,
       storageKey,
       sortOrder,
+      thumbhash,
     };
 
     await this.prisma.routeDraftImage.create({

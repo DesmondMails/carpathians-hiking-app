@@ -56,7 +56,14 @@ export const AllRouteCard: FC<AllRouteCardProps> = ({
             style={StyleSheet.absoluteFill}
             contentFit='cover'
             onError={() => setFailedCoverKey(coverKey)}
-            cachePolicy='disk'
+            cachePolicy='memory-disk'
+            transition={200}
+            placeholder={
+              route.coverImageThumbhash
+                ? { thumbhash: route.coverImageThumbhash }
+                : undefined
+            }
+            placeholderContentFit='cover'
           />
         ) : (
           <RouteCoverPlaceholder />
