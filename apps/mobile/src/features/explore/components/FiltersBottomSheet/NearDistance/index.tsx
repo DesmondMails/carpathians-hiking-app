@@ -82,7 +82,7 @@ export const NearDistance: FC<NearDistanceProps> = ({
 
       <View style={[filterStyles.sliderGroup, !enabled && styles.disabled]}>
         <Slider
-          value={value ?? 50}
+          value={value ?? 40}
           minimumValue={MIN_NEAR_DISTANCE_KM}
           maximumValue={MAX_NEAR_DISTANCE_KM}
           enabled={enabled}

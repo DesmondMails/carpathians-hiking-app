@@ -28,9 +28,11 @@ model Route {
   createdAt            DateTime     @default(now())
   updatedAt            DateTime     @updatedAt
   routePois            RoutePoi[]
+  startPoint           Unsupported("geography(Point, 4326)")?
 
   @@index([createdByUserId])
   @@index([status])
+  @@index([startPoint], type: Gist)
 }
 
 enum RouteStatus {

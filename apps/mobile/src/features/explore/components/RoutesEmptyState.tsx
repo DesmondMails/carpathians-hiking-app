@@ -11,11 +11,11 @@ export function RoutesEmptyState() {
       <View
         style={styles.icon}
         accessibilityElementsHidden
-        importantForAccessibility="no-hide-descendants"
+        importantForAccessibility='no-hide-descendants'
       >
-        <Feather name="map" size={24} color={colors.primary} />
+        <Feather name='map' size={24} color={colors.primary} />
       </View>
-      <AppText variant="bodyMedium" style={styles.title}>
+      <AppText variant='bodyMedium' style={styles.title}>
         Маршрутів не знайдено
       </AppText>
       <AppText color={colors.textSecondary} style={styles.description}>
@@ -28,8 +28,8 @@ export function RoutesEmptyState() {
 const styles = StyleSheet.create({
   container: {
     alignItems: 'center',
-    paddingHorizontal: 32,
-    paddingVertical: 48,
+    paddingVertical: 102,
+    height: '100%',
   },
   icon: {
     width: 52,

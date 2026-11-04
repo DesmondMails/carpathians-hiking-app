@@ -104,6 +104,7 @@ export class SearchRouteQueryDto {
   @ValidateIf(hasGeoParam)
   @Type(() => Number)
   @IsNumber()
+  @Max(40000)
   @IsPositive()
   @ApiPropertyOptional({
     description:

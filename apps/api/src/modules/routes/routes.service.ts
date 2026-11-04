@@ -18,7 +18,6 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
-import * as turf from '@turf/turf';
 
 import { asStartCoordinates } from 'src/common/utils/json-guards';
 import {
@@ -310,7 +309,7 @@ export class RoutesService {
     });
   }
 
-  createRouteFromDraft(
+  async createRouteFromDraft(
     tx: Prisma.TransactionClient,
     draftRoute: RouteDraft,
     preview: RouteDraftPreview,
@@ -324,9 +323,13 @@ export class RoutesService {
       derived,
     );
 
-    return tx.route.create({
+    const route = await tx.route.create({
       data,
     });
+
+    await this.setStartPoint(tx, route);
+
+    return route;
   }
 
   async getGpxUrl(routeId: string): Promise<string> {
@@ -514,10 +517,15 @@ export class RoutesService {
     const isNearMeSearch =
       radiusM != null && longitude != null && latitude != null;
 
+    const nearbyIds = isNearMeSearch
+      ? await this.searchNearbyRoutes(longitude, latitude, radiusM)
+      : undefined;
+
     const searchText = searchQuery?.searchText?.trim();
 
-    let routes = await this.prisma.route.findMany({
+    const routes = await this.prisma.route.findMany({
       where: {
+        id: nearbyIds ? { in: nearbyIds } : undefined,
         status: 'PUBLISHED',
         difficulty: searchQuery?.difficulty?.length
           ? {
@@ -545,39 +553,44 @@ export class RoutesService {
           : undefined,
       },
       orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
-      ...(isNearMeSearch ? {} : { take: limit, skip: offset }),
-      select: { ...ROUTE_LIST_SELECT, routeCoordinatesJson: isNearMeSearch },
+      take: limit,
+      skip: offset,
+      select: ROUTE_LIST_SELECT,
     });
 
-    if (isNearMeSearch) {
-      routes = routes.filter((route) => {
-        const startPoint = asStartCoordinates(route.routeCoordinatesJson ?? []);
-
-        if (!startPoint) return false;
-
-        return this.checkIfPointNear(
-          [longitude, latitude],
-          [startPoint.longitude, startPoint.latitude],
-          radiusM,
-        );
-      });
-
-      routes = routes.slice(offset, offset + limit);
-    }
-
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    return routes.map(({ routeCoordinatesJson, ...rest }) => rest);
+    return routes;
   }
 
-  private checkIfPointNear(
-    userCoords: [number, number],
-    routeStartCoords: [number, number],
-    radiusM: number,
-  ): boolean {
-    const distance = turf.distance(userCoords, routeStartCoords, {
-      units: 'meters',
-    });
+  private async setStartPoint(
+    tx: Prisma.TransactionClient,
+    route: Pick<Route, 'id' | 'routeCoordinatesJson'>,
+  ): Promise<void> {
+    const start = asStartCoordinates(route.routeCoordinatesJson);
 
-    return distance <= radiusM;
+    if (!start) return;
+
+    await tx.$executeRaw`
+      UPDATE "Route"
+      SET "startPoint" = ST_SetSRID(ST_MakePoint(${start.longitude}, ${start.latitude}), 4326)::geography
+      WHERE id = ${route.id}
+    `;
+  }
+
+  private async searchNearbyRoutes(
+    longitude: number,
+    latitude: number,
+    radiusM: number,
+  ): Promise<string[]> {
+    const nearRoutes = await this.prisma.$queryRaw<{ id: string }[]>`
+      SELECT id
+      FROM "Route"
+      WHERE "status" = 'PUBLISHED' AND
+      ST_DWithin(
+        "startPoint",
+        ST_SetSRID(ST_MakePoint(${longitude}, ${latitude}), 4326)::geography,
+        ${radiusM}
+      )`;
+
+    return nearRoutes.map((row) => row.id);
   }
 }
