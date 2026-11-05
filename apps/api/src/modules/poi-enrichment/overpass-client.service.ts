@@ -15,7 +15,7 @@ import {
 const DEFAULT_OVERPASS_URL = 'https://overpass-api.de/api/interpreter';
 const DEFAULT_OVERPASS_USER_AGENT =
   'hiking-app-poi-enrichment/1.0 (contact: support@hiking.app)';
-const REQUEST_TIMEOUT_MS = 27000;
+const REQUEST_TIMEOUT_MS = 60000;
 
 const retriableErrorCodes = [408, 429, 500, 502, 503, 504];
 
