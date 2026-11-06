@@ -7,13 +7,26 @@ import { PrismaService } from 'src/prisma/prisma.service';
 
 import { SignupDto } from '../auth/dto/signup.dto';
 import { GoogleUserPayload } from '../auth/interfaces';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 @Injectable()
 export class UsersService {
   constructor(private prisma: PrismaService) {}
 
-  async getMe(user: User): Promise<PublicUser> {
+  getMe(user: User): PublicUser {
     return toPublicUser(user);
+  }
+
+  async updateMe(
+    user: User,
+    updateUserPayload: UpdateUserDto,
+  ): Promise<User | null> {
+    const { name } = updateUserPayload;
+
+    return this.prisma.user.update({
+      where: { id: user.id },
+      data: { name },
+    });
   }
 
   async findByEmail(email: string): Promise<User | null> {
