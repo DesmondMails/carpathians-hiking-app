@@ -3,4 +3,5 @@ export interface PublicUser {
   email: string
   createdAt: Date
   updatedAt: Date
+  name: string | null
 }
