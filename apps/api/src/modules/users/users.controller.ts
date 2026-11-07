@@ -1,10 +1,10 @@
 import type { PublicUser } from '@hiking/shared';
-import { Body, Controller, Get, Patch } from '@nestjs/common';
+import { Body, Controller, Get, Logger, Patch } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ApiBearerAuth } from '@nestjs/swagger';
 
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
-import type { User } from 'src/prisma/generated/client';
+import type { AuthenticatedUser } from 'src/modules/auth/interfaces';
 
 import { PublicUserDto } from './dto/public-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -14,6 +14,8 @@ import { UsersService } from './users.service';
 @ApiTags('users')
 @Controller('users')
 export class UsersController {
+  private readonly logger = new Logger(UsersController.name);
+
   constructor(private usersService: UsersService) {}
 
   @ApiOperation({ summary: 'Отримати інформацію про себе' })
@@ -24,7 +26,8 @@ export class UsersController {
   })
   @ApiResponse({ status: 401, description: 'Користувач не авторизований' })
   @Get('me')
-  getMe(@CurrentUser() user: User): PublicUser {
+  getMe(@CurrentUser() user: AuthenticatedUser): PublicUser {
+    this.logger.log('Here is current user', user);
     return this.usersService.getMe(user);
   }
 
@@ -37,9 +40,9 @@ export class UsersController {
   @ApiResponse({ status: 401, description: 'Користувач не авторизований' })
   @Patch('me')
   updateMe(
-    @CurrentUser() user: User,
+    @CurrentUser() user: AuthenticatedUser,
     @Body() updateUserPayload: UpdateUserDto,
-  ): Promise<User | null> {
+  ): Promise<PublicUser> {
     return this.usersService.updateMe(user, updateUserPayload);
   }
 }

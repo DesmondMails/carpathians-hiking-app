@@ -27,7 +27,8 @@ import { Throttle, ThrottlerGuard } from '@nestjs/throttler';
 
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import { FileExtensionValidator } from 'src/common/validators/file-extension.validator';
-import type { User, RouteDraft, Route } from 'src/prisma/generated/client';
+import type { AuthenticatedUser } from 'src/modules/auth/interfaces';
+import type { RouteDraft, Route } from 'src/prisma/generated/client';
 
 import { CompleteDraftImageUploadDto } from './dto/complete-image-upload.dto';
 import { CreatePresignedUrlDto } from './dto/create-presigned-url.dto';
@@ -48,7 +49,7 @@ export class RoutesDraftController {
   @ApiResponse({ status: 201, description: 'Draft маршрут успішно створений' })
   @ApiResponse({ status: 401, description: 'Користувач не авторизований' })
   async createRouteDraft(
-    @CurrentUser() user: User,
+    @CurrentUser() user: AuthenticatedUser,
     @Body() createRouteDraftDto: CreateRouteDraftDto,
   ): Promise<RouteDraft> {
     return this.routesDraftService.createRouteDraft(
@@ -82,7 +83,7 @@ export class RoutesDraftController {
   @ApiResponse({ status: 401, description: 'Користувач не авторизований' })
   @ApiResponse({ status: 400, description: 'Неправильний формат файлу' })
   async importGpx(
-    @CurrentUser() user: User,
+    @CurrentUser() user: AuthenticatedUser,
     @UploadedFile(
       new ParseFilePipe({
         validators: [new FileExtensionValidator({ extensions: ['.gpx'] })],
@@ -107,7 +108,7 @@ export class RoutesDraftController {
   })
   @ApiResponse({ status: 404, description: 'Draft не знайдено' })
   async finalizeRouteDraft(
-    @CurrentUser() user: User,
+    @CurrentUser() user: AuthenticatedUser,
     @Param('id') routeDraftId: string,
     @Body() finalizeRouteDraftDto: FinalizeRouteDraftDto,
   ): Promise<Route> {
@@ -132,7 +133,7 @@ export class RoutesDraftController {
   })
   @ApiResponse({ status: 404, description: 'Draft не знайдено' })
   async createPresignedImageUploadUrl(
-    @CurrentUser() user: User,
+    @CurrentUser() user: AuthenticatedUser,
     @Param('id') routeDraftId: string,
     @Body() createPresignedUrlDto: CreatePresignedUrlDto,
   ): Promise<PresignedUrlResponse> {
@@ -154,7 +155,7 @@ export class RoutesDraftController {
   })
   @ApiResponse({ status: 404, description: 'Draft не знайдено' })
   async completeDraftImageUpload(
-    @CurrentUser() user: User,
+    @CurrentUser() user: AuthenticatedUser,
     @Param('id') routeDraftId: string,
     @Body() completeDraftImageUploadDto: CompleteDraftImageUploadDto,
   ): Promise<void> {
@@ -175,7 +176,7 @@ export class RoutesDraftController {
   })
   @ApiResponse({ status: 404, description: 'Draft не знайдено' })
   async updateRouteDraft(
-    @CurrentUser() user: User,
+    @CurrentUser() user: AuthenticatedUser,
     @Param('id') routeDraftId: string,
     @Body() updateRouteDraftDto: UpdateRouteDraftDto,
   ): Promise<RouteDraft> {
@@ -196,7 +197,7 @@ export class RoutesDraftController {
   })
   @ApiResponse({ status: 404, description: 'Draft не знайдено' })
   async getRouteDraftById(
-    @CurrentUser() user: User,
+    @CurrentUser() user: AuthenticatedUser,
     @Param('id') routeDraftId: string,
   ): Promise<RouteDraft> {
     return this.routesDraftService.findOwnedRouteDraftById(
@@ -216,7 +217,7 @@ export class RoutesDraftController {
   })
   @ApiResponse({ status: 404, description: 'Draft не знайдено' })
   async deleteRouteDraft(
-    @CurrentUser() user: User,
+    @CurrentUser() user: AuthenticatedUser,
     @Param('id') routeDraftId: string,
   ): Promise<void> {
     return this.routesDraftService.deleteRouteDraft(routeDraftId, user.id);
@@ -233,7 +234,7 @@ export class RoutesDraftController {
   })
   @ApiResponse({ status: 404, description: 'Зображення не знайдено' })
   async deleteRouteDraftImage(
-    @CurrentUser() user: User,
+    @CurrentUser() user: AuthenticatedUser,
     @Param('id') routeDraftId: string,
     @Param('imageId') imageId: string,
   ): Promise<void> {

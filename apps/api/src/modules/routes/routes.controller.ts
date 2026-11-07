@@ -25,7 +25,8 @@ import {
 } from '@nestjs/swagger';
 
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
-import type { Route, User } from 'src/prisma/generated/client';
+import type { AuthenticatedUser } from 'src/modules/auth/interfaces';
+import type { Route } from 'src/prisma/generated/client';
 
 import { CompleteRouteImageUploadDto } from './dto/complete-route-image-upload.dto';
 import { CreateRouteImagePresignedDto } from './dto/create-route-image-presigned.dto';
@@ -47,7 +48,7 @@ export class RoutesController {
   @ApiResponse({ status: 201, description: 'Маршрут успішно створений' })
   @ApiResponse({ status: 401, description: 'Користувач не авторизований' })
   async createRoute(
-    @CurrentUser() user: User,
+    @CurrentUser() user: AuthenticatedUser,
     @Body() createRouteDto: CreateRouteDto,
   ): Promise<Route> {
     return this.routesService.createRoute(user.id, createRouteDto);
@@ -63,7 +64,7 @@ export class RoutesController {
   })
   @ApiResponse({ status: 404, description: 'Маршрут не знайдено' })
   async updateRoute(
-    @CurrentUser() user: User,
+    @CurrentUser() user: AuthenticatedUser,
     @Param('id') routeId: string,
     @Body() updateRouteDto: UpdateRouteDto,
   ): Promise<Route> {
@@ -83,7 +84,7 @@ export class RoutesController {
   })
   @ApiResponse({ status: 404, description: 'Маршрут не знайдено' })
   async getEditableRoute(
-    @CurrentUser() user: User,
+    @CurrentUser() user: AuthenticatedUser,
     @Param('id') routeId: string,
   ): Promise<EditableRoute> {
     return this.routesService.getEditableRoute(routeId, user.id);
@@ -152,7 +153,7 @@ export class RoutesController {
     description: 'Посилання для завантаження зображення успішно створено',
   })
   async createRouteImageUploadUrl(
-    @CurrentUser() user: User,
+    @CurrentUser() user: AuthenticatedUser,
     @Param('id') routeId: string,
     @Body() createRouteImagePresignedDto: CreateRouteImagePresignedDto,
   ): Promise<PresignedUrlResponse> {
@@ -168,7 +169,7 @@ export class RoutesController {
   @ApiOperation({ summary: 'Завершити завантаження зображення маршруту' })
   @ApiResponse({ status: 200, description: 'Зображення успішно завантажено' })
   async completeRouteImageUpload(
-    @CurrentUser() user: User,
+    @CurrentUser() user: AuthenticatedUser,
     @Param('id') routeId: string,
     @Body() completeRouteImageUploadDto: CompleteRouteImageUploadDto,
   ): Promise<void> {
@@ -183,7 +184,7 @@ export class RoutesController {
   @ApiOperation({ summary: 'Оновити обкладинку маршруту' })
   @ApiResponse({ status: 200, description: 'Обкладинку успішно оновлено' })
   async setRouteCover(
-    @CurrentUser() user: User,
+    @CurrentUser() user: AuthenticatedUser,
     @Param('id') routeId: string,
     @Body() setRouteCoverDto: SetRouteCoverDto,
   ): Promise<void> {
@@ -201,7 +202,7 @@ export class RoutesController {
   @ApiResponse({ status: 404, description: 'Маршрут не знайдено' })
   async reEnrichRoutePois(
     @Param('id') routeId: string,
-    @CurrentUser() user: User,
+    @CurrentUser() user: AuthenticatedUser,
   ): Promise<void> {
     return this.routesService.reEnrichRoutePois(routeId, user.id);
   }
@@ -218,7 +219,7 @@ export class RoutesController {
   @ApiResponse({ status: 404, description: 'Маршрут не знайдено' })
   async deleteRoute(
     @Param('id') routeId: string,
-    @CurrentUser() user: User,
+    @CurrentUser() user: AuthenticatedUser,
   ): Promise<void> {
     return this.routesService.deleteRoute(routeId, user.id);
   }
@@ -228,7 +229,7 @@ export class RoutesController {
   @ApiOperation({ summary: 'Видалити зображення маршруту' })
   @ApiResponse({ status: 204, description: 'Зображення успішно видалено' })
   async deleteRouteImage(
-    @CurrentUser() user: User,
+    @CurrentUser() user: AuthenticatedUser,
     @Param('id') routeId: string,
     @Param('imageId') imageId: string,
   ): Promise<void> {

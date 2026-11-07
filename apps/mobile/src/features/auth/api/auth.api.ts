@@ -1,4 +1,4 @@
-import { PublicUser, LoginResponse, SignupResponse } from '@hiking/shared'
+import { LoginResponse, SignupResponse } from '@hiking/shared'
 
 import { apiClient } from '@/src/shared/api/client'
 
@@ -19,7 +19,7 @@ export const authApi = {
   async signup(payload: SignupPayload): Promise<SignupResponse> {
     const { data } = await apiClient.post<SignupResponse>(
       '/auth/signup',
-      payload,
+      payload
     )
 
     return data
@@ -28,7 +28,7 @@ export const authApi = {
   async verifyEmail(payload: VerifyEmailPayload): Promise<LoginResponse> {
     const { data } = await apiClient.post<LoginResponse>(
       '/auth/verify-email',
-      payload,
+      payload
     )
 
     return data
@@ -36,12 +36,6 @@ export const authApi = {
 
   async resendCode(payload: ResendCodePayload): Promise<void> {
     await apiClient.post('/auth/resend-code', payload)
-  },
-
-  async me(): Promise<PublicUser> {
-    const { data } = await apiClient.get<PublicUser>('/auth/me')
-
-    return data
   },
 
   async refresh(refreshToken: string): Promise<LoginResponse> {
@@ -52,16 +46,17 @@ export const authApi = {
     return data
   },
 
-  async logout(): Promise<void> {
-    const { data } = await apiClient.post('/auth/logout')
-
-    return data
+  // Token is passed explicitly: local storage is already cleared by the time this runs
+  async logout(accessToken: string): Promise<void> {
+    await apiClient.post('/auth/logout', undefined, {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    })
   },
 
   async googleLogin(idToken: string): Promise<LoginResponse> {
     const { data } = await apiClient.post<LoginResponse>(
       '/auth/google/native',
-      { idToken },
+      { idToken }
     )
 
     return data

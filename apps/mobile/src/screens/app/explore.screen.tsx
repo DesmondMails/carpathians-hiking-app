@@ -21,6 +21,7 @@ import type { SearchFormValues } from '@/src/features/explore/schemas/search.sch
 import { hasActiveFilters } from '@/src/features/explore/utills/has-active-filters'
 import { AppSearch, RoutesLoader } from '@/src/shared/components'
 import { useDebounce, useUserLocation } from '@/src/shared/hooks'
+import { colors } from '@/src/theme/colors'
 
 export default function ExploreScreen() {
   const userLocation = useUserLocation()
@@ -172,7 +173,7 @@ export default function ExploreScreen() {
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: '#f7f7f7' },
+  root: { flex: 1, backgroundColor: colors.backgroundPrimary },
   list: { paddingBottom: 100 },
   loader: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   categoryChips: { marginTop: 12, paddingBottom: 12 },

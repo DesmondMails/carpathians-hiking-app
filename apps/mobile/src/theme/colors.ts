@@ -8,6 +8,7 @@ export const colors = {
   background: '#043521',
   backgroundDark: '#0d462f',
   surface: '#ffffff',
+  backgroundPrimary: '#f7f7f7',
 
   // TEXT
   textPrimary: '#334155',

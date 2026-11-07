@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react'
+import React, { useImperativeHandle, useMemo, useRef, useState } from 'react'
 
 import {
   View,
@@ -7,6 +7,8 @@ import {
   Pressable,
   TextInputProps,
 } from 'react-native'
+
+import { BottomSheetTextInput } from '@gorhom/bottom-sheet'
 
 import { colors } from '@/src/theme/colors'
 import { inputRadius, inputSizes } from '@/src/theme/input'
@@ -18,28 +20,40 @@ import { AppText } from './AppText'
 
 type AppInputStatus = 'default' | 'success' | 'error'
 
+export type AppInputHandle = Pick<TextInput, 'focus'>
+
 type AppInputProps = TextInputProps & {
+  ref?: React.Ref<AppInputHandle>
   label?: string
   helperText?: string
   status?: AppInputStatus
   leftIcon?: React.ReactNode
   rightIcon?: React.ReactNode
   onRightIconPress?: () => void
+  bottomSheet?: boolean
 }
 
 export function AppInput({
+  ref,
   label,
   helperText,
   status = 'default',
   leftIcon,
   rightIcon,
   onRightIconPress,
+  bottomSheet = false,
   style,
   onFocus,
   onBlur,
   ...props
 }: AppInputProps) {
   const [focused, setFocused] = useState(false)
+  const inputRef = useRef<TextInput | null>(null)
+  const Input = bottomSheet ? BottomSheetTextInput : TextInput
+
+  useImperativeHandle(ref, () => ({
+    focus: () => inputRef.current?.focus(),
+  }), [])
 
   const palette = useMemo(() => {
     const base = inputColors[status]
@@ -72,7 +86,10 @@ export function AppInput({
       >
         {leftIcon ? <View style={styles.leftIcon}>{leftIcon}</View> : null}
 
-        <TextInput
+        <Input
+          ref={(input) => {
+            inputRef.current = input ?? null
+          }}
           placeholderTextColor={palette.placeholder}
           style={[styles.input, { color: palette.text }, style]}
           onFocus={(e) => {

@@ -9,6 +9,7 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { OAuth2Client } from 'google-auth-library';
@@ -34,13 +35,28 @@ const googleOAuth2Client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 @Injectable()
 export class AuthService {
   private readonly logger = new Logger(AuthService.name);
+  private readonly accessSecret: string;
+  private readonly accessExpiresIn: ms.StringValue;
+  private readonly refreshSecret: string;
+  private readonly refreshExpiresIn: ms.StringValue;
 
   constructor(
     private usersService: UsersService,
     private jwtService: JwtService,
     private emailService: EmailService,
     private prisma: PrismaService,
-  ) {}
+    config: ConfigService,
+  ) {
+    // getOrThrow fails at startup instead of silently signing with a fallback secret
+    this.accessSecret = config.getOrThrow<string>('JWT_SECRET');
+    this.accessExpiresIn = config.getOrThrow<ms.StringValue>(
+      'JWT_ACCESS_TOKEN_EXPIRATION',
+    );
+    this.refreshSecret = config.getOrThrow<string>('JWT_REFRESH_TOKEN_SECRET');
+    this.refreshExpiresIn = config.getOrThrow<ms.StringValue>(
+      'JWT_REFRESH_TOKEN_EXPIRATION',
+    );
+  }
 
   async signup(signupDto: SignupDto): Promise<SignupResponse> {
     const { email, password } = signupDto;
@@ -196,12 +212,13 @@ export class AuthService {
   ): Promise<LoginResponse> {
     const { refreshToken } = refreshTokenDto;
 
-    const payload = await this.jwtService.verifyAsync<JwtPayload>(
-      refreshToken,
-      {
-        secret: process.env.JWT_REFRESH_SECRET,
-      },
-    );
+    // verifyAsync throws library errors (expired, malformed, bad signature),
+    // which Nest would turn into a 500
+    const payload = await this.jwtService
+      .verifyAsync<JwtPayload>(refreshToken, { secret: this.refreshSecret })
+      .catch(() => {
+        throw new UnauthorizedException('Доступ заборонено');
+      });
 
     const user = await this.usersService.findById(payload.sub);
 
@@ -268,12 +285,12 @@ export class AuthService {
 
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAsync(payload, {
-        secret: process.env.JWT_ACCESS_SECRET,
-        expiresIn: process.env.JWT_ACCESS_TOKEN_EXPIRATION as ms.StringValue,
+        secret: this.accessSecret,
+        expiresIn: this.accessExpiresIn,
       }),
       this.jwtService.signAsync(payload, {
-        secret: process.env.JWT_REFRESH_SECRET,
-        expiresIn: process.env.JWT_REFRESH_TOKEN_EXPIRATION as ms.StringValue,
+        secret: this.refreshSecret,
+        expiresIn: this.refreshExpiresIn,
       }),
     ]);
 

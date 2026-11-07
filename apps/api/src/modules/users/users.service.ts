@@ -6,27 +6,29 @@ import { AuthProvider, Prisma, User } from 'src/prisma/generated/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 
 import { SignupDto } from '../auth/dto/signup.dto';
-import { GoogleUserPayload } from '../auth/interfaces';
+import { AuthenticatedUser, GoogleUserPayload } from '../auth/interfaces';
 import { UpdateUserDto } from './dto/update-user.dto';
 
 @Injectable()
 export class UsersService {
   constructor(private prisma: PrismaService) {}
 
-  getMe(user: User): PublicUser {
+  getMe(user: AuthenticatedUser): PublicUser {
     return toPublicUser(user);
   }
 
   async updateMe(
-    user: User,
+    user: AuthenticatedUser,
     updateUserPayload: UpdateUserDto,
-  ): Promise<User | null> {
+  ): Promise<PublicUser> {
     const { name } = updateUserPayload;
 
-    return this.prisma.user.update({
+    const updatedUser = await this.prisma.user.update({
       where: { id: user.id },
       data: { name },
     });
+
+    return toPublicUser(updatedUser);
   }
 
   async findByEmail(email: string): Promise<User | null> {
@@ -59,10 +61,10 @@ export class UsersService {
     });
   }
 
-  async findOneWithSelect(
+  async findOneWithSelect<S extends Prisma.UserSelect>(
     email: string,
-    select: Prisma.UserSelect,
-  ): Promise<Prisma.UserGetPayload<{ select: typeof select }> | null> {
+    select: S,
+  ): Promise<Prisma.UserGetPayload<{ select: S }> | null> {
     return this.prisma.user.findUnique({ where: { email }, select });
   }
 
