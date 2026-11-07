@@ -23,10 +23,11 @@ import { JwtStrategy } from './strategies/jwt.strategy';
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
-        secret: config.get<string>('JWT_SECRET'),
+        secret: config.getOrThrow<string>('JWT_SECRET'),
         signOptions: {
-          expiresIn:
-            config.get<ms.StringValue>('JWT_ACCESS_TOKEN_EXPIRATION') || '30s',
+          expiresIn: config.getOrThrow<ms.StringValue>(
+            'JWT_ACCESS_TOKEN_EXPIRATION',
+          ),
         },
       }),
     }),

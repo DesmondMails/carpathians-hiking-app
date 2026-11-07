@@ -1,19 +1,8 @@
-import { Redirect, Tabs } from 'expo-router'
+import { Tabs } from 'expo-router'
 
-import { useAuth } from '@/src/features/auth/hooks/useAuth'
 import { CustomTabBar } from '@/src/shared/components/CustomTabBar'
 
 export default function AppLayout() {
-  const { isAuthenticated, isHydrated } = useAuth()
-
-  if (!isHydrated) {
-    return null
-  }
-
-  if (!isAuthenticated) {
-    return <Redirect href='/(auth)/login' />
-  }
-
   return (
     <Tabs
       tabBar={(props) => <CustomTabBar {...props} />}

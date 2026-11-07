@@ -1,17 +1,11 @@
-import { Redirect, Stack } from 'expo-router'
-
-import { useAuth } from '@/src/features/auth/hooks/useAuth'
+import { Stack } from 'expo-router'
 
 export default function AuthLayout() {
-  const { isAuthenticated, isHydrated } = useAuth()
-
-  if (!isHydrated) {
-    return null
-  }
-
-  if (isAuthenticated) {
-    return <Redirect href='/(app)' />
-  }
-
-  return <Stack screenOptions={{ headerShown: false }} />
+  return (
+    <Stack screenOptions={{ headerShown: false }}>
+      <Stack.Screen name='login' />
+      <Stack.Screen name='signup' />
+      <Stack.Screen name='verify-code' />
+    </Stack>
+  )
 }

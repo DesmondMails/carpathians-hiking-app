@@ -1,6 +1,7 @@
 import type { LoginResponse } from '@hiking/shared'
 import axios from 'axios'
 
+import { isAuthRejection } from './auth-error'
 import { apiClient } from './client'
 import { getBaseUrl } from './getBaseUrl'
 import { tokenStorage } from './token-storage'
@@ -40,12 +41,15 @@ apiClient.interceptors.response.use(
 
         originalRequest.headers.Authorization = `Bearer ${data.accessToken}`
         return apiClient(originalRequest)
-      } catch {
-        await tokenStorage.clearTokens()
+      } catch (refreshError) {
+        // Couldn't reach the server: keep the session and surface the real error
+        if (!isAuthRejection(refreshError)) {
+          return Promise.reject(refreshError)
+        }
 
         const { useAuthStore } =
           await import('@/src/features/auth/store/auth.store')
-        useAuthStore.getState().logout()
+        await useAuthStore.getState().clearSession()
 
         return Promise.reject(error)
       }

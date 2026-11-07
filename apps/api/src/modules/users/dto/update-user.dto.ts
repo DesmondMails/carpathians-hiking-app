@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Transform } from 'class-transformer';
 import { IsString, MaxLength, MinLength } from 'class-validator';
 
 export class UpdateUserDto {
@@ -13,5 +14,8 @@ export class UpdateUserDto {
   @MaxLength(12, {
     message: "Ім'я повинно містити не більше 12 символів",
   })
+  @Transform(({ value }: { value: unknown }) =>
+    typeof value === 'string' ? value.trim() : value,
+  )
   name!: string;
 }

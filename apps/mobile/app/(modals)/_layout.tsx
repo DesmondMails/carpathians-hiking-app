@@ -1,17 +1,5 @@
-import { Redirect, Stack } from 'expo-router'
-
-import { useAuth } from '@/src/features/auth/hooks/useAuth'
+import { Stack } from 'expo-router'
 
 export default function ModalsLayout() {
-  const { isAuthenticated, isHydrated } = useAuth()
-
-  if (!isHydrated) {
-    return null
-  }
-
-  if (!isAuthenticated) {
-    return <Redirect href='/(auth)/login' />
-  }
   return <Stack screenOptions={{ headerShown: false }} />
-
 }

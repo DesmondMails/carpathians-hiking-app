@@ -19,6 +19,7 @@ SplashScreen.preventAutoHideAsync()
 
 export default function RootLayout() {
   const hydrate = useAuthStore((state) => state.hydrate)
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated)
   const [appReady, setAppReady] = useState(false)
   const [showAnimatedSplash, setShowAnimatedSplash] = useState(true)
   const [nativeSplashHidden, setNativeSplashHidden] = useState(false)
@@ -67,16 +68,21 @@ export default function RootLayout() {
         <ThemeProvider value={DefaultTheme}>
           <BottomSheetModalProvider>
             <Stack>
-              <Stack.Screen name='(app)' options={{ headerShown: false }} />
-              <Stack.Screen name='(auth)' options={{ headerShown: false }} />
-              <Stack.Screen name='routes' options={{ headerShown: false }} />
-              <Stack.Screen
-                name='(modals)'
-                options={{
-                  presentation: 'fullScreenModal',
-                  headerShown: false,
-                }}
-              />
+              <Stack.Protected guard={isAuthenticated}>
+                <Stack.Screen name='(app)' options={{ headerShown: false }} />
+                <Stack.Screen name='routes' options={{ headerShown: false }} />
+                <Stack.Screen
+                  name='(modals)'
+                  options={{
+                    presentation: 'fullScreenModal',
+                    headerShown: false,
+                  }}
+                />
+              </Stack.Protected>
+
+              <Stack.Protected guard={!isAuthenticated}>
+                <Stack.Screen name='(auth)' options={{ headerShown: false }} />
+              </Stack.Protected>
             </Stack>
           </BottomSheetModalProvider>
           <StatusBar style='auto' />

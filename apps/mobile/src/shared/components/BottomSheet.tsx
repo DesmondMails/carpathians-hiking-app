@@ -23,6 +23,11 @@ type BottomSheetProps = {
   snapPoints?: (number | string)[]
   enableContentPanningGesture?: boolean
   onAnimate?: (fromIndex: number, toIndex: number) => void
+  onChange?: (index: number) => void
+  onDismiss?: () => void
+  dismissible?: boolean
+  closeAccessibilityLabel?: string
+  androidKeyboardInputMode?: 'adjustPan' | 'adjustResize'
 }
 
 const DEFAULT_SNAP_POINTS = ['90%']
@@ -35,6 +40,11 @@ export const BottomSheet: FC<BottomSheetProps> = ({
   snapPoints = DEFAULT_SNAP_POINTS,
   enableContentPanningGesture = true,
   onAnimate,
+  onChange,
+  onDismiss,
+  dismissible = true,
+  closeAccessibilityLabel = 'Закрити фільтри',
+  androidKeyboardInputMode = 'adjustPan',
 }) => {
   const insets = useSafeAreaInsets()
   const renderBackdrop = useCallback(
@@ -43,21 +53,27 @@ export const BottomSheet: FC<BottomSheetProps> = ({
         {...props}
         appearsOnIndex={0}
         disappearsOnIndex={-1}
+        pressBehavior={dismissible ? 'close' : 'none'}
       />
     ),
-    [],
+    [dismissible],
   )
 
   return (
     <BottomSheetModal
       ref={ref}
       onAnimate={onAnimate}
+      onChange={onChange}
+      onDismiss={onDismiss}
       index={0}
       snapPoints={snapPoints}
       enableDynamicSizing={false}
       topInset={insets.top}
       backdropComponent={renderBackdrop}
-      enablePanDownToClose
+      enablePanDownToClose={dismissible}
+      keyboardBehavior='interactive'
+      keyboardBlurBehavior='restore'
+      android_keyboardInputMode={androidKeyboardInputMode}
       enableContentPanningGesture={enableContentPanningGesture}
       backgroundStyle={styles.background}
       handleIndicatorStyle={styles.handle}
@@ -67,11 +83,13 @@ export const BottomSheet: FC<BottomSheetProps> = ({
           <AppText variant="h2">{title}</AppText>
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel="Закрити фільтри"
+            accessibilityLabel={closeAccessibilityLabel}
+            disabled={!dismissible}
             onPress={() => ref.current?.dismiss()}
             style={({ pressed }) => [
               styles.closeButton,
               pressed && styles.pressed,
+              !dismissible && styles.pressed,
             ]}
           >
             <Feather name="x" size={22} color={colors.textPrimary} />

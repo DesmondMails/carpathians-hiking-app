@@ -15,7 +15,6 @@ import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import { Public } from 'src/common/decorators/public.decorator';
-import type { User } from 'src/prisma/generated/client';
 
 import { AuthService } from './auth.service';
 import { GoogleNativeDto } from './dto/google-native.dto';
@@ -24,7 +23,7 @@ import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { ResendCodeDto } from './dto/resend-code.dto';
 import { SignupDto } from './dto/signup.dto';
 import { VerifyEmailDto } from './dto/verify-email.dto';
-import { GoogleUserPayload } from './interfaces';
+import type { AuthenticatedUser, GoogleUserPayload } from './interfaces';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -122,7 +121,7 @@ export class AuthController {
   @Post('logout')
   @ApiOperation({ summary: 'Вийти' })
   @ApiResponse({ status: 204, description: 'Користувач успішно вийшов' })
-  async logout(@CurrentUser() user: User): Promise<void> {
+  async logout(@CurrentUser() user: AuthenticatedUser): Promise<void> {
     return this.authService.logout(user.id);
   }
 }

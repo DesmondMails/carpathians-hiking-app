@@ -3,12 +3,14 @@ import { StyleSheet, View } from 'react-native'
 import { Image } from 'expo-image'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
+import { useAuthStore } from '@/src/features/auth/store/auth.store'
 import { AppText } from '@/src/shared/components/AppText'
 import { colors } from '@/src/theme/colors'
 import { typography } from '@/src/theme/typography'
 
 export const HomapageHero = () => {
   const insets = useSafeAreaInsets()
+  const name = useAuthStore((state) => state.user?.name)
 
   const HERO_HEIGHT = 240 + insets.top
 
@@ -35,11 +37,10 @@ export const HomapageHero = () => {
       ))}
 
       <View style={[styles.heroContent, { paddingTop: insets.top + 20 }]}>
-        <AppText style={styles.heroEmoji}>👋</AppText>
-        <AppText style={styles.heroTitle}>Привіт, Іван!</AppText>
-        <AppText style={styles.heroSubtitle}>
-          Ви пройшли 50 км за цей місяць і{'\n'}зберегли 20 кг CO2!
+        <AppText style={styles.heroTitle}>
+          {name ? `Привіт, ${name}!` : 'Привіт, мандрівнику!'}
         </AppText>
+        <AppText style={styles.heroSubtitle}>Готові до нових пригод?</AppText>
       </View>
     </View>
   )
@@ -56,10 +57,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingHorizontal: 24,
     gap: 6,
-  },
-  heroEmoji: {
-    fontSize: 36,
-    lineHeight: 44,
   },
   heroTitle: {
     fontFamily: typography.h1.fontFamily,
