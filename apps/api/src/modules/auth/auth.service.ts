@@ -226,12 +226,7 @@ export class AuthService {
       throw new UnauthorizedException('Доступ заборонено');
     }
 
-    const refreshTokenMatches = await bcrypt.compare(
-      refreshToken,
-      user.refreshTokenHash,
-    );
-
-    if (!refreshTokenMatches) {
+    if (!this.refreshTokenMatches(refreshToken, user.refreshTokenHash)) {
       throw new UnauthorizedException('Доступ заборонено');
     }
 
@@ -270,10 +265,30 @@ export class AuthService {
     userId: string,
     refreshToken: string,
   ): Promise<void> {
-    const hashedRefreshToken = await bcrypt.hash(refreshToken, 10);
     await this.usersService.updateHashedRefreshToken(
       userId,
-      hashedRefreshToken,
+      this.hashRefreshToken(refreshToken),
+    );
+  }
+
+  // bcrypt only reads the first 72 bytes, which for a JWT is the header plus
+  // the start of `sub` — identical across all of a user's tokens. SHA-256
+  // covers the whole token; it's high-entropy, so a slow hash isn't needed.
+  private hashRefreshToken(refreshToken: string): string {
+    return crypto.createHash('sha256').update(refreshToken).digest('hex');
+  }
+
+  private refreshTokenMatches(
+    refreshToken: string,
+    storedHash: string,
+  ): boolean {
+    const presented = Buffer.from(this.hashRefreshToken(refreshToken));
+    const stored = Buffer.from(storedHash);
+
+    // Legacy bcrypt hashes differ in length and timingSafeEqual would throw
+    return (
+      presented.length === stored.length &&
+      crypto.timingSafeEqual(presented, stored)
     );
   }
 
