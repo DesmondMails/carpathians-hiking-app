@@ -12,6 +12,7 @@ import {
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Throttle, ThrottlerGuard } from '@nestjs/throttler';
 
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import { Public } from 'src/common/decorators/public.decorator';
@@ -26,6 +27,7 @@ import { VerifyEmailDto } from './dto/verify-email.dto';
 import type { AuthenticatedUser, GoogleUserPayload } from './interfaces';
 
 @ApiTags('auth')
+@UseGuards(ThrottlerGuard)
 @Controller('auth')
 export class AuthController {
   private readonly logger = new Logger(AuthController.name);
@@ -55,6 +57,7 @@ export class AuthController {
     description: 'Код підтвердження не валідний або застарів',
   })
   @ApiResponse({ status: 404, description: 'Користувача не знайдено' })
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
   async verifyEmail(@Body() dto: VerifyEmailDto): Promise<LoginResponse> {
     return this.authService.verifyEmail(dto);
   }
@@ -68,6 +71,7 @@ export class AuthController {
     description: 'Код підтвердження успішно надіслано',
   })
   @ApiResponse({ status: 404, description: 'Користувача не знайдено' })
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
   async resendCode(@Body() dto: ResendCodeDto): Promise<void> {
     return this.authService.resendVerificationCode(dto);
   }
@@ -75,6 +79,7 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @Public()
   @Post('login')
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
   @ApiOperation({ summary: 'Увійти' })
   @ApiResponse({ status: 200, description: 'Користувач успішно увійшов' })
   @ApiResponse({ status: 401, description: 'Невірні email або пароль' })
