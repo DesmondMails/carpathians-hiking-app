@@ -15,6 +15,7 @@ import {
   Param,
   Patch,
   Post,
+  Put,
   Query,
 } from '@nestjs/common';
 import {
@@ -26,21 +27,26 @@ import {
 
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import type { AuthenticatedUser } from 'src/modules/auth/interfaces';
-import type { Route } from 'src/prisma/generated/client';
+import type { Route, SavedRoute } from 'src/prisma/generated/client';
 
 import { CompleteRouteImageUploadDto } from './dto/complete-route-image-upload.dto';
 import { CreateRouteImagePresignedDto } from './dto/create-route-image-presigned.dto';
 import { CreateRouteDto } from './dto/create-route.dto';
+import { SavedRouteQueryDto } from './dto/saved-route-query.dto';
 import { SearchRouteQueryDto } from './dto/search-route-query.dto';
 import { SetRouteCoverDto } from './dto/set-route-cover.dto';
 import { UpdateRouteDto } from './dto/update-route.dto';
 import { RoutesService } from './routes.service';
+import { SavedRoutesService } from './saved-routes.service';
 
 @ApiBearerAuth()
 @ApiTags('routes')
 @Controller('routes')
 export class RoutesController {
-  constructor(private routesService: RoutesService) {}
+  constructor(
+    private routesService: RoutesService,
+    private savedRoutesService: SavedRoutesService,
+  ) {}
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
@@ -52,6 +58,20 @@ export class RoutesController {
     @Body() createRouteDto: CreateRouteDto,
   ): Promise<Route> {
     return this.routesService.createRoute(user.id, createRouteDto);
+  }
+
+  @Get('saved')
+  @ApiOperation({ summary: 'Отримати збережені маршрути користувача' })
+  @ApiResponse({
+    status: 200,
+    description: 'Збережені маршрути успішно отримані',
+  })
+  @ApiResponse({ status: 401, description: 'Користувач не авторизований' })
+  async getSavedRoutes(
+    @Query() savedRoutesQuery: SavedRouteQueryDto,
+    @CurrentUser() user: AuthenticatedUser,
+  ): Promise<RouteListItem[]> {
+    return this.savedRoutesService.getSavedRoutes(user.id, savedRoutesQuery);
   }
 
   @Patch(':id')
@@ -98,10 +118,11 @@ export class RoutesController {
     description: 'Некоректні параметри пошуку або пагінації',
   })
   async getAllRoutes(
+    @CurrentUser() user: AuthenticatedUser,
     @Query()
     searchQuery?: SearchRouteQueryDto,
   ): Promise<RouteListItem[]> {
-    return this.routesService.getAllRoutes(searchQuery);
+    return this.routesService.getAllRoutes(user.id, searchQuery);
   }
 
   @Get(':id/pois')
@@ -130,8 +151,11 @@ export class RoutesController {
   @ApiResponse({ status: 200, description: 'Маршрут успішно отриманий' })
   @ApiResponse({ status: 401, description: 'Користувач не авторизований' })
   @ApiResponse({ status: 404, description: 'Маршрут не знайдено' })
-  async getRouteById(@Param('id') routeId: string): Promise<RouteDetails> {
-    return this.routesService.getRouteDetails(routeId);
+  async getRouteById(
+    @Param('id') routeId: string,
+    @CurrentUser() user: AuthenticatedUser,
+  ): Promise<RouteDetails> {
+    return this.routesService.getRouteDetails(routeId, user.id);
   }
 
   @Get(':id/gpx-url')
@@ -205,6 +229,33 @@ export class RoutesController {
     @CurrentUser() user: AuthenticatedUser,
   ): Promise<void> {
     return this.routesService.reEnrichRoutePois(routeId, user.id);
+  }
+
+  @Put(':id/saved')
+  @ApiOperation({ summary: 'Зберегти маршрут' })
+  @ApiResponse({ status: 200, description: 'Маршрут успішно збережено' })
+  @ApiResponse({ status: 401, description: 'Користувач не авторизований' })
+  @ApiResponse({
+    status: 404,
+    description: 'Маршрут не знайдено або недоступний',
+  })
+  async saveRoute(
+    @Param('id') routeId: string,
+    @CurrentUser() user: AuthenticatedUser,
+  ): Promise<SavedRoute> {
+    return this.savedRoutesService.saveRoute(routeId, user.id);
+  }
+
+  @Delete(':id/saved')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: 'Видалити збереження' })
+  @ApiResponse({ status: 204, description: 'Збереження успішно видалене' })
+  @ApiResponse({ status: 401, description: 'Користувач не авторизований' })
+  async deleteSavedRoute(
+    @Param('id') routeId: string,
+    @CurrentUser() user: AuthenticatedUser,
+  ): Promise<void> {
+    return this.savedRoutesService.deleteSaving(routeId, user.id);
   }
 
   @Delete(':id')

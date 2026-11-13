@@ -15,6 +15,7 @@ model User {
   routes      Route[]
   routeDrafts RouteDraft[]
   routeImages RouteImage[]
+  savedRoutes SavedRoute[]
 }
 
 enum AuthProvider {

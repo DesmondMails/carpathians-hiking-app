@@ -50,9 +50,11 @@ import { FinalizeRouteDraftDto } from '../routes-draft/dto/finalize-route-draft.
 import { StorageService } from '../storage/storage.service';
 import { selectFeaturedRoutePois } from './mappers/featured-route-pois';
 
-type RouteListRow = Prisma.RouteGetPayload<{
+export type RouteListRow = Prisma.RouteGetPayload<{
   select: typeof ROUTE_LIST_SELECT;
 }>;
+
+type RouteListRowWithSaveState = RouteListRow & { isSaved: boolean };
 
 @Injectable()
 export class RoutesService {
@@ -109,9 +111,12 @@ export class RoutesService {
     return route;
   }
 
-  async getRouteDetails(routeId: string): Promise<RouteDetails> {
-    const { createdByUser, ...route } =
-      await this.findRouteWithAuthorById(routeId);
+  async getRouteDetails(
+    routeId: string,
+    userId: string,
+  ): Promise<RouteDetails> {
+    const { createdByUser, savedRoutes, ...route } =
+      await this.findRouteWithAuthorById(routeId, userId);
 
     const imagesOrdered =
       route.coverImageId != null
@@ -127,10 +132,15 @@ export class RoutesService {
 
     const coverImageUrl = await this.resolveCoverImageUrl(route);
 
-    return toRouteView(route, createdByUser, {
-      coverImageUrl,
-      imageUrls,
-    });
+    return toRouteView(
+      route,
+      createdByUser,
+      {
+        coverImageUrl,
+        imageUrls,
+      },
+      savedRoutes.length > 0,
+    );
   }
 
   async getRoutePois(routeId: string): Promise<RoutePoisResponse> {
@@ -169,12 +179,19 @@ export class RoutesService {
   }
 
   async getAllRoutes(
+    userId: string,
     searchQuery?: SearchRouteQueryDto,
   ): Promise<RouteListItem[]> {
     this.checkDistanceOrThrowErr(searchQuery);
 
-    const routes = await this.selectFilteredRoutes(searchQuery);
+    const routes = await this.selectFilteredRoutes(userId, searchQuery);
 
+    return this.toRouteListItems(routes);
+  }
+
+  async toRouteListItems(
+    routes: RouteListRowWithSaveState[],
+  ): Promise<RouteListItem[]> {
     return Promise.all(
       routes.map(async (route) => ({
         ...route,
@@ -385,13 +402,25 @@ export class RoutesService {
 
   private findRouteWithAuthorById(
     routeId: string,
-  ): Promise<Route & { createdByUser: User; images: RouteImage[] }> {
+    userId: string,
+  ): Promise<
+    Route & {
+      createdByUser: User;
+      images: RouteImage[];
+      savedRoutes: { userId: string }[];
+    }
+  > {
     const request = this.prisma.route.findUnique({
       where: { id: routeId },
       include: {
         createdByUser: true,
         images: {
           orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }],
+        },
+        // Only the current user's row: tells whether they saved this route
+        savedRoutes: {
+          where: { userId },
+          select: { userId: true },
         },
       },
     });
@@ -514,8 +543,9 @@ export class RoutesService {
   }
 
   private async selectFilteredRoutes(
+    userId: string,
     searchQuery?: SearchRouteQueryDto,
-  ): Promise<RouteListRow[]> {
+  ): Promise<RouteListRowWithSaveState[]> {
     const { radiusM, longitude, latitude } = searchQuery ?? {};
 
     const { limit = DEFAULT_LIMIT, offset = DEFAULT_OFFSET } =
@@ -562,10 +592,19 @@ export class RoutesService {
       orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
       take: limit,
       skip: offset,
-      select: ROUTE_LIST_SELECT,
+      select: {
+        ...ROUTE_LIST_SELECT,
+        savedRoutes: {
+          where: { userId },
+          select: { userId: true },
+        },
+      },
     });
 
-    return routes;
+    return routes.map(({ savedRoutes, ...route }) => ({
+      ...route,
+      isSaved: savedRoutes.length > 0,
+    }));
   }
 
   private async setStartPoint(

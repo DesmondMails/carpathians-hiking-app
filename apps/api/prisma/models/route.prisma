@@ -29,6 +29,7 @@ model Route {
   updatedAt            DateTime                               @updatedAt
   routePois            RoutePoi[]
   startPoint           Unsupported("geography(Point, 4326)")?
+  savedRoutes          SavedRoute[]
 
   @@index([createdByUserId])
   @@index([status])

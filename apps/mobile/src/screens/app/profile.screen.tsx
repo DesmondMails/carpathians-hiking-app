@@ -8,10 +8,9 @@ import {
   MyReviewsBtn,
 } from '@/src/features/profile/components'
 import { AppText } from '@/src/shared/components'
+import { TAB_BAR_HEIGHT } from '@/src/shared/constants'
 import { colors } from '@/src/theme/colors'
 import { spacing } from '@/src/theme/spacing'
-
-const TAB_BAR_HEIGHT = 68
 
 export default function ProfileScreen() {
   return (

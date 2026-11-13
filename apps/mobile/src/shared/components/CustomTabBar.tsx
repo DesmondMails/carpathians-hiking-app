@@ -14,12 +14,12 @@ import { colors } from '@/src/theme/colors'
 
 import { AnimatedPressable } from './AnimatedPressable'
 
-type TabName = 'index' | 'explore' | 'history' | 'profile'
+type TabName = 'index' | 'explore' | 'saved' | 'profile'
 
 const TAB_CONFIG: Record<TabName, { icon: string }> = {
   index: { icon: 'home' },
   explore: { icon: 'compass' },
-  history: { icon: 'clock' },
+  saved: { icon: 'bookmark' },
   profile: { icon: 'user' },
 }
 

@@ -1,11 +1,25 @@
+import { FC } from 'react'
+
 import { StyleSheet, View } from 'react-native'
 
 import { Feather } from '@expo/vector-icons'
 
 import { AppText } from '@/src/shared/components/AppText'
+import {
+  ROUTES_EMPTY_STATE_DESCRIPTION,
+  ROUTES_EMPTY_STATE_TITLE,
+} from '@/src/shared/constants'
 import { colors } from '@/src/theme/colors'
 
-export function RoutesEmptyState() {
+interface IRoutesEmptyState {
+  titleText?: string
+  descriptionText?: string
+}
+
+export const RoutesEmptyState: FC<IRoutesEmptyState> = ({
+  titleText = ROUTES_EMPTY_STATE_TITLE,
+  descriptionText = ROUTES_EMPTY_STATE_DESCRIPTION,
+}) => {
   return (
     <View style={styles.container}>
       <View
@@ -16,10 +30,10 @@ export function RoutesEmptyState() {
         <Feather name='map' size={24} color={colors.primary} />
       </View>
       <AppText variant='bodyMedium' style={styles.title}>
-        Маршрутів не знайдено
+        {titleText}
       </AppText>
       <AppText color={colors.textSecondary} style={styles.description}>
-        Спробуй змінити фільтри або збільшити радіус пошуку.
+        {descriptionText}
       </AppText>
     </View>
   )

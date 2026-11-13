@@ -38,6 +38,7 @@ interface RouteState {
   ) => Promise<FeaturedPoisLoadResult>
   loadGpxUrl: (routeId: string) => Promise<string>
   reEnrichRoutePois: (routeId: string) => Promise<void>
+  changeIsSavedStatus: (routeId: string, isSaved: boolean) => void
 }
 
 export const useRouteStore = create<RouteState>((set, get) => {
@@ -256,5 +257,13 @@ export const useRouteStore = create<RouteState>((set, get) => {
         if (isCurrentRequest()) set({ isReEnriching: false })
       }
     },
+
+    changeIsSavedStatus: (routeId, isSaved) =>
+      set((state) => {
+        // Saves can come from other screens; only the open route is affected
+        if (state.route?.id !== routeId) return state
+
+        return { route: { ...state.route, isSaved } }
+      }),
   }
 })
