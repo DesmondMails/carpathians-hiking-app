@@ -20,6 +20,7 @@ import { usePoiEnrichmentRetry } from '@/src/features/route/hooks/usePoiEnrichme
 import { useRoute } from '@/src/features/route/hooks/useRoute'
 import { ensureGpxFile, shareGpxFile } from '@/src/features/route/utils/gpxFile'
 import { buildRouteLink } from '@/src/features/route/utils/routeLink'
+import { useSharedSavedRouteStore } from '@/src/shared/store/saved-shared.store'
 import { toast } from '@/src/shared/store/toast.store'
 import { colors } from '@/src/theme/colors'
 
@@ -38,10 +39,22 @@ export default function RouteScreen() {
   } = useRoute()
   const { user } = useAuth()
 
-  const [saved, setSaved] = useState(false)
+  const saveRoute = useSharedSavedRouteStore((s) => s.saveRoute)
+  const unsaveRoute = useSharedSavedRouteStore((s) => s.unsaveRoute)
+
   const [scrollEnabled, setScrollEnabled] = useState(true)
 
-  const handleSave = () => setSaved((v) => !v)
+  const handleSave = () => {
+    if (!route) return
+
+    if (route.isSaved) {
+      unsaveRoute(route.id)
+
+      return
+    }
+
+    saveRoute(route.id)
+  }
 
   const handleShare = async () => {
     if (!route) return
@@ -113,7 +126,7 @@ export default function RouteScreen() {
   return (
     <View style={styles.root}>
       <ControlsTop
-        saved={saved}
+        saved={route.isSaved}
         onSave={handleSave}
         onShare={handleShare}
         onEdit={isOwner ? handleEdit : undefined}

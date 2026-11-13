@@ -39,6 +39,7 @@ interface ExploreState {
   loadMore: () => Promise<boolean>
   retryRefresh: () => Promise<boolean>
   retryLoadMore: () => Promise<boolean>
+  changeIsSavedStatus: (routeId: string, isSave: boolean) => void
 }
 
 // Next pages only extend results of the current, successfully loaded search
@@ -190,6 +191,20 @@ export const useExploreStore = create<ExploreState>((set, get) => {
       if (!get().loadMoreError) return Promise.resolve(false)
 
       return loadPage(PAGE_REQUEST.NEXT)
+    },
+    changeIsSavedStatus: async (routeId, isSaved) => {
+      const routesWithChangedStatus = get().routes.map((route) => {
+        if (route.id === routeId) {
+          return {
+            ...route,
+            isSaved,
+          }
+        }
+
+        return route
+      })
+
+      set({ routes: [...routesWithChangedStatus] })
     },
   }
 })

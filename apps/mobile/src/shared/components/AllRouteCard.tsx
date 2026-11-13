@@ -13,28 +13,36 @@ import { formatElevation } from '@/src/shared/utils/formatElevation'
 import { colors } from '@/src/theme/colors'
 import { typography } from '@/src/theme/typography'
 
-import { DiffBadge } from './DiffBadge'
-import { MetaChip } from './MetaChip'
-import { RouteCoverPlaceholder } from './RouteCoverPlaceholder'
-import { SaveButton } from './SaveButton'
+import { DiffBadge } from '../../features/explore/components/DiffBadge'
+import { MetaChip } from '../../features/explore/components/MetaChip'
+import { RouteCoverPlaceholder } from '../../features/explore/components/RouteCoverPlaceholder'
+import { SaveButton } from '../../features/explore/components/SaveButton'
+import { useSharedSavedRouteStore } from '../store/saved-shared.store'
 
 interface AllRouteCardProps {
   route: RouteListItem
-  saved: boolean
-  onSave: () => void
+  saved?: boolean
 }
 
-export const AllRouteCard: FC<AllRouteCardProps> = ({
-  route,
-  saved,
-  onSave,
-}) => {
+export const AllRouteCard: FC<AllRouteCardProps> = ({ route, saved }) => {
   const router = useRouter()
+  const saveRoute = useSharedSavedRouteStore((s) => s.saveRoute)
+  const unsaveRoute = useSharedSavedRouteStore((s) => s.unsaveRoute)
   // Keyed by route and URL: FlashList reuses this component for other routes,
   // so a previous failure must not hide a different cover
   const coverKey = `${route.id}:${route.coverImageUrl ?? ''}`
   const [failedCoverKey, setFailedCoverKey] = useState<string | null>(null)
   const showCover = !!route.coverImageUrl && failedCoverKey !== coverKey
+
+  const handleSaveClick = () => {
+    if (saved) {
+      unsaveRoute(route.id)
+
+      return
+    }
+
+    saveRoute(route.id)
+  }
 
   const handleCardClick = () => {
     router.navigate({
@@ -79,7 +87,7 @@ export const AllRouteCard: FC<AllRouteCardProps> = ({
               {route.region}
             </AppText>
           </View>
-          <SaveButton saved={saved} onPress={onSave} />
+          <SaveButton saved={!!saved} onPress={handleSaveClick} />
         </View>
         <View style={styles.metaRow}>
           <MetaChip

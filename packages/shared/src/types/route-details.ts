@@ -57,6 +57,8 @@ export interface RouteDetails {
 
   createdBy: RouteAuthor
 
+  isSaved: boolean
+
   status: 'DRAFT' | 'PUBLISHED' | 'ARCHIVED'
   createdAt: string
   updatedAt: string

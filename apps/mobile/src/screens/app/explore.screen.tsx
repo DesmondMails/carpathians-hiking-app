@@ -46,19 +46,10 @@ export default function ExploreScreen() {
     appliedSearchPayload?.searchText ?? ''
   )
 
-  const [saved, setSaved] = useState<Set<string>>(new Set())
   const sheetRef = useRef<BottomSheetModal>(null)
   const listRef = useRef<FlashListRef<RouteListItem>>(null)
 
   const debouncedSearchText = useDebounce<string>(searchText, 500)
-
-  const toggleSave = (id: string) =>
-    setSaved((prev) => {
-      const next = new Set(prev)
-      if (next.has(id)) next.delete(id)
-      else next.add(id)
-      return next
-    })
 
   const handleOpenSheet = useCallback(() => {
     sheetRef.current?.present()
@@ -133,7 +124,6 @@ export default function ExploreScreen() {
           <FlashList
             ref={listRef}
             data={routes}
-            extraData={saved}
             maintainVisibleContentPosition={{ disabled: true }}
             ListEmptyComponent={<RoutesEmptyState />}
             ListFooterComponent={
@@ -152,11 +142,7 @@ export default function ExploreScreen() {
             }}
             onEndReachedThreshold={0.5}
             renderItem={({ item }) => (
-              <AllRouteCard
-                route={item}
-                saved={saved.has(item.id)}
-                onSave={() => toggleSave(item.id)}
-              />
+              <AllRouteCard route={item} saved={item?.isSaved} />
             )}
           />
         </>

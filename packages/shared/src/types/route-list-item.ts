@@ -17,4 +17,5 @@ export interface RouteListItem {
   images: any[]
   createdAt: string
   updatedAt: string
+  isSaved?: boolean
 }

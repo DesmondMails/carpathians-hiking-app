@@ -77,6 +77,7 @@ export const toRouteView = (
   route: Route,
   author: RouteAuthorSource,
   images: RouteImageViewSource,
+  isSaved: boolean,
 ): RouteDetails => {
   const createdBy: RouteAuthor = {
     id: author.id,
@@ -111,6 +112,8 @@ export const toRouteView = (
     reviewCount: route.reviewCount,
 
     createdBy,
+
+    isSaved,
 
     status: route.status,
     createdAt: route.createdAt.toISOString(),

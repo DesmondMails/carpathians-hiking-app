@@ -1,0 +1,11 @@
+model SavedRoute {
+  route   Route    @relation(fields: [routeId], references: [id], onDelete: Cascade)
+  routeId String
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId  String
+  savedAt DateTime @default(now())
+
+  @@id([routeId, userId])
+  @@index([routeId])
+  @@index([userId])
+}

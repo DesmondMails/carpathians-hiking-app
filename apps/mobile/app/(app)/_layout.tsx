@@ -10,7 +10,7 @@ export default function AppLayout() {
     >
       <Tabs.Screen name='index' />
       <Tabs.Screen name='explore' />
-      <Tabs.Screen name='history' />
+      <Tabs.Screen name='saved' />
       <Tabs.Screen name='profile' />
     </Tabs>
   )
