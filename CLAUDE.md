@@ -115,7 +115,7 @@ Mobile (`cd apps/mobile`): `npm run start`, `npm run ios` / `npm run android` (n
 
 ## API architecture
 
-- **Global auth by default.** `JwtAuthGuard` is registered as `APP_GUARD`, so every endpoint requires a JWT unless decorated with `@Public()`. Use `@CurrentUser()` to get the user. Global `ThrottlerModule` limit is 10 req/min; global `ValidationPipe` uses `whitelist + transform`. Swagger is served at `/api`.
+- **Global auth by default.** `JwtAuthGuard` is registered as `APP_GUARD`, so every endpoint requires a JWT unless decorated with `@Public()`. Use `@CurrentUser()` to get the user. `ThrottlerModule` defaults to 10 req/min, but `ThrottlerGuard` is not global: only handlers with `@UseGuards(ThrottlerGuard)` (the `auth` controller and GPX import, with 5/min via `@Throttle`) are rate-limited. The global `ValidationPipe` uses `whitelist + transform`. Swagger is served at `/api`.
 - **Prisma.** The schema is split across `prisma/schema.prisma` (generator/datasource only) and `prisma/models/*.prisma`. The client is generated into `src/prisma/generated` (gitignored) and imported as `src/prisma/generated/client`. Use `src/...` absolute imports (mapped in jest and tsconfig).
 - **PostGIS via raw SQL.** `Route.startPoint` is `Unsupported("geography(Point, 4326)")`, so it is written and queried only with `$executeRaw`/`$queryRaw` (see `routes.service.ts`: `setStartPoint`, `searchNearbyRoutes`). Coordinates go to `ST_MakePoint(longitude, latitude)`.
 - **SafeQL lint.** `eslint.config.mjs` type-checks raw SQL tagged `prisma.$queryRaw`/`tx.$queryRaw` etc. against a temporary DB built from `prisma/migrations`. Lint therefore fails without `DATABASE_URL` pointing at a running Postgres server.
