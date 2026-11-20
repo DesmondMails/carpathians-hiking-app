@@ -30,4 +30,9 @@ export class PublicUserDto implements PublicUser {
     example: 'Микита',
   })
   name!: string | null;
+
+  @ApiProperty({
+    description: 'Дата онбордингу',
+  })
+  onboardedAt!: Date | null;
 }

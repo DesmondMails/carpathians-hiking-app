@@ -9,8 +9,16 @@ export const profileApi = {
     return data
   },
 
-  async updateMe(payload: { name: string }): Promise<PublicUser> {
+  async updateMe(payload: { name?: string }): Promise<PublicUser> {
     const { data } = await apiClient.patch<PublicUser>('/users/me', payload)
+
+    return data
+  },
+
+  async completeOnboarding(): Promise<PublicUser> {
+    const { data } = await apiClient.post<PublicUser>(
+      '/users/me/onboarding/complete'
+    )
 
     return data
   },

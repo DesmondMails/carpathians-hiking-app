@@ -9,4 +9,5 @@ export const toPublicUser = (user: AuthenticatedUser | User): PublicUser => ({
   createdAt: user.createdAt,
   updatedAt: user.updatedAt,
   name: user.name,
+  onboardedAt: user.onboardedAt,
 });

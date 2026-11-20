@@ -12,6 +12,7 @@ export const authenticatedUserSelect = {
   createdAt: true,
   updatedAt: true,
   name: true,
+  onboardedAt: true,
 } satisfies Prisma.UserSelect;
 
 /** User attached to `request.user` by JwtStrategy.validate */

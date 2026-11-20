@@ -1,5 +1,5 @@
 import { PublicUser } from '@hiking/shared';
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 
 import { toPublicUser } from 'src/common/mappers';
 import { AuthProvider, Prisma, User } from 'src/prisma/generated/client';
@@ -11,6 +11,8 @@ import { UpdateUserDto } from './dto/update-user.dto';
 
 @Injectable()
 export class UsersService {
+  private logger = new Logger(UsersService.name);
+
   constructor(private prisma: PrismaService) {}
 
   getMe(user: AuthenticatedUser): PublicUser {
@@ -26,6 +28,23 @@ export class UsersService {
     const updatedUser = await this.prisma.user.update({
       where: { id: user.id },
       data: { name },
+    });
+
+    return toPublicUser(updatedUser);
+  }
+
+  /**
+   * Idempotent: the first call sets the timestamp, repeated calls
+   * keep the original date and just return the current user.
+   */
+  async completeOnboarding(user: AuthenticatedUser): Promise<PublicUser> {
+    if (user.onboardedAt) {
+      return toPublicUser(user);
+    }
+
+    const updatedUser = await this.prisma.user.update({
+      where: { id: user.id },
+      data: { onboardedAt: new Date() },
     });
 
     return toPublicUser(updatedUser);

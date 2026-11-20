@@ -2,8 +2,11 @@ import { FC } from 'react'
 
 import {
   ImageBackground,
+  ImageBackgroundProps,
+  ImageSourcePropType,
   KeyboardAvoidingView,
   Platform,
+  StyleProp,
   StyleSheet,
   View,
   ViewStyle,
@@ -13,25 +16,32 @@ import { AppText } from '@/src/shared/components/AppText'
 import { colors } from '@/src/theme/colors'
 import { spacing } from '@/src/theme/spacing'
 
-interface AuthWrapperProps {
+const DEFAULT_HERO_IMAGE = require('@/assets/images/hoverla.jpeg')
+
+interface HeroCardLayoutProps {
   title: string
   subtitle?: string
   children: React.ReactNode
-  cardStyle?: ViewStyle
+  cardStyle?: StyleProp<ViewStyle>
+  image?: ImageSourcePropType
+  imageProps?: Omit<ImageBackgroundProps, 'source'>
 }
 
-export const AuthWrapper: FC<AuthWrapperProps> = ({
+export const HeroCardLayout: FC<HeroCardLayoutProps> = ({
   title,
   subtitle,
   children,
   cardStyle,
+  image = DEFAULT_HERO_IMAGE,
+  imageProps,
 }) => {
   return (
     <View style={styles.container}>
       <ImageBackground
-        source={require('@/assets/images/hoverla.jpeg')}
         resizeMode='cover'
-        style={styles.hero}
+        {...imageProps}
+        source={image}
+        style={[styles.hero, imageProps?.style]}
       />
 
       <KeyboardAvoidingView
@@ -39,11 +49,13 @@ export const AuthWrapper: FC<AuthWrapperProps> = ({
         style={styles.bottomWrap}
       >
         <View style={[styles.card, cardStyle]}>
-          <AppText variant='title' style={styles.title}>
-            {title}
-          </AppText>
+          {!!title && (
+            <AppText variant='title' style={styles.title}>
+              {title}
+            </AppText>
+          )}
 
-          {subtitle && (
+          {!!subtitle && (
             <AppText variant='body' style={styles.subtitle}>
               {subtitle}
             </AppText>

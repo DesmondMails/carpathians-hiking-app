@@ -14,7 +14,13 @@ export type LocationStatus =
   | 'services-disabled'
   | 'error'
 
-export const useUserLocation = () => {
+type UseUserLocationOptions = {
+  fetchOnMount?: boolean
+}
+
+export const useUserLocation = ({
+  fetchOnMount = true,
+}: UseUserLocationOptions = {}) => {
   const [location, setLocation] = useState<Location.LocationObject>()
   const [permission, setPermission] =
     useState<Location.LocationPermissionResponse>()
@@ -22,29 +28,63 @@ export const useUserLocation = () => {
     null,
   )
   const [status, setStatus] = useState<LocationStatus>('loading')
-  const requestInFlight = useRef(false)
+  const [isRequestingPermission, setIsRequestingPermission] = useState(false)
+  const locationRequestInFlight = useRef(false)
+  const permissionRequestInFlight = useRef(false)
 
-  const refreshLocation = useCallback(async (requestPermission = true) => {
-    if (requestInFlight.current) return
+  const requestPermission = useCallback(async () => {
+    if (permissionRequestInFlight.current) return false
 
-    requestInFlight.current = true
+    permissionRequestInFlight.current = true
+    setIsRequestingPermission(true)
+    setAllowLocationError(null)
+
+    try {
+      let currentPermission = await Location.getForegroundPermissionsAsync()
+
+      if (!currentPermission.granted && currentPermission.canAskAgain) {
+        currentPermission = await Location.requestForegroundPermissionsAsync()
+      }
+
+      setPermission(currentPermission)
+
+      if (!currentPermission.granted) {
+        setStatus(
+          currentPermission.canAskAgain
+            ? 'permission-required'
+            : 'permission-blocked',
+        )
+      }
+
+      return currentPermission.granted
+    } catch (error) {
+      setStatus('error')
+      setAllowLocationError(
+        error instanceof Error
+          ? error
+          : new Error('Не вдалося запросити доступ до локації.'),
+      )
+      return false
+    } finally {
+      permissionRequestInFlight.current = false
+      setIsRequestingPermission(false)
+    }
+  }, [])
+
+  // Checks permission and fetches coordinates when access is already granted.
+  // It never opens the system permission dialog.
+  const refreshLocation = useCallback(async () => {
+    if (locationRequestInFlight.current) return
+
+    locationRequestInFlight.current = true
     setStatus('loading')
     setAllowLocationError(null)
     setLocation(undefined)
 
     try {
-      let currentPermission = await Location.getForegroundPermissionsAsync()
-
-      const shouldRequestPermission =
-        !currentPermission.granted &&
-        currentPermission.canAskAgain &&
-        requestPermission
-
-      if (shouldRequestPermission) {
-        currentPermission = await Location.requestForegroundPermissionsAsync()
-      }
-
+      const currentPermission = await Location.getForegroundPermissionsAsync()
       setPermission(currentPermission)
+
       if (!currentPermission.granted) {
         setStatus(
           currentPermission.canAskAgain
@@ -74,12 +114,14 @@ export const useUserLocation = () => {
             ),
       )
     } finally {
-      requestInFlight.current = false
+      locationRequestInFlight.current = false
     }
   }, [])
 
   const recoverLocation = useCallback(async () => {
-    if (requestInFlight.current) return
+    if (locationRequestInFlight.current || permissionRequestInFlight.current) {
+      return
+    }
 
     try {
       if (status === 'permission-blocked' && Platform.OS !== 'web') {
@@ -87,21 +129,26 @@ export const useUserLocation = () => {
       } else if (status === 'services-disabled' && Platform.OS === 'android') {
         await Linking.sendIntent('android.settings.LOCATION_SOURCE_SETTINGS')
       } else {
-        await refreshLocation()
+        const hasPermission = await requestPermission()
+        if (hasPermission) await refreshLocation()
       }
     } catch {
       toast.error('Не вдалося відкрити налаштування. Відкрийте їх вручну.')
     }
-  }, [status, refreshLocation])
+  }, [requestPermission, refreshLocation, status])
 
   useEffect(() => {
-    void refreshLocation()
+    if (fetchOnMount) void refreshLocation()
 
     let previousState = AppState.currentState
     const subscription = AppState.addEventListener('change', (nextState) => {
       // Returning from Settings should recheck permission without another prompt.
-      if (previousState !== 'active' && nextState === 'active') {
-        void refreshLocation(false)
+      if (
+        fetchOnMount &&
+        previousState !== 'active' &&
+        nextState === 'active'
+      ) {
+        void refreshLocation()
       }
       previousState = nextState
     })
@@ -109,16 +156,18 @@ export const useUserLocation = () => {
     return () => {
       subscription.remove()
     }
-  }, [refreshLocation])
+  }, [fetchOnMount, refreshLocation])
 
   return {
     location,
     status,
     recoverLocation,
+    requestPermission,
     allowedLocationStatus: permission?.status,
     canAskAgain: permission?.canAskAgain,
     allowLocationError,
     isLoading: status === 'loading',
+    isRequestingPermission,
     refreshLocation,
   }
 }

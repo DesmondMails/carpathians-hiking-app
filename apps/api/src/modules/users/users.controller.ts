@@ -1,5 +1,14 @@
 import type { PublicUser } from '@hiking/shared';
-import { Body, Controller, Get, Logger, Patch } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Logger,
+  Patch,
+  Post,
+} from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ApiBearerAuth } from '@nestjs/swagger';
 
@@ -27,7 +36,6 @@ export class UsersController {
   @ApiResponse({ status: 401, description: 'Користувач не авторизований' })
   @Get('me')
   getMe(@CurrentUser() user: AuthenticatedUser): PublicUser {
-    this.logger.log('Here is current user', user);
     return this.usersService.getMe(user);
   }
 
@@ -44,5 +52,20 @@ export class UsersController {
     @Body() updateUserPayload: UpdateUserDto,
   ): Promise<PublicUser> {
     return this.usersService.updateMe(user, updateUserPayload);
+  }
+
+  @ApiOperation({ summary: 'Завершити онбординг' })
+  @ApiResponse({
+    status: 200,
+    description: 'Онбординг завершено (повторний виклик нічого не змінює)',
+    type: PublicUserDto,
+  })
+  @ApiResponse({ status: 401, description: 'Користувач не авторизований' })
+  @Post('me/onboarding/complete')
+  @HttpCode(HttpStatus.OK)
+  completeOnboarding(
+    @CurrentUser() user: AuthenticatedUser,
+  ): Promise<PublicUser> {
+    return this.usersService.completeOnboarding(user);
   }
 }

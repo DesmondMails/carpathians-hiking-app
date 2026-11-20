@@ -10,11 +10,11 @@ import {
 
 import { useLocalSearchParams } from 'expo-router'
 
-import { AuthWrapper } from '@/src/features/auth/components/AuthWrapper'
 import { EmailVerified } from '@/src/features/auth/components/EmailVerified'
 import { useAuth } from '@/src/features/auth/hooks/useAuth'
 import { AppButton } from '@/src/shared/components/AppButton'
 import { AppText } from '@/src/shared/components/AppText'
+import { HeroCardLayout } from '@/src/shared/components/HeroCardLayout'
 import { OtpInput } from '@/src/shared/components/OtpInput'
 import { colors } from '@/src/theme/colors'
 
@@ -91,7 +91,7 @@ export default function VerifyCodeNewScreen() {
   }
 
   return (
-    <AuthWrapper
+    <HeroCardLayout
       title='Підтвердження email'
       subtitle='Ми надіслали 6-значний код на ваш email'
     >
@@ -138,7 +138,7 @@ export default function VerifyCodeNewScreen() {
         style={styles.verifyButton}
         disabled={!isComplete || isLoading}
       />
-    </AuthWrapper>
+    </HeroCardLayout>
   )
 }
 
