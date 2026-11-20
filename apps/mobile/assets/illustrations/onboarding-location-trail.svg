@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 150" fill="none" role="img" aria-labelledby="title desc">
+  <title id="title">Локація на маршруті</title>
+  <desc id="desc">Стежка з кількома точками маршруту веде до позначки місця.</desc>
+  <circle cx="120" cy="77" r="58" fill="#F8FCFA"/>
+  <circle cx="120" cy="77" r="43" stroke="#D4E9DF" stroke-width="2" stroke-dasharray="3 6"/>
+  <circle cx="120" cy="77" r="27" stroke="#D4E9DF" stroke-width="2"/>
+  <path d="M48 113c18-2 24-31 43-31 15 0 16 24 32 24 14 0 15-38 34-38 11 0 17 9 25 9" stroke="#389D75" stroke-width="4" stroke-linecap="round" stroke-dasharray="1 9"/>
+  <circle cx="48" cy="113" r="7" fill="#B8DDCC" stroke="#389D75" stroke-width="3"/>
+  <circle cx="91" cy="82" r="5" fill="#A8C9B3" stroke="#F8FCFA" stroke-width="2"/>
+  <circle cx="123" cy="106" r="5" fill="#A8C9B3" stroke="#F8FCFA" stroke-width="2"/>
+  <path d="M182 51c-10 0-18 8-18 18 0 13 18 31 18 31s18-18 18-31c0-10-8-18-18-18Z" fill="#389D75"/>
+  <circle cx="182" cy="69" r="6" fill="#F8FCFA"/>
+  <path d="M120 13v10M120 131v10M56 77h10M174 77h10" stroke="#A8C9B3" stroke-width="3" stroke-linecap="round"/>
+</svg>

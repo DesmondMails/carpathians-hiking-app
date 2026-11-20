@@ -1,1 +1,1 @@
-export { default } from '@/src/screens/app/route.screen'
+export { default } from '@/src/screens/app-tabs/route.screen'

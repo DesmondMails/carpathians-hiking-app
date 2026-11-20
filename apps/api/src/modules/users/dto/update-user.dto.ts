@@ -1,8 +1,15 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
-import { IsString, MaxLength, MinLength } from 'class-validator';
+import {
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  MaxLength,
+  MinLength,
+} from 'class-validator';
 
 export class UpdateUserDto {
+  @IsOptional()
   @ApiProperty({
     description: "Ваше ім'я",
     example: 'Микита',
@@ -17,5 +24,6 @@ export class UpdateUserDto {
   @Transform(({ value }: { value: unknown }) =>
     typeof value === 'string' ? value.trim() : value,
   )
-  name!: string;
+  @IsNotEmpty()
+  name?: string;
 }

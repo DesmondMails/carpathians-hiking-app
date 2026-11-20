@@ -6,7 +6,6 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useRouter } from 'expo-router'
 import { Controller, useForm } from 'react-hook-form'
 
-import { AuthWrapper } from '@/src/features/auth/components'
 import { useAuth } from '@/src/features/auth/hooks/useAuth'
 import {
   RegisterFormValues,
@@ -15,6 +14,7 @@ import {
 import { AppButton } from '@/src/shared/components/AppButton'
 import { AppInput } from '@/src/shared/components/AppInput'
 import { AppText } from '@/src/shared/components/AppText'
+import { HeroCardLayout } from '@/src/shared/components/HeroCardLayout'
 import { colors } from '@/src/theme/colors'
 import { spacing } from '@/src/theme/spacing'
 
@@ -76,7 +76,7 @@ export default function SignupNewScreen() {
   }
 
   return (
-    <AuthWrapper title='Зареєструйтесь та розпочніть свою подорож'>
+    <HeroCardLayout title='Зареєструйтесь та розпочніть свою подорож'>
       <View style={styles.socialRow}>
         <AppButton
           title='Увійти з Google'
@@ -174,7 +174,7 @@ export default function SignupNewScreen() {
           </AppText>
         </Pressable>
       </View>
-    </AuthWrapper>
+    </HeroCardLayout>
   )
 }
 

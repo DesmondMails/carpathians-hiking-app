@@ -1,17 +1,20 @@
-import { Tabs } from 'expo-router'
+import { Stack } from 'expo-router'
 
-import { CustomTabBar } from '@/src/shared/components/CustomTabBar'
+import { useAuthStore } from '@/src/features/auth/store/auth.store'
 
 export default function AppLayout() {
+  const hasUserPassedOnboarding =
+    useAuthStore((state) => state.user?.onboardedAt) !== null
+
   return (
-    <Tabs
-      tabBar={(props) => <CustomTabBar {...props} />}
-      screenOptions={{ headerShown: false }}
-    >
-      <Tabs.Screen name='index' />
-      <Tabs.Screen name='explore' />
-      <Tabs.Screen name='saved' />
-      <Tabs.Screen name='profile' />
-    </Tabs>
+    <Stack screenOptions={{ headerShown: false }}>
+      <Stack.Protected guard={hasUserPassedOnboarding}>
+        <Stack.Screen name='(tabs)'></Stack.Screen>
+      </Stack.Protected>
+
+      <Stack.Protected guard={!hasUserPassedOnboarding}>
+        <Stack.Screen name='onboarding'></Stack.Screen>
+      </Stack.Protected>
+    </Stack>
   )
 }

@@ -32,6 +32,7 @@ type AppButtonProps = {
   disabled?: boolean
   fullWidth?: boolean
   style?: ViewStyle
+  accessibilityLabel?: string
 }
 
 export function AppButton({
@@ -45,6 +46,7 @@ export function AppButton({
   disabled = false,
   fullWidth = true,
   style,
+  accessibilityLabel,
 }: AppButtonProps) {
   const resolvedVariant: ButtonVariant = disabled ? 'disabled' : variant
   const palette = buttonColors[resolvedVariant]
@@ -67,6 +69,8 @@ export function AppButton({
     <Pressable
       onPress={onPress}
       disabled={disabled || loading}
+      accessibilityRole='button'
+      accessibilityLabel={accessibilityLabel ?? title}
       style={({ pressed }) => [
         styles.base,
         baseStyle,

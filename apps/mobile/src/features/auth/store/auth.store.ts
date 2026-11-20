@@ -3,6 +3,8 @@ import { create } from 'zustand'
 
 import { isAuthRejection } from '@/src/shared/api/auth-error'
 import { tokenStorage } from '@/src/shared/api/token-storage'
+import { toast } from '@/src/shared/store/toast.store'
+import { getErrorMessage } from '@/src/shared/utils/getErrorMessage'
 
 import { profileApi } from '../../profile/api/profile.api'
 import { authApi } from '../api/auth.api'
@@ -30,7 +32,8 @@ interface AuthState {
   clearSession: () => Promise<void>
   hydrate: () => Promise<void>
   signInWithGoogle: () => Promise<void>
-  updateProfile: (payload: { name: string }) => Promise<void>
+  updateProfile: (payload: { name?: string }) => Promise<void>
+  completeOnboarding: () => Promise<void>
 }
 
 export const useAuthStore = create<AuthState>((set, get) => ({
@@ -200,8 +203,37 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
   },
   updateProfile: async (payload) => {
-    const user = await profileApi.updateMe(payload)
+    set({ isLoading: true })
 
-    set({ user })
+    try {
+      const user = await profileApi.updateMe(payload)
+
+      set({ user })
+    } catch (error) {
+      const errMessage = getErrorMessage(error, 'Не вдалось оновити профіль.')
+
+      toast.error(errMessage)
+
+      throw error
+    } finally {
+      set({ isLoading: false })
+    }
+  },
+
+  // Rethrows so the caller can unlock its UI; the toast is shown here.
+  // No global isLoading: the calling step owns its own submitting state.
+  completeOnboarding: async () => {
+    try {
+      const user = await profileApi.completeOnboarding()
+
+      // Server response is the source of truth for the whole user
+      set({ user })
+    } catch (error) {
+      toast.error(
+        getErrorMessage(error, 'Не вдалося завершити онбординг. Спробуйте ще раз.')
+      )
+
+      throw error
+    }
   },
 }))

@@ -4,4 +4,5 @@ export interface PublicUser {
   createdAt: Date
   updatedAt: Date
   name: string | null
+  onboardedAt: Date | null
 }

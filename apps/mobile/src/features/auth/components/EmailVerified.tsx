@@ -2,9 +2,9 @@ import { useEffect } from 'react'
 
 import { Image, StyleSheet, View } from 'react-native'
 
-import { AuthWrapper } from '@/src/features/auth/components/AuthWrapper'
 import { AppButton } from '@/src/shared/components/AppButton'
 import { AppText } from '@/src/shared/components/AppText'
+import { HeroCardLayout } from '@/src/shared/components/HeroCardLayout'
 import { colors } from '@/src/theme/colors'
 import { spacing } from '@/src/theme/spacing'
 
@@ -21,7 +21,7 @@ export const EmailVerified = () => {
   }, [confirmAuthentication])
 
   return (
-    <AuthWrapper title=''>
+    <HeroCardLayout title=''>
       <View style={styles.content}>
         <Image
           source={require('@/assets/images/email_verified.png')}
@@ -48,7 +48,7 @@ export const EmailVerified = () => {
           variant='primary'
         />
       </View>
-    </AuthWrapper>
+    </HeroCardLayout>
   )
 }
 
