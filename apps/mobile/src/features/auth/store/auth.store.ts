@@ -226,11 +226,16 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     try {
       const user = await profileApi.completeOnboarding()
 
+      console.log('USer after onboarding', user)
+
       // Server response is the source of truth for the whole user
       set({ user })
     } catch (error) {
       toast.error(
-        getErrorMessage(error, 'Не вдалося завершити онбординг. Спробуйте ще раз.')
+        getErrorMessage(
+          error,
+          'Не вдалося завершити онбординг. Спробуйте ще раз.'
+        )
       )
 
       throw error

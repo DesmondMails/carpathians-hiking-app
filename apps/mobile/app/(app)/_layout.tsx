@@ -3,8 +3,9 @@ import { Stack } from 'expo-router'
 import { useAuthStore } from '@/src/features/auth/store/auth.store'
 
 export default function AppLayout() {
-  const hasUserPassedOnboarding =
-    useAuthStore((state) => state.user?.onboardedAt) !== null
+  const hasUserPassedOnboarding = useAuthStore(
+    (state) => !!state.user && state.user.onboardedAt !== null
+  )
 
   return (
     <Stack screenOptions={{ headerShown: false }}>
