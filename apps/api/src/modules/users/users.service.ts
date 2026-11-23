@@ -38,16 +38,23 @@ export class UsersService {
    * keep the original date and just return the current user.
    */
   async completeOnboarding(user: AuthenticatedUser): Promise<PublicUser> {
-    if (user.onboardedAt) {
-      return toPublicUser(user);
-    }
-
-    const updatedUser = await this.prisma.user.update({
-      where: { id: user.id },
-      data: { onboardedAt: new Date() },
+    await this.prisma.user.updateMany({
+      where: {
+        id: user.id,
+        onboardedAt: null,
+      },
+      data: {
+        onboardedAt: new Date(),
+      },
     });
 
-    return toPublicUser(updatedUser);
+    const freshUser = await this.prisma.user.findUniqueOrThrow({
+      where: {
+        id: user.id,
+      },
+    });
+
+    return toPublicUser(freshUser);
   }
 
   async findByEmail(email: string): Promise<User | null> {
