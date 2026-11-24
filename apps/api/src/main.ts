@@ -4,6 +4,7 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 import { AppModule } from './app.module';
+import { validationExceptionFactory } from './common/utils/validation-exception.factory';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -38,6 +39,7 @@ async function bootstrap() {
     new ValidationPipe({
       transform: true,
       whitelist: true,
+      exceptionFactory: validationExceptionFactory,
     }),
   );
 
