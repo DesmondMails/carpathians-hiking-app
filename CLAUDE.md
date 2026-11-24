@@ -145,9 +145,11 @@ Mobile (`cd apps/mobile`): `npm run start`, `npm run ios` / `npm run android` (n
 
 Both apps enforce `import/order` (builtin → external → internal → relative, alphabetized, blank lines between groups) via ESLint. The API uses Prettier with single quotes, trailing commas and semicolons. Mobile code uses no semicolons and single quotes in JSX attributes.
 
-## Project skill
+## Project skills
 
 `.claude/skills/review-code` (`/review-code [api|mobile|shared|branch]`) is a read-only, learning-focused review: it gives hints instead of full patches, because the developer prefers to implement fixes themselves. This skill applies its own review instructions; use it when invoked rather than duplicating its checklist here.
+
+`.claude/skills/prepare-mr` (`/prepare-mr [staged|branch|<base-ref>]`) generates a one-line commit message and a 1–3 sentence PR description from the git diff. It is read-only and never commits or pushes.
 
 ## Keeping this file useful
 
