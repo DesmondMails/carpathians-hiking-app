@@ -1,9 +1,6 @@
 import { FC } from 'react'
 
 import {
-  ImageBackground,
-  ImageBackgroundProps,
-  ImageSourcePropType,
   KeyboardAvoidingView,
   Platform,
   StyleProp,
@@ -11,6 +8,8 @@ import {
   View,
   ViewStyle,
 } from 'react-native'
+
+import { Image, ImageProps } from 'expo-image'
 
 import { AppText } from '@/src/shared/components/AppText'
 import { colors } from '@/src/theme/colors'
@@ -23,8 +22,8 @@ interface HeroCardLayoutProps {
   subtitle?: string
   children: React.ReactNode
   cardStyle?: StyleProp<ViewStyle>
-  image?: ImageSourcePropType
-  imageProps?: Omit<ImageBackgroundProps, 'source'>
+  image?: ImageProps['source']
+  imageProps?: Omit<ImageProps, 'source'>
 }
 
 export const HeroCardLayout: FC<HeroCardLayoutProps> = ({
@@ -37,8 +36,10 @@ export const HeroCardLayout: FC<HeroCardLayoutProps> = ({
 }) => {
   return (
     <View style={styles.container}>
-      <ImageBackground
-        resizeMode='cover'
+      <Image
+        contentFit='cover'
+        cachePolicy='memory-disk'
+        transition={200}
         {...imageProps}
         source={image}
         style={[styles.hero, imageProps?.style]}
@@ -74,9 +75,10 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
   },
   hero: {
-    flex: 1,
-    position: 'relative',
+    ...StyleSheet.absoluteFillObject,
+    // Same box as the previous `flex: 1` + `top: -150`: full container size, shifted up by 150.
     top: -150,
+    bottom: 150,
   },
   bottomWrap: {
     position: 'absolute',

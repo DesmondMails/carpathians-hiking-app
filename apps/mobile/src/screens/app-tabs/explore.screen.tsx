@@ -5,6 +5,7 @@ import { StyleSheet, View } from 'react-native'
 import { BottomSheetModal } from '@gorhom/bottom-sheet'
 import type { RouteListItem } from '@hiking/shared'
 import { FlashList, FlashListRef } from '@shopify/flash-list'
+import { useFocusEffect } from 'expo-router'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
 import {
@@ -74,9 +75,11 @@ export default function ExploreScreen() {
     applySearchText(debouncedSearchText)
   }, [debouncedSearchText, applySearchText])
 
-  useEffect(() => {
-    void loadRoutes()
-  }, [loadRoutes])
+  useFocusEffect(
+    useCallback(() => {
+      void loadRoutes()
+    }, [loadRoutes])
+  )
 
   // Runs after the new first page has rendered, so FlashList measures it first
   useEffect(() => {

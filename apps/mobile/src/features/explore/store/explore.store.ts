@@ -30,6 +30,7 @@ interface ExploreState {
   offset: number
   appliedFilters: SearchFormValues
   appliedSearchPayload: AppliedSearchPayload
+  needsRefresh: boolean
   applyFilters: (
     filters: SearchFormValues,
     payload: AppliedSearchPayload
@@ -39,6 +40,7 @@ interface ExploreState {
   loadMore: () => Promise<boolean>
   retryRefresh: () => Promise<boolean>
   retryLoadMore: () => Promise<boolean>
+  invalidateRoutes: () => void
   changeIsSavedStatus: (routeId: string, isSave: boolean) => void
 }
 
@@ -141,6 +143,7 @@ export const useExploreStore = create<ExploreState>((set, get) => {
     offset: 0,
     appliedFilters: DEFAULT_FORM_VALUES,
     appliedSearchPayload: {},
+    needsRefresh: false,
 
     applyFilters: (filters, payload) => {
       set({
@@ -169,7 +172,12 @@ export const useExploreStore = create<ExploreState>((set, get) => {
       return loadPage(PAGE_REQUEST.FIRST)
     },
     loadRoutes: () => {
-      const { isLoading, isRefreshing, hasLoaded } = get()
+      const { isLoading, isRefreshing, hasLoaded, needsRefresh } = get()
+
+      if (needsRefresh) {
+        set({ needsRefresh: false })
+        return loadPage(PAGE_REQUEST.FIRST)
+      }
 
       if (isLoading || isRefreshing || hasLoaded) return Promise.resolve(false)
 
@@ -179,6 +187,9 @@ export const useExploreStore = create<ExploreState>((set, get) => {
       if (get().loadMoreError) return Promise.resolve(false)
 
       return loadPage(PAGE_REQUEST.NEXT)
+    },
+    invalidateRoutes: () => {
+      set({ needsRefresh: true })
     },
     // The failed first page used the payload that is still applied
     retryRefresh: () => {

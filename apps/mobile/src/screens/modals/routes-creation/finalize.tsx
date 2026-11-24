@@ -5,6 +5,7 @@ import { View, StyleSheet } from 'react-native'
 import { FinalizeRouteDraftPayload } from '@hiking/shared'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 
+import { useExploreStore } from '@/src/features/explore/store/explore.store'
 import {
   CreateRouteModalWrapper,
   FinalizeRouteForm,
@@ -15,6 +16,9 @@ import { colors } from '@/src/theme/colors'
 
 export default function RoutesCreationFinalizeScreen() {
   const router = useRouter()
+
+  const invalidateRoutes = useExploreStore((s) => s.invalidateRoutes)
+
   const { draftId } = useLocalSearchParams<{ draftId?: string }>()
   const { routeDraft, isFinalizing, finalizeRoute } = useCreateRoute()
 
@@ -41,6 +45,8 @@ export default function RoutesCreationFinalizeScreen() {
       pathname: '/routes/[id]',
       params: { id: route.id },
     })
+
+    invalidateRoutes()
   }
 
   return (

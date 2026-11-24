@@ -9,6 +9,7 @@ import {
 } from '@hiking/shared'
 import { create } from 'zustand'
 
+import { useExploreStore } from '../../explore/store/explore.store'
 import { GpxFileAsset, routeCreationApi } from '../api/route-creation.api'
 
 interface RouteCreationState {
@@ -20,16 +21,16 @@ interface RouteCreationState {
   createRoute: (payload: CreateRoutePayload) => Promise<Route>
   finalizeRoute: (
     routeDraftId: string,
-    payload: FinalizeRouteDraftPayload,
+    payload: FinalizeRouteDraftPayload
   ) => Promise<Route>
   resetRouteDraft: () => void
   getPresignedUrl: (
     routeDraftId: string,
-    payload: GetPresignedUrlPayload,
+    payload: GetPresignedUrlPayload
   ) => Promise<PresignedUrlResponse>
   completeImageUpload: (
     routeDraftId: string,
-    payload: CompleteUploadPayload,
+    payload: CompleteUploadPayload
   ) => Promise<void>
   deleteImage: (routeDraftId: string, imageId: string) => Promise<void>
 }
@@ -74,7 +75,7 @@ export const useRouteCreationStore = create<RouteCreationState>((set) => ({
     try {
       const route = await routeCreationApi.finalizeRouteDraft(
         routeDraftId,
-        payload,
+        payload
       )
 
       set({ routeDraft: null })
@@ -91,7 +92,7 @@ export const useRouteCreationStore = create<RouteCreationState>((set) => ({
     try {
       const presignedUrlData = await routeCreationApi.getPresignedUrl(
         routeDraftId,
-        payload,
+        payload
       )
 
       return presignedUrlData

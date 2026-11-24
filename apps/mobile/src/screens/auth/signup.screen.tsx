@@ -15,6 +15,7 @@ import { AppButton } from '@/src/shared/components/AppButton'
 import { AppInput } from '@/src/shared/components/AppInput'
 import { AppText } from '@/src/shared/components/AppText'
 import { HeroCardLayout } from '@/src/shared/components/HeroCardLayout'
+import { getApiFieldErrors } from '@/src/shared/utils/getApiFieldErrors'
 import { colors } from '@/src/theme/colors'
 import { spacing } from '@/src/theme/spacing'
 
@@ -49,11 +50,15 @@ export default function SignupNewScreen() {
         params: { email: trimmedEmail },
       })
     } catch (err: unknown) {
-      const message =
-        (err as { response?: { data?: { message?: string | string[] } } })
-          ?.response?.data?.message ?? 'Щось пішло не так. Спробуйте знову.'
-      setError('email', {
-        message: Array.isArray(message) ? message.join(', ') : message,
+      const fieldErrors = getApiFieldErrors(
+        err,
+        'Щось пішло не так. Спробуйте знову.'
+      )
+
+      fieldErrors.forEach(({ field, message }) => {
+        const name = field === 'password' ? 'password' : 'email'
+
+        setError(name, { message })
       })
     }
   }
