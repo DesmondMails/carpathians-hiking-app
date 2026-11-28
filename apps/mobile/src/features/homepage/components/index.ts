@@ -1,5 +1,4 @@
 export { HomapageHero } from './HomapageHero'
 export { HomePageSearchBar } from './HomePageSearchBar'
 export { HomepageContent } from './HomepageContent'
-export { WeekendCard } from './WeekendCard'
 export { PopularRow } from './PopularRow'

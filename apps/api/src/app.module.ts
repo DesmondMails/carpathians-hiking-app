@@ -6,6 +6,7 @@ import { ThrottlerModule } from '@nestjs/throttler';
 
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { AuthModule } from './modules/auth/auth.module';
+import { HomeModule } from './modules/home/home.module';
 import { RoutesModule } from './modules/routes/routes.module';
 import { RoutesDraftModule } from './modules/routes-draft/routes-draft.module';
 import { StorageModule } from './modules/storage/storage.module';
@@ -19,6 +20,7 @@ import { PrismaModule } from './prisma/prisma.module';
     AuthModule,
     UsersModule,
     RoutesModule,
+    HomeModule,
     RoutesDraftModule,
     StorageModule,
     BullModule.forRoot({

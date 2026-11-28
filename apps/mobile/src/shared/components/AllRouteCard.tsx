@@ -8,8 +8,12 @@ import { Image } from 'expo-image'
 import { useRouter } from 'expo-router'
 
 import { AppText } from '@/src/shared/components/AppText'
-import { formatDuration } from '@/src/shared/utils/formatDuration'
-import { formatElevation } from '@/src/shared/utils/formatElevation'
+import {
+  formatDistance,
+  formatDuration,
+  formatElevation,
+  formatRating,
+} from '@/src/shared/formatters'
 import { colors } from '@/src/theme/colors'
 import { typography } from '@/src/theme/typography'
 
@@ -90,30 +94,14 @@ export const AllRouteCard: FC<AllRouteCardProps> = ({ route, saved }) => {
           <SaveButton saved={!!saved} onPress={handleSaveClick} />
         </View>
         <View style={styles.metaRow}>
-          <MetaChip
-            icon='map'
-            label={
-              route?.distanceM
-                ? `${Number(route?.distanceM / 1000).toFixed(1)} km`
-                : ''
-            }
-          />
+          <MetaChip icon='map' label={formatDistance(route.distanceM)} />
           <View style={styles.dot} />
           <MetaChip
             icon='trending-up'
-            label={
-              route?.elevationGainM
-                ? formatElevation(route.elevationGainM)
-                : 'н/д'
-            }
+            label={formatElevation(route.elevationGainM)}
           />
           <View style={styles.dot} />
-          <MetaChip
-            icon='clock'
-            label={
-              route?.durationH != null ? formatDuration(route.durationH) : '-'
-            }
-          />
+          <MetaChip icon='clock' label={formatDuration(route.durationH)} />
         </View>
         <View style={styles.bottomRow}>
           {route.difficulty ? (
@@ -122,8 +110,7 @@ export const AllRouteCard: FC<AllRouteCardProps> = ({ route, saved }) => {
           <View style={styles.ratingRow}>
             <Ionicons name='star' size={12} color='#f59e0b' />
             <AppText style={styles.ratingText}>
-              {/* {route.rating} · {route.reviewCount} відгуків */}
-              Дороби відгуки
+              {formatRating(route.rating, route.reviewCount)}
             </AppText>
           </View>
         </View>
@@ -183,7 +170,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
   },
-  ratingRow: { flexDirection: 'row', alignItems: 'center', gap: 3 },
+  ratingRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+    marginLeft: 'auto',
+  },
   ratingText: {
     fontFamily: typography.body.fontFamily,
     fontSize: 11,

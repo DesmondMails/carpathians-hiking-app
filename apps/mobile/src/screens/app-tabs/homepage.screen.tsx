@@ -10,9 +10,11 @@ import {
 } from '@/src/features/homepage/components'
 import { useHomepage } from '@/src/features/homepage/hooks/useHomepage'
 import { AppSearch } from '@/src/shared/components/AppSearch'
+import { useUserLocation } from '@/src/shared/hooks'
 
 export default function HomepageScreen() {
-  const { loadRoutes } = useHomepage()
+  const { location, isLoading: isLocationLoading } = useUserLocation()
+  const { loadHomePageData } = useHomepage()
 
   const router = useRouter()
 
@@ -21,8 +23,17 @@ export default function HomepageScreen() {
   }
 
   useEffect(() => {
-    loadRoutes()
-  }, [loadRoutes])
+    if (isLocationLoading) {
+      return
+    }
+
+    const params = {
+      latitude: location?.coords.latitude,
+      longitude: location?.coords.longitude,
+    }
+
+    loadHomePageData(params)
+  }, [loadHomePageData, location?.coords, isLocationLoading])
 
   return (
     <View style={styles.root}>

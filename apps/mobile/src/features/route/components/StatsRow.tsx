@@ -6,8 +6,12 @@ import { Feather, Ionicons } from '@expo/vector-icons'
 import type { RouteDetails } from '@hiking/shared'
 
 import { AppText } from '@/src/shared/components/AppText'
-import { formatDuration } from '@/src/shared/utils/formatDuration'
-import { toFixedNumber } from '@/src/shared/utils/toFixedNumber'
+import {
+  formatDistance,
+  formatDuration,
+  formatElevation,
+  formatRating,
+} from '@/src/shared/formatters'
 import { colors } from '@/src/theme/colors'
 import { spacing } from '@/src/theme/spacing'
 import { typography } from '@/src/theme/typography'
@@ -35,19 +39,19 @@ export const StatsRow: FC<StatsRowProps> = ({ route }) => (
   <View style={styles.row}>
     <StatItem
       icon={<Feather name='map' size={15} color={colors.primary} />}
-      value={`${toFixedNumber(route.distanceM ? route.distanceM / 1000 : 0)} км`}
+      value={formatDistance(route.distanceM)}
     />
     <StatItem
       icon={<Feather name='trending-up' size={15} color={colors.primary} />}
-      value={`${route.elevationGainM} м`}
+      value={formatElevation(route.elevationGainM)}
     />
     <StatItem
       icon={<Feather name='clock' size={15} color={colors.primary} />}
-      value={formatDuration(route.durationH ?? 0)}
+      value={formatDuration(route.durationH)}
     />
     <StatItem
       icon={<Ionicons name='star' size={15} color='#f59e0b' />}
-      value={`${route.rating || 'N/A'}`}
+      value={formatRating(route.rating, route.reviewCount)}
       isLast
     />
   </View>

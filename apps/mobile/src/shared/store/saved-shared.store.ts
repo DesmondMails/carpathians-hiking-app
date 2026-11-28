@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 
 import { useExploreStore } from '@/src/features/explore/store/explore.store'
+import { useHomepageStore } from '@/src/features/homepage/store/homepage.store'
 import { useRouteStore } from '@/src/features/route/store/route.store'
 import { useSavedStore } from '@/src/features/saved/store/saved.store'
 
@@ -21,7 +22,9 @@ export const useSharedSavedRouteStore = create<SharedSavedRouteStore>(() => ({
       useExploreStore
         .getState()
         .changeIsSavedStatus(savedRouteInfo.routeId, true)
-      useRouteStore
+      useRouteStore.getState().changeIsSavedStatus(savedRouteInfo.routeId, true)
+
+      useHomepageStore
         .getState()
         .changeIsSavedStatus(savedRouteInfo.routeId, true)
 
@@ -44,6 +47,7 @@ export const useSharedSavedRouteStore = create<SharedSavedRouteStore>(() => ({
       useExploreStore.getState().changeIsSavedStatus(routeId, false)
       useRouteStore.getState().changeIsSavedStatus(routeId, false)
       useSavedStore.getState().removeFromSaved(routeId)
+      useHomepageStore.getState().changeIsSavedStatus(routeId, false)
 
       toast.success('Маршрут видалено зі збережених.')
     } catch (error) {
