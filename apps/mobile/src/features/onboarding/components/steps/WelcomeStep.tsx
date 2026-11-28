@@ -21,7 +21,6 @@ export const WelcomeStep = ({ onNext }: OnboardingStepComponentProps) => {
     setIsloading(true)
 
     try {
-      // On success the (app) layout guard flips and navigates to (tabs)
       await completeOnboarding()
 
       onNext()

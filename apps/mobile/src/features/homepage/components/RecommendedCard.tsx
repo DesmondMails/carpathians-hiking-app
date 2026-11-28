@@ -1,78 +1,139 @@
-import { FC } from 'react'
+import { FC, useState } from 'react'
 
 import { Pressable, StyleSheet, View } from 'react-native'
 
 import { Feather, Ionicons } from '@expo/vector-icons'
+import { RouteListItem } from '@hiking/shared'
 import { Image } from 'expo-image'
+import { useRouter } from 'expo-router'
 
 import { AppText } from '@/src/shared/components/AppText'
+import {
+  formatDistance,
+  formatDuration,
+  formatElevation,
+  formatRating,
+} from '@/src/shared/formatters'
+import { useSharedSavedRouteStore } from '@/src/shared/store/saved-shared.store'
 import { colors } from '@/src/theme/colors'
 import { typography } from '@/src/theme/typography'
 
 import { BottomGradient } from '../../explore/components/BottomGradient'
 import { DiffBadge } from '../../explore/components/DiffBadge'
 import { MetaChip } from '../../explore/components/MetaChip'
+import { RouteCoverPlaceholder } from '../../explore/components/RouteCoverPlaceholder'
 import { SaveButton } from '../../explore/components/SaveButton'
-import { Route } from '../../explore/types'
+
+// TODO: mocks until RouteListItem gets rating, POI counts and distance to user
+const MOCK_RATING = { rating: 4.7, reviewCount: 12 }
+const MOCK_POI = { water: 2, shelter: 1, viewpoint: 3 }
+const MOCK_DISTANCE_FROM_USER_M = 12400
 
 interface RecommendedCardProps {
-  route: Route
-  saved: boolean
-  onSave: () => void
+  route: RouteListItem
+  saved?: boolean
 }
 
-export const RecommendedCard: FC<RecommendedCardProps> = ({
-  route,
-  saved,
-  onSave,
-}) => {
-  const poi = route.poi
+export const RecommendedCard: FC<RecommendedCardProps> = ({ route, saved }) => {
+  const router = useRouter()
+  const saveRoute = useSharedSavedRouteStore((s) => s.saveRoute)
+  const unsaveRoute = useSharedSavedRouteStore((s) => s.unsaveRoute)
+
+  const [coverFailed, setCoverFailed] = useState(false)
+  const showCover = !!route.coverImageUrl && !coverFailed
+
+  const poi = MOCK_POI
+
+  const handleCardPress = () => {
+    router.push({
+      pathname: '/routes/[id]',
+      params: { id: route.id },
+    })
+  }
+
+  const handleSaveClick = () => {
+    if (saved) {
+      unsaveRoute(route.id)
+
+      return
+    }
+
+    saveRoute(route.id)
+  }
 
   return (
-    <View style={styles.card}>
+    <Pressable onPress={handleCardPress} style={styles.card}>
       <View style={styles.imageWrap}>
-        <Image
-          source={{ uri: route.imageUri }}
-          style={StyleSheet.absoluteFill}
-          contentFit='cover'
-        />
-        <BottomGradient height={100} />
+        {showCover ? (
+          <Image
+            source={{
+              uri: route.coverImageUrl!,
+              cacheKey: route.coverImageId ?? route.id,
+            }}
+            style={StyleSheet.absoluteFill}
+            contentFit='cover'
+            cachePolicy='memory-disk'
+            transition={200}
+            onError={() => setCoverFailed(true)}
+            placeholder={
+              route.coverImageThumbhash
+                ? { thumbhash: route.coverImageThumbhash }
+                : undefined
+            }
+            placeholderContentFit='cover'
+          />
+        ) : (
+          <RouteCoverPlaceholder />
+        )}
         <View style={styles.imageFooter}>
-          <AppText style={styles.imageTitle}>{route.title}</AppText>
-          <AppText style={styles.imageRegion}>{route.region}</AppText>
+          <AppText style={styles.imageTitle} numberOfLines={2}>
+            {route.title}
+          </AppText>
+          {route.region ? (
+            <AppText style={styles.imageRegion} numberOfLines={1}>
+              {route.region}
+            </AppText>
+          ) : null}
         </View>
         <View style={styles.imageSave}>
-          <SaveButton saved={saved} onPress={onSave} />
+          <SaveButton saved={!!saved} onPress={handleSaveClick} />
         </View>
       </View>
 
       <View style={styles.body}>
         <View style={styles.metaRow}>
-          <MetaChip icon='map' label={`${route.distanceKm} km`} />
+          <MetaChip icon='map' label={formatDistance(route.distanceM)} />
           <View style={styles.dot} />
-          <MetaChip icon='trending-up' label={`${route.elevationM} m`} />
+          <MetaChip
+            icon='trending-up'
+            label={formatElevation(route.elevationGainM)}
+          />
           <View style={styles.dot} />
-          <MetaChip icon='clock' label={`${route.durationH}h`} />
+          <MetaChip icon='clock' label={formatDuration(route.durationH)} />
           <View style={styles.dot} />
           <View style={styles.ratingInline}>
             <Ionicons name='star' size={12} color='#f59e0b' />
             <AppText style={styles.ratingText}>
-              {route.rating} ({route.reviewCount})
+              {`${formatRating(MOCK_RATING.rating, MOCK_RATING.reviewCount)} (${MOCK_RATING.reviewCount})`}
             </AppText>
           </View>
         </View>
 
         <View style={styles.diffRow}>
-          <DiffBadge difficulty={route.difficulty} />
+          {route.difficulty ? (
+            <DiffBadge difficulty={route.difficulty} />
+          ) : null}
+          {/* TODO: Replace with other data, coords could be not present */}
           <View style={styles.distChip}>
             <Feather name='navigation' size={11} color={colors.primary} />
             <AppText style={styles.distText}>
-              {route.distanceFromUserKm} km
+              {formatDistance(MOCK_DISTANCE_FROM_USER_M)}
             </AppText>
           </View>
         </View>
 
         {poi && (
+          //TODO: Replace with real transport data after transport info implementation
           <View style={styles.poiRow}>
             <Feather name='info' size={12} color={colors.gray400} />
             <AppText style={styles.poiText}>
@@ -85,7 +146,7 @@ export const RecommendedCard: FC<RecommendedCardProps> = ({
         )}
 
         <View style={styles.ctaRow}>
-          <Pressable style={styles.ctaBtn}>
+          <Pressable onPress={handleCardPress} style={styles.ctaBtn}>
             <Feather name='eye' size={14} color={colors.primary} />
             <AppText style={styles.ctaBtnText}>Перегляд</AppText>
           </Pressable>
@@ -93,13 +154,9 @@ export const RecommendedCard: FC<RecommendedCardProps> = ({
             <Feather name='download' size={14} color={colors.primary} />
             <AppText style={styles.ctaBtnText}>GPX</AppText>
           </Pressable>
-          <Pressable style={styles.ctaBtn}>
-            <Feather name='navigation-2' size={14} color={colors.primary} />
-            <AppText style={styles.ctaBtnText}>Транспорт</AppText>
-          </Pressable>
         </View>
       </View>
-    </View>
+    </Pressable>
   )
 }
 
@@ -115,7 +172,11 @@ const styles = StyleSheet.create({
     shadowRadius: 14,
     elevation: 5,
   },
-  imageWrap: { height: 200, width: '100%' },
+  imageWrap: {
+    height: 200,
+    width: '100%',
+    backgroundColor: colors.primaryLight,
+  },
   imageFooter: {
     position: 'absolute',
     bottom: 0,
@@ -156,11 +217,18 @@ const styles = StyleSheet.create({
     color: colors.gray500,
   },
   diffRow: {
+    // Badge height, so cards without a difficulty keep the same height
+    minHeight: 22,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
   },
-  distChip: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  distChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    marginLeft: 'auto',
+  },
   distText: {
     fontFamily: typography.bodyMedium.fontFamily,
     fontSize: 12,

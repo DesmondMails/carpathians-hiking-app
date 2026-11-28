@@ -10,7 +10,11 @@ import {
 } from '@hiking/shared'
 
 import { AppText } from '@/src/shared/components'
-import { formatDuration } from '@/src/shared/utils/formatDuration'
+import {
+  formatDistance,
+  formatDuration,
+  formatElevation,
+} from '@/src/shared/formatters'
 import { colors } from '@/src/theme/colors'
 import { spacing } from '@/src/theme/spacing'
 
@@ -25,8 +29,7 @@ export const RouteDraftSummary: FC<RouteDraftSummaryProps> = ({
 }) => {
   const preview = routeDraft.previewJson
 
-  const distanceKm =
-    preview?.distanceM != null ? preview.distanceM / 1000 : undefined
+  const distanceM = preview?.distanceM
   const elevationGainM = preview?.elevationGainM
   // Same rounding as the API on finalize, so the saved route shows this value
   const durationH =
@@ -40,17 +43,17 @@ export const RouteDraftSummary: FC<RouteDraftSummaryProps> = ({
 
   const stats: { icon: keyof typeof Feather.glyphMap; label: string }[] = []
 
-  if (distanceKm != null) {
+  if (distanceM != null) {
     stats.push({
       icon: 'map',
-      label: `${distanceKm.toFixed(1)} км`,
+      label: formatDistance(distanceM),
     })
   }
 
   if (elevationGainM != null) {
     stats.push({
       icon: 'trending-up',
-      label: `${Math.round(elevationGainM)} м`,
+      label: formatElevation(elevationGainM),
     })
   }
 

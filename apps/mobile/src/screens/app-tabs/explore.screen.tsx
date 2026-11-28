@@ -5,7 +5,7 @@ import { StyleSheet, View } from 'react-native'
 import { BottomSheetModal } from '@gorhom/bottom-sheet'
 import type { RouteListItem } from '@hiking/shared'
 import { FlashList, FlashListRef } from '@shopify/flash-list'
-import { useFocusEffect } from 'expo-router'
+import { router, useFocusEffect, useLocalSearchParams } from 'expo-router'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
 import {
@@ -16,13 +16,17 @@ import {
   RoutesListFooter,
   RoutesRefreshStatus,
 } from '@/src/features/explore/components'
+import { DEFAULT_FORM_VALUES } from '@/src/features/explore/constants'
 import { useExplore } from '@/src/features/explore/hooks/useExplore'
 import { toSearchPayload } from '@/src/features/explore/mappers/search.payload'
 import type { SearchFormValues } from '@/src/features/explore/schemas/search.schema'
+import { useExploreStore } from '@/src/features/explore/store/explore.store'
 import { hasActiveFilters } from '@/src/features/explore/utills/has-active-filters'
 import { AppSearch, RoutesLoader } from '@/src/shared/components'
 import { useDebounce, useUserLocation } from '@/src/shared/hooks'
 import { colors } from '@/src/theme/colors'
+
+const NEAR_ME_PRESET_RADIUS_KM = 10
 
 export default function ExploreScreen() {
   const userLocation = useUserLocation()
@@ -50,6 +54,8 @@ export default function ExploreScreen() {
   const sheetRef = useRef<BottomSheetModal>(null)
   const listRef = useRef<FlashListRef<RouteListItem>>(null)
 
+  const { nearMe } = useLocalSearchParams<{ nearMe?: string }>()
+
   const debouncedSearchText = useDebounce<string>(searchText, 500)
 
   const handleOpenSheet = useCallback(() => {
@@ -70,6 +76,28 @@ export default function ExploreScreen() {
   const handleRetryRefresh = () => {
     retryRefresh()
   }
+
+  useEffect(() => {
+    if (nearMe !== 'true' || userLocation.isLoading) {
+      return
+    }
+
+    if (userLocation.location) {
+      handleApplyFilters({
+        ...DEFAULT_FORM_VALUES,
+        ...useExploreStore.getState().appliedFilters,
+        nearMe: true,
+        radius: NEAR_ME_PRESET_RADIUS_KM,
+      })
+    }
+
+    router.setParams({ nearMe: undefined })
+  }, [
+    nearMe,
+    userLocation.isLoading,
+    userLocation.location,
+    handleApplyFilters,
+  ])
 
   useEffect(() => {
     applySearchText(debouncedSearchText)

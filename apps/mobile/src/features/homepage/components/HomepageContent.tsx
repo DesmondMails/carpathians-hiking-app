@@ -1,7 +1,6 @@
-import { useState } from 'react'
-
 import { ScrollView, StyleSheet, View } from 'react-native'
 
+import { HomeKindWithList } from '@hiking/shared'
 import { useRouter } from 'expo-router'
 
 import {
@@ -9,115 +8,97 @@ import {
   RecommendedCard,
   SectionHeader,
 } from '@/src/features/explore/components'
-import {
-  NEARBY_ROUTES,
-  POPULAR_ROUTES,
-  RECOMMENDED_ROUTES,
-} from '@/src/features/explore/data/mock-routes'
+import { ErrorState } from '@/src/shared/components/ErrorState'
 import { colors } from '@/src/theme/colors'
 import { typography } from '@/src/theme/typography'
 
-import { PopularRow } from './PopularRow'
-import { WeekendCard } from './WeekendCard'
+import { HomepageSkeleton } from './HomepageSkeleton'
 import { useHomepage } from '../hooks/useHomepage'
+
+const SECTION_TITLES: Record<HomeKindWithList['kind'], string> = {
+  nearby: 'Поруч з вами',
+  recent: 'Нещодавно додані',
+  ideas: 'Ідеї для походу',
+  for_you: 'Рекомендовано для вас',
+}
 
 export const HomepageContent = () => {
   const router = useRouter()
-  const { routes } = useHomepage()
 
-  const [favorites, setFavorites] = useState<Set<string>>(new Set())
-  const [savedPopular, setSavedPopular] = useState<Set<string>>(new Set())
+  const { homepageData, homepageError, reloadHomePageData } = useHomepage()
 
-  const handleSeeAllPress = () => {
+  const handleNearMeAllClicked = () => {
+    router.push({
+      pathname: '/explore',
+      params: {
+        nearMe: 'true',
+      },
+    })
+  }
+
+  const handleRecentAllClicked = () => {
     router.push('/explore')
   }
 
-  const toggleFavorite = (id: string) => {
-    setFavorites((prev) => {
-      const next = new Set(prev)
-      next.has(id) ? next.delete(id) : next.add(id)
-      return next
-    })
+  const handleSeeAllPress = () => {
+    const isNearMeCarouselKind = homepageData?.carousel.kind === 'nearby'
+
+    return isNearMeCarouselKind
+      ? handleNearMeAllClicked()
+      : handleRecentAllClicked()
   }
 
-  const togglePopular = (id: string) => {
-    setSavedPopular((prev) => {
-      const next = new Set(prev)
-      next.has(id) ? next.delete(id) : next.add(id)
-      return next
-    })
+  // Error wins only when there is nothing to show; a failed refresh keeps the old data
+  if (!homepageData && homepageError) {
+    return (
+      <ErrorState
+        title='Не вдалось завантажити маршрути'
+        description={homepageError}
+        onRetry={reloadHomePageData}
+      />
+    )
   }
+
+  if (!homepageData) {
+    return <HomepageSkeleton />
+  }
+
+  const { carousel, recommendations } = homepageData
 
   return (
     <View style={styles.content}>
-      <View style={styles.section}>
-        <SectionHeader title='Поруч з вами' onSeeAll={handleSeeAllPress} />
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.hScroll}
-        >
-          {NEARBY_ROUTES.map((route) => (
-            <NearbyCard
-              key={route.id}
-              route={route}
-              saved={favorites.has(route.id)}
-              onSave={() => toggleFavorite(route.id)}
-            />
-          ))}
-        </ScrollView>
-      </View>
-
-      <View style={styles.section}>
-        <SectionHeader
-          title='Рекомендовано для вас'
-          onSeeAll={handleSeeAllPress}
-        />
-        <View style={styles.vGap}>
-          {RECOMMENDED_ROUTES.map((route) => (
-            <RecommendedCard
-              key={route.id}
-              route={route}
-              saved={favorites.has(route.id)}
-              onSave={() => toggleFavorite(route.id)}
-            />
-          ))}
-        </View>
-      </View>
-
-      <View style={styles.section}>
-        <SectionHeader title='Ідеї на вихідні' />
-        <WeekendCard />
-      </View>
-
-      {/* Popular this week */}
-      <View style={styles.section}>
-        <SectionHeader
-          title='Популярне цього тижня'
-          onSeeAll={handleSeeAllPress}
-        />
-        {routes.map((route, i) => (
-          <PopularRow
-            key={route.id}
-            route={{
-              id: route.id,
-              title: route.title,
-              region: 'Some region',
-              distanceKm: route.distanceKm,
-              elevationM: route.elevationGainM,
-              durationH: 0,
-              difficulty: 'Легкий',
-              rating: 0,
-              reviewCount: 0,
-              distanceFromUserKm: 0,
-              imageUri: 'https://via.placeholder.com/150',
-            }}
-            rank={i + 1}
-            saved={savedPopular.has(route.id)}
-            onSave={() => togglePopular(route.id)}
+      {carousel.routes.length > 0 ? (
+        <View style={styles.section}>
+          <SectionHeader
+            title={SECTION_TITLES[carousel.kind]}
+            onSeeAll={handleSeeAllPress}
           />
-        ))}
-      </View>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.hScroll}
+          >
+            {carousel.routes.map((route) => (
+              <NearbyCard key={route.id} route={route} saved={route?.isSaved} />
+            ))}
+          </ScrollView>
+        </View>
+      ) : null}
+
+      {recommendations.routes.length > 0 ? (
+        <View style={styles.section}>
+          <SectionHeader title={SECTION_TITLES[recommendations.kind]} />
+          <View style={styles.vGap}>
+            {recommendations.routes.map((route) => (
+              <RecommendedCard
+                key={route.id}
+                route={route}
+                saved={route?.isSaved}
+              />
+            ))}
+          </View>
+        </View>
+      ) : null}
     </View>
   )
 }

@@ -1,13 +1,19 @@
 import { useHomepageStore } from '../store/homepage.store'
 
 export const useHomepage = () => {
-  const routes = useHomepageStore((state) => state.routes)
+  const homepageData = useHomepageStore((state) => state.homepageData)
   const isLoading = useHomepageStore((state) => state.isLoading)
-  const loadRoutes = useHomepageStore((state) => state.loadRoutes)
+  const homepageError = useHomepageStore((state) => state.homepageError)
+  const loadHomePageData = useHomepageStore((state) => state.loadHomePageData)
+  const reloadHomePageData = useHomepageStore(
+    (state) => state.reloadHomePageData
+  )
 
   return {
-    routes,
+    homepageData,
     isLoading,
-    loadRoutes,
+    homepageError,
+    loadHomePageData,
+    reloadHomePageData,
   }
 }

@@ -13,6 +13,9 @@ export interface RouteListItem {
   distanceM: number | null
   elevationGainM: number | null
   durationH: number | null
+  // Optional until the API selects them for list endpoints (ROUTE_LIST_SELECT)
+  rating?: number
+  reviewCount?: number
   status: 'DRAFT' | 'PUBLISHED' | 'ARCHIVED'
   images: any[]
   createdAt: string

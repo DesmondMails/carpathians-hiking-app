@@ -1,10 +1,14 @@
-import { Route } from '@hiking/shared'
+import { GetHomePayload, HomeResponse } from '@hiking/shared'
 
 import { apiClient } from '@/src/shared/api/client'
 
 export const homepageApi = {
-  async getRoutes(): Promise<Route[]> {
-    const { data } = await apiClient.get<Route[]>('/routes')
+  async getHomeData(payload?: GetHomePayload): Promise<HomeResponse> {
+    const { data } = await apiClient.get<HomeResponse>('/home', {
+      params: {
+        ...payload,
+      },
+    })
 
     return data
   },

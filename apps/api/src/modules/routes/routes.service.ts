@@ -19,6 +19,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 
+import { RouteListRowWithSaveState } from 'src/common/types';
 import { asStartCoordinates } from 'src/common/utils/json-guards';
 import {
   RouteWithPois,
@@ -49,12 +50,6 @@ import { PoiEnrichmentService } from '../poi-enrichment/poi-enrichment.service';
 import { FinalizeRouteDraftDto } from '../routes-draft/dto/finalize-route-draft.dto';
 import { StorageService } from '../storage/storage.service';
 import { selectFeaturedRoutePois } from './mappers/featured-route-pois';
-
-export type RouteListRow = Prisma.RouteGetPayload<{
-  select: typeof ROUTE_LIST_SELECT;
-}>;
-
-type RouteListRowWithSaveState = RouteListRow & { isSaved: boolean };
 
 @Injectable()
 export class RoutesService {
@@ -622,7 +617,7 @@ export class RoutesService {
     `;
   }
 
-  private async searchNearbyRoutes(
+  async searchNearbyRoutes(
     longitude: number,
     latitude: number,
     radiusM: number,
@@ -635,7 +630,9 @@ export class RoutesService {
         "startPoint",
         ST_SetSRID(ST_MakePoint(${longitude}, ${latitude}), 4326)::geography,
         ${radiusM}
-      )`;
+      )
+      ORDER BY "startPoint" <-> ST_SetSRID(ST_MakePoint(${longitude}, ${latitude}), 4326)::geography
+      `;
 
     return nearRoutes.map((row) => row.id);
   }
